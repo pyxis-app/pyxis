@@ -1,7 +1,8 @@
 .git
+.github
 node_modules
-frontend/node_modules
-frontend/.next
+.next
+out
 npm-debug.log*
 pnpm-debug.log*
 .env
@@ -15,3 +16,6 @@ dist/
 coverage/
 docs/
 assets/
+data/
+backups/
+tsconfig.tsbuildinfo
