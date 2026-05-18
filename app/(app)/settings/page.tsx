@@ -1,34 +1,44 @@
 "use client";
 
-import { Settings } from "lucide-react";
-import { FloatingCard } from "@/components/shared/floating-card";
+import { useAccount, useDisconnect } from "wagmi";
+import { signOut } from "@/lib/siwe-client";
 
 export default function SettingsPage() {
+  const { isConnected, address } = useAccount();
+  const { disconnect } = useDisconnect();
+
+  function disconnectAndSignOut() {
+    disconnect();
+    // Clear the SIWE session cookie client-side so the next /api/history
+    // call returns 401 instead of serving the stale wallet's sessions.
+    signOut().catch(() => {
+      /* signOut is best-effort */
+    });
+  }
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-          <Settings className="w-7 h-7 text-[var(--accent)]" />
-          Settings
-        </h1>
-        <p className="text-sm text-[var(--muted)] mt-1">Pyxis configuration</p>
-      </div>
-
-      <FloatingCard>
-        <h2 className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-3">
-          About
-        </h2>
-        <div className="text-sm text-[var(--muted)] space-y-1.5">
-          <p>Pyxis — Web3 Intelligence Swarm</p>
-          <p>Pricing: $0.25 USDC per research session</p>
-          <p>Network: Base Sepolia</p>
+    <div className="p-6 space-y-4 max-w-2xl">
+      <h1 className="text-xl font-semibold">Settings</h1>
+      <div className="glass-card p-6 space-y-3">
+        <div className="text-sm">
+          <div className="text-[var(--muted)] text-xs mb-1">Wallet</div>
+          <div className="font-mono">
+            {isConnected ? address : "Not connected"}
+          </div>
         </div>
-      </FloatingCard>
-
-      <p className="text-xs text-[var(--muted)]">
-        Wallet controls and preference toggles will appear here once the app workspace
-        is wired up.
-      </p>
+        <div className="text-sm">
+          <div className="text-[var(--muted)] text-xs mb-1">Theme</div>
+          <div>Dark (only theme for now)</div>
+        </div>
+        {isConnected && (
+          <button
+            onClick={disconnectAndSignOut}
+            className="text-sm px-3 py-2 rounded-md border border-[var(--card-border)] hover:bg-[var(--card)]"
+          >
+            Disconnect & sign out
+          </button>
+        )}
+      </div>
     </div>
   );
 }
