@@ -313,7 +313,7 @@ export function FlowGraph() {
       </div>
 
       {/* Phase caption — under the graph, crossfades with phase */}
-      <div className="mt-2 lg:mt-4 h-12 flex items-start justify-center px-4">
+      <div className="mt-3 lg:mt-4 min-h-[76px] flex items-start justify-center px-4">
         <AnimatePresence mode="wait">
           <motion.div
             key={phase}
