@@ -55,15 +55,20 @@ export function HowItWorks() {
               className={`relative py-12 ${i < STEPS.length - 1 ? "md:border-r border-[var(--hair)]" : ""} ${i > 0 ? "border-t md:border-t-0 border-[var(--hair)]" : ""}`}
             >
               <div className="px-2 md:px-8">
-                <div className="flex items-baseline justify-between mb-8">
+                <div className="flex items-baseline justify-between mb-8 gap-3">
                   <span
                     className="font-display text-[68px] leading-none italic text-[var(--gold)] opacity-70"
                     style={{ fontVariationSettings: '"WONK" 1, "opsz" 144' }}
                   >
                     {step.roman}
                   </span>
-                  <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-[var(--gold-soft)]">
-                    {step.star} &nbsp; {step.role}
+                  <span className="text-right">
+                    <span className="font-display italic text-[16px] text-[var(--gold)] mr-2">
+                      {step.star}
+                    </span>
+                    <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-[var(--gold-soft)]">
+                      {step.role}
+                    </span>
                   </span>
                 </div>
                 <h3 className="font-display text-[32px] leading-tight mb-4">{step.title}</h3>
