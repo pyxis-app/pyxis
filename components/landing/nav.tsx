@@ -40,9 +40,12 @@ export function LandingNav() {
           </div>
           <Link
             href="/research"
-            className="text-[13px] font-mono uppercase tracking-[0.18em] text-[var(--gold)] editorial-link"
+            className="group inline-flex items-baseline gap-2 text-[12px] font-mono uppercase tracking-[0.22em] text-[var(--gold)] hover:text-[var(--foreground)] transition-colors"
           >
-            Enter
+            Open app
+            <span className="font-display text-[13px] leading-none translate-y-[1px] group-hover:translate-x-0.5 transition-transform">
+              →
+            </span>
           </Link>
         </div>
       </div>
