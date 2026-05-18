@@ -60,7 +60,7 @@ export function StarField() {
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 80% 60% at 50% 30%, rgba(91, 143, 255, 0.045) 0%, transparent 60%), radial-gradient(ellipse 70% 50% at 80% 80%, rgba(212, 184, 134, 0.03) 0%, transparent 70%), var(--background)",
+            "radial-gradient(ellipse 80% 60% at 50% 30%, rgba(91, 143, 255, 0.06) 0%, transparent 60%), radial-gradient(ellipse 70% 50% at 80% 85%, rgba(45, 82, 196, 0.05) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 15% 70%, rgba(167, 139, 250, 0.025) 0%, transparent 70%), var(--background)",
         }}
       />
 

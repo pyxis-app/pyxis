@@ -64,7 +64,7 @@ export function Constellation() {
         preserveAspectRatio="xMidYMid meet"
       >
         {/* Pipeline connecting lines (subtle) */}
-        <g stroke="rgba(212, 184, 134, 0.25)" strokeWidth="0.12" strokeLinecap="round">
+        <g stroke="rgba(127, 170, 255, 0.30)" strokeWidth="0.12" strokeLinecap="round">
           {LINES.map(([a, b], i) => (
             <line
               key={`l-${i}`}
@@ -77,7 +77,7 @@ export function Constellation() {
         </g>
 
         {/* Field stars (dim) */}
-        <g fill="rgba(236, 234, 216, 0.55)">
+        <g fill="rgba(229, 233, 240, 0.55)">
           {FIELD.map((s, i) => (
             <circle
               key={`f-${i}`}
@@ -94,9 +94,9 @@ export function Constellation() {
         <g>
           {NAMED.map((s, i) => (
             <g key={`n-${i}`} className="star" style={{ animationDelay: `${s.delay}s` }}>
-              <circle cx={s.x} cy={s.y} r={s.r * 1.4} fill="rgba(212, 184, 134, 0.10)" />
-              <circle cx={s.x} cy={s.y} r={s.r * 0.9} fill="rgba(212, 184, 134, 0.22)" />
-              <circle cx={s.x} cy={s.y} r={s.r * 0.45} fill="rgba(255, 244, 220, 0.95)" />
+              <circle cx={s.x} cy={s.y} r={s.r * 1.4} fill="rgba(91, 143, 255, 0.12)" />
+              <circle cx={s.x} cy={s.y} r={s.r * 0.9} fill="rgba(127, 170, 255, 0.28)" />
+              <circle cx={s.x} cy={s.y} r={s.r * 0.45} fill="rgba(240, 245, 255, 0.95)" />
             </g>
           ))}
         </g>
@@ -106,7 +106,7 @@ export function Constellation() {
           fontFamily="var(--font-geist-mono), monospace"
           fontSize="2.4"
           letterSpacing="0.05em"
-          fill="rgba(212, 184, 134, 0.85)"
+          fill="rgba(127, 170, 255, 0.85)"
         >
           {NAMED.map((s, i) => {
             const right = s.x >= 50;
@@ -128,7 +128,7 @@ export function Constellation() {
           fontFamily="var(--font-fraunces), serif"
           fontSize="3.2"
           fontStyle="italic"
-          fill="rgba(236, 234, 216, 0.5)"
+          fill="rgba(229, 233, 240, 0.5)"
         >
           Pyxis — the Mariner&apos;s Compass
         </text>
