@@ -58,7 +58,9 @@ export function Hero() {
                 <div className="text-[var(--gold-soft)] uppercase tracking-[0.18em] mb-1.5">
                   Pipeline
                 </div>
-                <div className="text-[var(--foreground)] tabular">5 agents</div>
+                <div className="text-[var(--foreground)] font-display italic" style={{ fontVariationSettings: '"opsz" 9' }}>
+                  α → β γ δ → ε
+                </div>
               </div>
               <div>
                 <div className="text-[var(--gold-soft)] uppercase tracking-[0.18em] mb-1.5">

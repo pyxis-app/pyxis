@@ -30,6 +30,7 @@ type NodeId = "commander" | "scout" | "analyst" | "sentinel" | "synthesizer";
 
 interface Node {
   id: NodeId;
+  greek: string;
   name: string;
   role: string;
   x: number;
@@ -38,11 +39,11 @@ interface Node {
 
 // viewBox is 100×150
 const NODES: Node[] = [
-  { id: "commander",   name: "Commander",   role: "reads your topic",      x: 50, y: 28  },
-  { id: "scout",       name: "Scout",       role: "scans news + docs",      x: 18, y: 72  },
-  { id: "analyst",     name: "Analyst",     role: "checks prices + TVL",    x: 50, y: 72  },
-  { id: "sentinel",    name: "Sentinel",    role: "reads community mood",   x: 82, y: 72  },
-  { id: "synthesizer", name: "Synthesizer", role: "writes the briefing",    x: 50, y: 116 },
+  { id: "commander",   greek: "α", name: "Commander",   role: "reads your topic",     x: 50, y: 28  },
+  { id: "scout",       greek: "β", name: "Scout",       role: "scans news + docs",     x: 18, y: 72  },
+  { id: "analyst",     greek: "γ", name: "Analyst",     role: "checks prices + TVL",   x: 50, y: 72  },
+  { id: "sentinel",    greek: "δ", name: "Sentinel",    role: "reads community mood",  x: 82, y: 72  },
+  { id: "synthesizer", greek: "ε", name: "Synthesizer", role: "writes the briefing",   x: 50, y: 116 },
 ];
 
 const TOPIC_PILL_Y = 8;
@@ -245,11 +246,9 @@ export function FlowGraph() {
             );
           })}
 
-          {/* ── Node labels (name + role description) ─────── */}
+          {/* ── Node labels (Greek + name + role description) ─ */}
           {NODES.map((node) => {
             const bright = nodeBright(node.id, phase);
-            // For middle row of probes, label sits below the node;
-            // Commander label below; Synthesizer label below.
             const labelY = node.y + 7;
             return (
               <motion.g
@@ -257,9 +256,22 @@ export function FlowGraph() {
                 animate={{ opacity: bright ? 1 : 0.5 }}
                 transition={{ duration: 0.5 }}
               >
+                {/* Greek identifier — small italic eyebrow above the name */}
                 <text
                   x={node.x}
-                  y={labelY}
+                  y={labelY - 2.5}
+                  textAnchor="middle"
+                  fontFamily="var(--font-fraunces), serif"
+                  fontSize="2.8"
+                  fontStyle="italic"
+                  fill="rgba(127, 170, 255, 0.75)"
+                >
+                  {node.greek}
+                </text>
+                {/* Name */}
+                <text
+                  x={node.x}
+                  y={labelY + 1.6}
                   textAnchor="middle"
                   fontFamily="var(--font-fraunces), serif"
                   fontSize="3.4"
@@ -268,9 +280,10 @@ export function FlowGraph() {
                 >
                   {node.name}
                 </text>
+                {/* Role description — monospace, smaller */}
                 <text
                   x={node.x}
-                  y={labelY + 3.6}
+                  y={labelY + 5.2}
                   textAnchor="middle"
                   fontFamily="var(--font-geist-mono), monospace"
                   fontSize="2.1"
