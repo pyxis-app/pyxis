@@ -1,29 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { ProbeGraphModal } from "./probe-graph-modal";
 
-const STEPS = [
+interface Agent { greek: string; name: string; }
+interface Step {
+  roman: string;
+  title: string;
+  body: string;
+  agents: Agent[];
+}
+
+const STEPS: Step[] = [
   {
     roman: "I",
     title: "Decompose",
     body: "The Commander reads your topic and splits it into three focused queries — one for facts, one for metrics, one for sentiment.",
-    star: "α",
-    role: "Commander",
+    agents: [{ greek: "α", name: "Commander" }],
   },
   {
     roman: "II",
     title: "Probe",
     body: "Scout, Analyst, and Sentinel each run targeted web searches in parallel. Live price and TVL data inject directly into the Analyst's context.",
-    star: "β γ δ",
-    role: "Scout · Analyst · Sentinel",
+    agents: [
+      { greek: "β", name: "Scout" },
+      { greek: "γ", name: "Analyst" },
+      { greek: "δ", name: "Sentinel" },
+    ],
   },
   {
     roman: "III",
     title: "Synthesize",
     body: "Findings merge into a single structured briefing with cited sources, a confidence score, and explicit gap notes.",
-    star: "ε",
-    role: "Synthesizer",
+    agents: [{ greek: "ε", name: "Synthesizer" }],
   },
 ];
 
@@ -55,21 +64,30 @@ export function HowItWorks() {
               className={`relative py-12 ${i < STEPS.length - 1 ? "md:border-r border-[var(--hair)]" : ""} ${i > 0 ? "border-t md:border-t-0 border-[var(--hair)]" : ""}`}
             >
               <div className="px-2 md:px-8">
-                <div className="flex items-baseline justify-between mb-8 gap-3">
+                <div className="flex items-start justify-between mb-8 gap-3">
                   <span
                     className="font-display text-[68px] leading-none italic text-[var(--gold)] opacity-70"
                     style={{ fontVariationSettings: '"WONK" 1, "opsz" 144' }}
                   >
                     {step.roman}
                   </span>
-                  <span className="inline-flex items-baseline gap-4 text-right whitespace-nowrap">
-                    <span className="font-display italic text-[17px] text-[var(--gold)] tracking-[0.18em]">
-                      {step.star}
-                    </span>
-                    <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-[var(--gold-soft)]">
-                      {step.role}
-                    </span>
-                  </span>
+                  <div className="flex flex-wrap items-baseline justify-end gap-x-3 gap-y-2 text-right pt-3">
+                    {step.agents.map((agent, idx) => (
+                      <Fragment key={idx}>
+                        {idx > 0 && (
+                          <span className="text-[var(--gold-soft)] opacity-50">·</span>
+                        )}
+                        <span className="inline-flex items-baseline gap-2 whitespace-nowrap">
+                          <span className="font-display italic text-[17px] leading-none text-[var(--gold)]">
+                            {agent.greek}
+                          </span>
+                          <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-[var(--gold-soft)]">
+                            {agent.name}
+                          </span>
+                        </span>
+                      </Fragment>
+                    ))}
+                  </div>
                 </div>
                 <h3 className="font-display text-[32px] leading-tight mb-4">{step.title}</h3>
                 <p className="text-[14px] leading-relaxed text-[var(--muted)] max-w-xs">
