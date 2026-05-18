@@ -220,6 +220,55 @@ body {
 
 ::selection { background: var(--accent); color: var(--foreground); }
 
+/* ── Briefing prose typography (used by landing demo + app /research) ── */
+
+.prose-pyxis h2 {
+  font-family: var(--font-fraunces), serif;
+  font-size: 32px;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  margin-top: 2.25rem;
+  margin-bottom: 1.1rem;
+  color: var(--foreground);
+}
+.prose-pyxis h2:first-child { margin-top: 0; }
+.prose-pyxis h3 {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--gold-soft);
+  margin-top: 1.75rem;
+  margin-bottom: 0.6rem;
+}
+.prose-pyxis p, .prose-pyxis li {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--foreground);
+}
+.prose-pyxis p { margin-bottom: 1rem; }
+.prose-pyxis ul { list-style: none; padding-left: 0; margin: 0.5rem 0 1rem; }
+.prose-pyxis li {
+  padding-left: 1.4rem;
+  position: relative;
+  margin-bottom: 0.45rem;
+  color: rgba(229, 233, 240, 0.84);
+}
+.prose-pyxis li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--gold-soft);
+}
+.prose-pyxis strong { color: var(--foreground); font-weight: 600; }
+.prose-pyxis a {
+  color: var(--gold);
+  text-decoration: underline;
+  text-decoration-color: rgba(127, 170, 255, 0.3);
+  text-underline-offset: 3px;
+}
+.prose-pyxis a:hover { text-decoration-color: var(--gold); }
+
 /* ── Existing app utilities — kept for /research, /history ─── */
 
 .glow-scout    { box-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }

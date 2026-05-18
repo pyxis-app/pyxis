@@ -14,27 +14,50 @@ export interface Briefing {
 }
 
 export function BriefingCard({ b }: { b: Briefing }) {
+  const date = new Date(b.createdAt).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  });
   return (
-    <div className="glass-card p-6">
-      <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-4">
-        <div>{b.topic}</div>
-        <div className="flex items-center gap-3">
-          <span>Confidence {b.confidence}/100</span>
-          <span>{b.sources} sources</span>
-          {b.partial && <span className="text-[var(--sentinel)]">partial</span>}
-          {b.paymentTx && (
+    <article className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-8 lg:gap-12">
+      {/* Meta column */}
+      <aside className="lg:sticky lg:top-8 self-start text-[12px] space-y-5">
+        <Meta label="Subject" value={b.topic} />
+        <Meta label="Issued" value={date} />
+        <Meta label="Confidence" value={`${b.confidence}/100`} mono />
+        <Meta label="Sources" value={String(b.sources)} mono />
+        <Meta label="Completion" value={b.partial ? "Partial" : "Full"} />
+        {b.paymentTx && (
+          <div>
+            <div className="eyebrow mb-1.5">Settlement</div>
             <a
               href={`https://sepolia.basescan.org/tx/${b.paymentTx}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[var(--accent)] hover:underline"
+              className="font-mono text-[11px] text-[var(--gold)] editorial-link"
             >
-              tx ↗
+              View on Basescan ↗
             </a>
-          )}
-        </div>
+          </div>
+        )}
+      </aside>
+
+      {/* Body */}
+      <div className="prose-pyxis max-w-3xl">
+        <MarkdownRenderer content={b.briefing} />
       </div>
-      <MarkdownRenderer content={b.briefing} />
+    </article>
+  );
+}
+
+function Meta({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div>
+      <div className="eyebrow mb-1.5">{label}</div>
+      <div className={`text-[var(--foreground)] ${mono ? "font-mono tabular text-[13px]" : "font-display text-[15px]"}`}>
+        {value}
+      </div>
     </div>
   );
 }

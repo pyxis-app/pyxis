@@ -31,48 +31,62 @@ export function HistoryGrid() {
     if (!address) return;
     await signInWithEthereum({ config, address, chainId });
     setNeedsAuth(false);
-    // re-trigger fetch
     const r = await fetch("/api/history");
     if (r.ok) setSessions((await r.json()).sessions);
   }
 
-  if (!isConnected) {
-    return (
-      <p className="p-6 text-sm text-[var(--muted)]">
-        Connect a wallet to see history.
-      </p>
-    );
-  }
-  if (needsAuth) {
-    return (
-      <div className="p-6">
-        <p className="text-sm text-[var(--muted)] mb-4">
-          Sign in to access your history.
-        </p>
-        <button
-          onClick={authenticate}
-          className="px-4 py-2 rounded-md text-sm bg-gradient-to-r from-[#3b82f6] to-[#1e40af] text-white"
-        >
-          Sign in with Ethereum
-        </button>
-      </div>
-    );
-  }
-  if (sessions === null) {
-    return <p className="p-6 text-sm text-[var(--muted)]">Loading…</p>;
-  }
-  if (sessions.length === 0) {
-    return <p className="p-6 text-sm text-[var(--muted)]">No sessions yet.</p>;
-  }
-
   return (
-    <div className="p-6 space-y-6 max-w-5xl">
-      <h1 className="text-xl font-semibold">History</h1>
-      {sessions.map((s) => (
-        <div key={s.id} id={s.id}>
-          <BriefingCard b={s} />
+    <div className="px-8 lg:px-12 py-10 lg:py-12 max-w-[1100px]">
+      <header className="mb-12">
+        <div className="eyebrow mb-3">Archive · Volume I</div>
+        <h1 className="font-display text-[34px] sm:text-[44px] lg:text-[52px] leading-[1.05] tracking-[-0.02em]">
+          Past{" "}
+          <span className="italic" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1, "opsz" 144' }}>
+            briefings
+          </span>.
+        </h1>
+      </header>
+
+      {!isConnected ? (
+        <EmptyMessage text="Connect a wallet to see briefings tied to your address." />
+      ) : needsAuth ? (
+        <div className="hairline-top pt-8">
+          <p className="font-display italic text-[18px] text-[var(--foreground)]/85 mb-6 max-w-md" style={{ fontVariationSettings: '"opsz" 9' }}>
+            Sign in with your wallet to retrieve briefings stored on the server.
+          </p>
+          <button
+            onClick={authenticate}
+            className="group inline-flex items-baseline gap-2.5 px-5 py-3 bg-[var(--foreground)] text-[var(--background)] font-mono uppercase text-[10px] tracking-[0.22em] hover:bg-[var(--gold)] transition-colors duration-300"
+          >
+            Sign in with Ethereum
+            <span className="font-display text-[14px] leading-none translate-y-[1px] group-hover:translate-x-0.5 transition-transform">
+              →
+            </span>
+          </button>
         </div>
-      ))}
+      ) : sessions === null ? (
+        <EmptyMessage text="Loading…" />
+      ) : sessions.length === 0 ? (
+        <EmptyMessage text="No briefings yet. Your first session will appear here." />
+      ) : (
+        <div className="space-y-20 hairline-top pt-12">
+          {sessions.map((s, i) => (
+            <div key={s.id} id={s.id} className={i > 0 ? "hairline-top pt-20" : ""}>
+              <BriefingCard b={s} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EmptyMessage({ text }: { text: string }) {
+  return (
+    <div className="hairline-top pt-10">
+      <p className="font-display italic text-[18px] text-[var(--muted)] max-w-md" style={{ fontVariationSettings: '"opsz" 9' }}>
+        {text}
+      </p>
     </div>
   );
 }
