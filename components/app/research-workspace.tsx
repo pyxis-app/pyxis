@@ -27,7 +27,7 @@ const EXAMPLE_TOPICS = [
 
 const RUNNING_PHASES = [
   { t: 0,     caption: "Commander reading your topic…" },
-  { t: 1500,  caption: "Three probes searching in parallel…" },
+  { t: 1500,  caption: "Three agents searching in parallel…" },
   { t: 4500,  caption: "Cross-referencing market data…" },
   { t: 7000,  caption: "Synthesizer assembling the briefing…" },
   { t: 10000, caption: "Almost there — finalising citations…" },
@@ -269,7 +269,7 @@ export function ResearchWorkspace() {
                   </div>
                 </div>
               </div>
-              {/* Probe graph */}
+              {/* Agent flow graph */}
               <div className="aspect-[3/2] max-w-3xl mx-auto">
                 <ProbeNodeGraph live />
               </div>

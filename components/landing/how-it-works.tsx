@@ -20,7 +20,7 @@ const STEPS: Step[] = [
   },
   {
     roman: "II",
-    title: "Probe",
+    title: "Investigate",
     body: "Scout, Analyst, and Sentinel each run targeted web searches in parallel. Live price and TVL data inject directly into the Analyst's context.",
     agents: [
       { greek: "β", name: "Scout" },

@@ -7,7 +7,7 @@ const POINTS = [
   {
     n: "02",
     title: "Multi-angle",
-    body: "Three specialist probes for facts, metrics, and sentiment. The Synthesizer cross-references them before writing a word.",
+    body: "Three specialist agents for facts, metrics, and sentiment. The Synthesizer cross-references them before writing a word.",
   },
   {
     n: "03",

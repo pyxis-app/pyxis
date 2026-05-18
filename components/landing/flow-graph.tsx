@@ -15,12 +15,12 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
-type Phase = "input" | "commander" | "probes" | "converge" | "synthesize" | "done";
+type Phase = "input" | "commander" | "agents" | "converge" | "synthesize" | "done";
 
 const PHASES: Array<{ p: Phase; ms: number; caption: string }> = [
   { p: "input",      ms: 1300, caption: "You enter a Web3 topic to research." },
   { p: "commander",  ms: 1500, caption: "The Commander breaks it into three focused questions." },
-  { p: "probes",     ms: 1800, caption: "Three probes search the web in parallel — news, data, sentiment." },
+  { p: "agents",     ms: 1800, caption: "Three agents search the web in parallel — news, data, sentiment." },
   { p: "converge",   ms: 1500, caption: "Findings flow back to one place." },
   { p: "synthesize", ms: 1500, caption: "The Synthesizer writes a structured briefing with citations." },
   { p: "done",       ms: 1900, caption: "Ready to read — usually within ten seconds." },
@@ -74,7 +74,7 @@ function nodeBright(id: NodeId, phase: Phase): boolean {
   switch (phase) {
     case "input":       return false;
     case "commander":   return id === "commander";
-    case "probes":      return id === "commander" || id === "scout" || id === "analyst" || id === "sentinel";
+    case "agents":      return id === "commander" || id === "scout" || id === "analyst" || id === "sentinel";
     case "converge":    return id !== "synthesizer";
     case "synthesize":  return id === "synthesizer";
     case "done":        return true;
@@ -83,25 +83,25 @@ function nodeBright(id: NodeId, phase: Phase): boolean {
 
 function pulseFor(id: NodeId, phase: Phase): { active: boolean; delay: number; big: boolean } {
   if (phase === "commander" && id === "commander")   return { active: true, delay: 0,    big: false };
-  if (phase === "probes"    && id === "scout")       return { active: true, delay: 0.0,  big: false };
-  if (phase === "probes"    && id === "analyst")     return { active: true, delay: 0.18, big: false };
-  if (phase === "probes"    && id === "sentinel")    return { active: true, delay: 0.36, big: false };
+  if (phase === "agents"    && id === "scout")       return { active: true, delay: 0.0,  big: false };
+  if (phase === "agents"    && id === "analyst")     return { active: true, delay: 0.18, big: false };
+  if (phase === "agents"    && id === "sentinel")    return { active: true, delay: 0.36, big: false };
   if (phase === "synthesize" && id === "synthesizer") return { active: true, delay: 0,    big: true  };
   return { active: false, delay: 0, big: false };
 }
 
 function edgeLit(group: "out" | "in", phase: Phase): boolean {
-  if (phase === "probes" && group === "out") return true;
+  if (phase === "agents" && group === "out") return true;
   if (phase === "converge") return true;
   if (phase === "synthesize" || phase === "done") return true;
   return false;
 }
 
 function edgeFlowing(group: "out" | "in", phase: Phase): boolean {
-  return (phase === "probes" && group === "out") || (phase === "converge" && group === "in");
+  return (phase === "agents" && group === "out") || (phase === "converge" && group === "in");
 }
 
-const inputPillBright  = (phase: Phase) => phase === "input" || phase === "commander" || phase === "probes" || phase === "done";
+const inputPillBright  = (phase: Phase) => phase === "input" || phase === "commander" || phase === "agents" || phase === "done";
 const outputPillBright = (phase: Phase) => phase === "synthesize" || phase === "done";
 
 export function FlowGraph() {
@@ -142,7 +142,7 @@ export function FlowGraph() {
             strokeDasharray="0.6 1"
           />
 
-          {/* ── Edges (Commander → probes → Synthesizer) ───── */}
+          {/* ── Edges (Commander → agents → Synthesizer) ───── */}
           {EDGES.map((edge) => {
             const a = nodeById(edge.from);
             const b = nodeById(edge.to);
