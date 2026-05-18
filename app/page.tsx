@@ -1,10 +1,11 @@
 import { LandingNav } from "@/components/landing/nav";
+import { Hero } from "@/components/landing/hero";
 
 export default function LandingPage() {
   return (
     <main>
       <LandingNav />
-      <div id="hero" />
+      <Hero />
       <div id="how" />
       <div id="demo" />
       <div id="pricing" />
