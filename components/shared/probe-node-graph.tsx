@@ -13,9 +13,57 @@ interface ProbeNode {
 }
 
 interface ProbeNodeGraphProps {
-  topic: string;
-  probes: ProbeNode[];
+  topic?: string;
+  probes?: ProbeNode[];
+  synthesizing?: boolean;
+  /**
+   * Demo mode: cycles through preset probe states on a timer so the graph
+   * can be shown on the landing page without a live research session.
+   * When true, `topic`, `probes`, and `synthesizing` are ignored.
+   */
+  demo?: boolean;
+}
+
+// Preset cycle for demo mode: idle → searching → complete → synthesizing → reset
+const DEMO_TOPIC = "Solana ecosystem state";
+const DEMO_PROBES_BASE: Omit<ProbeNode, "status">[] = [
+  { type: "scout", label: "SCOUT", color: "#22d3ee" },
+  { type: "analyst", label: "ANALYST", color: "#a78bfa" },
+  { type: "sentinel", label: "SENTINEL", color: "#f59e0b" },
+];
+
+type DemoPhase = {
+  statuses: [ProbeStatus, ProbeStatus, ProbeStatus];
   synthesizing: boolean;
+};
+
+const DEMO_PHASES: DemoPhase[] = [
+  { statuses: ["idle", "idle", "idle"], synthesizing: false },
+  { statuses: ["searching", "searching", "searching"], synthesizing: false },
+  { statuses: ["complete", "searching", "searching"], synthesizing: false },
+  { statuses: ["complete", "complete", "searching"], synthesizing: false },
+  { statuses: ["complete", "complete", "complete"], synthesizing: true },
+  { statuses: ["complete", "complete", "complete"], synthesizing: false },
+];
+
+function useDemoState(active: boolean) {
+  const [phase, setPhase] = useState(0);
+  useEffect(() => {
+    if (!active) return;
+    const iv = setInterval(() => {
+      setPhase((p) => (p + 1) % DEMO_PHASES.length);
+    }, 2000);
+    return () => clearInterval(iv);
+  }, [active]);
+  const current = DEMO_PHASES[phase];
+  return {
+    topic: DEMO_TOPIC,
+    probes: DEMO_PROBES_BASE.map((p, i) => ({
+      ...p,
+      status: current.statuses[i],
+    })),
+    synthesizing: current.synthesizing,
+  };
 }
 
 // Rotating scan phrases per probe type
@@ -591,9 +639,18 @@ function CenterNode({ topic, synthesizing, anyActive, allDone }: {
   );
 }
 
-export function ProbeNodeGraph({ topic, probes, synthesizing }: ProbeNodeGraphProps) {
+export function ProbeNodeGraph({
+  topic: topicProp,
+  probes: probesProp,
+  synthesizing: synthesizingProp,
+  demo = false,
+}: ProbeNodeGraphProps) {
+  const demoState = useDemoState(demo);
+  const topic = demo ? demoState.topic : (topicProp ?? "");
+  const probes = demo ? demoState.probes : (probesProp ?? []);
+  const synthesizing = demo ? demoState.synthesizing : (synthesizingProp ?? false);
   const anyActive = probes.some((p) => p.status === "searching");
-  const allDone = probes.every((p) => p.status === "complete");
+  const allDone = probes.length > 0 && probes.every((p) => p.status === "complete");
 
   return (
     <div className="w-full max-w-3xl mx-auto">
