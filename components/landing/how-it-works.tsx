@@ -62,8 +62,8 @@ export function HowItWorks() {
                   >
                     {step.roman}
                   </span>
-                  <span className="text-right">
-                    <span className="font-display italic text-[16px] text-[var(--gold)] mr-2">
+                  <span className="inline-flex items-baseline gap-4 text-right whitespace-nowrap">
+                    <span className="font-display italic text-[17px] text-[var(--gold)] tracking-[0.18em]">
                       {step.star}
                     </span>
                     <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-[var(--gold-soft)]">
