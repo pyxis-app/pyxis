@@ -1,0 +1,56 @@
+services:
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+    restart: unless-stopped
+
+  acme-companion:
+    image: nginxproxy/acme-companion:latest
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - acme:/etc/acme.sh
+    environment:
+      DEFAULT_EMAIL: ricoita24@gmail.com
+    restart: unless-stopped
+
+  app:
+    image: ghcr.io/pyxis-boop/app:latest
+    environment:
+      VIRTUAL_HOST: ${PYXIS_DOMAIN}
+      LETSENCRYPT_HOST: ${PYXIS_DOMAIN}
+      VIRTUAL_PORT: "3000"
+    env_file: .env
+    volumes:
+      - ./data:/data
+      - ./backups:/backups
+    mem_limit: 1300m
+    restart: unless-stopped
+
+  backup:
+    image: alpine:3.20
+    volumes:
+      - ./data:/data
+      - ./backups:/backups
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        apk add --no-cache sqlite tzdata && \
+        printf '%s\n' '0 3 * * * sh -c "sqlite3 /data/probe.db \".backup /backups/probe-$$(date +\%Y\%m\%d).db\" && find /backups -mtime +7 -delete"' > /etc/crontabs/root && \
+        crond -f -l 2
+    restart: unless-stopped
+
+volumes:
+  certs:
+  vhost:
+  html:
+  acme:
