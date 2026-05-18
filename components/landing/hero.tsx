@@ -4,23 +4,22 @@ import { FlowGraph } from "./flow-graph";
 export function Hero() {
   return (
     <section className="relative overflow-hidden hairline-bottom">
-      <div className="max-w-[1280px] mx-auto px-8 pt-24 pb-24 lg:pt-40 lg:pb-32">
+      <div className="max-w-[1280px] mx-auto px-8 pt-12 pb-20 lg:pt-20 lg:pb-24">
         {/* Two-column hero */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-10 lg:gap-20 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-10 lg:gap-20 items-start">
           {/* LEFT — copy */}
           <div className="reveal reveal-2 max-w-[640px]">
-            <h1 className="font-display text-[56px] sm:text-[80px] lg:text-[104px] leading-[0.95] tracking-[-0.025em] text-[var(--foreground)]">
-              Navigate Web3 <br />
-              with a research{" "}
+            <h1 className="font-display text-[52px] sm:text-[76px] lg:text-[96px] leading-[0.95] tracking-[-0.025em] text-[var(--foreground)]">
+              A research <br />
               <span className="italic" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1, "opsz" 144' }}>
                 swarm
               </span>.
             </h1>
 
-            <p className="mt-10 max-w-[460px] text-[16px] leading-relaxed text-[var(--muted)]">
-              Five autonomous agents decompose your topic, sweep the open web,
-              cross-reference live market data, and return a sourced briefing
-              — settled on-chain, per request.
+            <p className="mt-10 max-w-[480px] text-[16px] leading-relaxed text-[var(--muted)]">
+              Five autonomous agents pull live market data and the latest
+              news across the open web. Every briefing returns sourced,
+              scored, and verifiable. Settled on-chain, per request.
             </p>
 
             <div className="mt-12 flex flex-wrap items-center gap-8">
