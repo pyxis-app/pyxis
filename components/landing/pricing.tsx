@@ -26,7 +26,7 @@ export function Pricing() {
               </span>
             </div>
             <div className="mt-6 font-display italic text-[28px] lg:text-[36px] text-[var(--muted)]" style={{ fontVariationSettings: '"opsz" 144' }}>
-              USDC, per briefing.
+              USDC, per research.
             </div>
           </div>
 

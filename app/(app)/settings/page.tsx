@@ -42,7 +42,7 @@ export default function SettingsPage() {
 
         <Row label="Pricing">
           <span className="font-mono text-[14px] text-[var(--foreground)] tabular">
-            $0.25 USDC per briefing
+            $0.25 USDC per research
           </span>
         </Row>
 

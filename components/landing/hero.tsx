@@ -4,18 +4,7 @@ import { FlowGraph } from "./flow-graph";
 export function Hero() {
   return (
     <section className="relative overflow-hidden hairline-bottom">
-      <div className="max-w-[1280px] mx-auto px-8 pt-20 pb-24 lg:pt-32 lg:pb-32">
-        {/* Top eyebrow row */}
-        <div className="reveal reveal-1 flex items-center justify-between mb-16 lg:mb-24">
-          <div className="eyebrow flex items-center gap-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--gold)]" />
-            Volume I &nbsp;·&nbsp; Issue 01 &nbsp;·&nbsp; Live on Base Sepolia
-          </div>
-          <div className="eyebrow opacity-70 hidden md:block">
-            $0.25 USDC / Briefing
-          </div>
-        </div>
-
+      <div className="max-w-[1280px] mx-auto px-8 pt-24 pb-24 lg:pt-40 lg:pb-32">
         {/* Two-column hero */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-10 lg:gap-20 items-center">
           {/* LEFT — copy */}

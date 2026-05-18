@@ -12,7 +12,7 @@ const POINTS = [
   {
     n: "03",
     title: "Pay per use",
-    body: "x402 native. No subscriptions, no quotas, no signups. One payment per briefing, settled on-chain.",
+    body: "x402 native. No subscriptions, no quotas, no signups. One payment per research, settled on-chain.",
   },
 ];
 
