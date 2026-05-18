@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Constellation } from "./constellation";
+import { FlowGraph } from "./flow-graph";
 
 const TICKER_ITEMS = [
   "01 · Modular DA layers in 2026",
@@ -88,7 +88,7 @@ export function Hero() {
 
           {/* RIGHT — constellation */}
           <div className="reveal reveal-3 relative aspect-[3/4] w-full max-w-[540px] mx-auto lg:max-w-none">
-            <Constellation />
+            <FlowGraph />
           </div>
         </div>
       </div>

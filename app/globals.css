@@ -97,13 +97,24 @@ body {
 
 /* ── Star + twinkle (constellation) ──────────────────────────── */
 
+/* Gentle opacity-only twinkle. No scale — stars stay steady like real
+   navigation stars; only their brightness modulates. */
 @keyframes twinkle {
-  0%, 100% { opacity: 0.35; transform: scale(1); }
-  50%      { opacity: 1;    transform: scale(1.15); }
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
 }
 .star {
-  animation: twinkle 6s ease-in-out infinite;
-  transform-origin: center;
+  animation: twinkle 8s ease-in-out infinite;
+}
+
+/* Signal flow on pipeline lines — a short dash travels from Commander down
+   through the probes to Synthesizer, suggesting data motion. */
+@keyframes signal-flow {
+  from { stroke-dashoffset: 100; }
+  to   { stroke-dashoffset: 0; }
+}
+.signal-line {
+  animation: signal-flow 4.5s linear infinite;
 }
 
 /* Star-field dots (background ambience) */
@@ -133,13 +144,16 @@ body {
     0 0 22px 4px rgba(91, 143, 255, 0.14);
 }
 
+/* Imperceptibly slow drift used only by the background star field (never the
+   named constellation). Tiny translate magnitude over a long cycle so the
+   field "breathes" without anything visibly moving. */
 @keyframes drift {
   0%   { transform: translate3d(0, 0, 0); }
   50%  { transform: translate3d(2px, -3px, 0); }
   100% { transform: translate3d(0, 0, 0); }
 }
 .drift {
-  animation: drift 24s ease-in-out infinite;
+  animation: drift 90s ease-in-out infinite;
 }
 
 /* Radial glow behind constellation */
