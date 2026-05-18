@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { NavShell } from "./components/nav-shell";
-import { DotGridProvider } from "./components/dot-grid-context";
-import { DotGridCanvas } from "./components/dot-grid-canvas";
+import { NavShell } from "@/components/shared/nav-shell";
+import { DotGridProvider } from "@/components/shared/dot-grid-context";
+import { DotGridCanvas } from "@/components/shared/dot-grid-canvas";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

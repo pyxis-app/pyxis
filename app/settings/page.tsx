@@ -1,7 +1,7 @@
 "use client";
 
 import { Settings } from "lucide-react";
-import { FloatingCard } from "../components/floating-card";
+import { FloatingCard } from "@/components/shared/floating-card";
 
 export default function SettingsPage() {
   return (

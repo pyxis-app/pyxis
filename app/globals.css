@@ -1,18 +1,26 @@
 @import "tailwindcss";
 
 :root {
+  /* surface colors — unchanged from hackathon */
   --background: #0f172a;
   --foreground: #e4e4e7;
   --card: #1e293b;
   --card-border: #334155;
-  --accent: #10b981;
-  --accent-glow: rgba(16, 185, 129, 0.15);
+  --muted: #94a3b8;
+
+  /* probe colors — internal product semantics, kept */
   --scout: #22d3ee;
   --analyst: #a78bfa;
   --sentinel: #f59e0b;
+
   --success: #22c55e;
   --danger: #ef4444;
-  --muted: #94a3b8;
+
+  /* Pyxis blue — replaces the hackathon emerald accent */
+  --accent: #3b82f6;
+  --accent-dark: #1e40af;
+  --accent-deep: #0a0f1c;
+  --accent-glow: rgba(59, 130, 246, 0.18);
 }
 
 @theme inline {
@@ -21,6 +29,8 @@
   --color-card: var(--card);
   --color-card-border: var(--card-border);
   --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --color-accent-deep: var(--accent-deep);
   --color-scout: var(--scout);
   --color-analyst: var(--analyst);
   --color-sentinel: var(--sentinel);
@@ -37,20 +47,17 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-/* Glow effects */
-.glow-scout { box-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
-.glow-analyst { box-shadow: 0 0 20px rgba(167, 139, 250, 0.3); }
+.glow-scout    { box-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
+.glow-analyst  { box-shadow: 0 0 20px rgba(167, 139, 250, 0.3); }
 .glow-sentinel { box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); }
-.glow-accent { box-shadow: 0 0 30px var(--accent-glow); }
+.glow-accent   { box-shadow: 0 0 30px var(--accent-glow); }
 
-/* Pulse animation for active probes */
 @keyframes probe-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.7; transform: scale(1.05); }
 }
 .probe-active { animation: probe-pulse 2s ease-in-out infinite; }
 
-/* Glassmorphism card */
 .glass-card {
   background: rgba(10, 15, 26, 0.8);
   backdrop-filter: blur(12px);
@@ -59,7 +66,6 @@ body {
   border-radius: 16px;
 }
 
-/* Drawer slide animation */
 @keyframes slide-in-right {
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
@@ -69,18 +75,19 @@ body {
   to { transform: translateX(100%); }
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--background); }
 ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 3px; }
 
-/* Skeleton loader */
 @keyframes skeleton-pulse {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 0.15; }
 }
-.skeleton {
-  background: var(--card-border);
-  border-radius: 8px;
-  animation: skeleton-pulse 1.5s ease-in-out infinite;
+.skeleton { background: var(--card-border); border-radius: 8px; animation: skeleton-pulse 1.5s ease-in-out infinite; }
+
+/* Constellation twinkle for landing hero stars */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.85; }
 }
+.star { animation: twinkle 4s ease-in-out infinite; }

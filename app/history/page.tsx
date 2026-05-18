@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { History, Search, Clock, FileText } from "lucide-react";
-import { FloatingCard } from "../components/floating-card";
-import { ReportDrawer } from "../components/report-drawer";
-import { EmptyState } from "../components/empty-state";
-import { useLocalStorage } from "../lib/use-local-storage";
+import { FloatingCard } from "@/components/shared/floating-card";
+import { ReportDrawer } from "@/components/shared/report-drawer";
+import { EmptyState } from "@/components/shared/empty-state";
+import { useLocalStorage } from "@/lib/use-local-storage";
 import { motion } from "framer-motion";
 
 interface ResearchEntry {

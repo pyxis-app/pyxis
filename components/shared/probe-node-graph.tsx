@@ -360,7 +360,7 @@ function ProbeCard({ probe, pos, index }: { probe: ProbeNode; pos: { x: number; 
             width={20}
             height={14}
             rx={7}
-            fill="#10b981"
+            fill="#3b82f6"
             initial={flash ? { opacity: 0, scale: 0.5 } : { opacity: 0.9 }}
             animate={{ opacity: 0.9, scale: 1 }}
             transition={{ type: "spring", stiffness: 300 }}
@@ -459,7 +459,7 @@ function CenterNode({ topic, synthesizing, anyActive, allDone }: {
         width={CENTER_W}
         height={CENTER_H}
         rx={14}
-        fill="#10b981"
+        fill="#3b82f6"
         opacity={synthesizing ? 0.1 : anyActive ? 0.06 : 0.04}
         filter="url(#glow-md)"
       />
@@ -471,7 +471,7 @@ function CenterNode({ topic, synthesizing, anyActive, allDone }: {
         height={CENTER_H}
         rx={14}
         fill="var(--card)"
-        stroke="#10b981"
+        stroke="#3b82f6"
         strokeWidth={synthesizing ? 2 : 1.5}
         strokeOpacity={synthesizing ? 0.8 : 0.5}
       />
@@ -482,7 +482,7 @@ function CenterNode({ topic, synthesizing, anyActive, allDone }: {
         y1={CENTER.y - CENTER_H / 2 + 0.5}
         x2={CENTER.x + CENTER_W / 2 - 25}
         y2={CENTER.y - CENTER_H / 2 + 0.5}
-        stroke="#10b981"
+        stroke="#3b82f6"
         strokeWidth={2}
         strokeOpacity={synthesizing ? 0.9 : 0.5}
         strokeLinecap="round"
@@ -491,14 +491,14 @@ function CenterNode({ topic, synthesizing, anyActive, allDone }: {
       {/* Radar sweep when synthesizing */}
       {synthesizing && (
         <g>
-          <circle cx={CENTER.x} cy={CENTER.y} r={radarR} fill="none" stroke="#10b981" strokeWidth={0.5} strokeOpacity={0.15} />
-          <circle cx={CENTER.x} cy={CENTER.y} r={radarR * 0.6} fill="none" stroke="#10b981" strokeWidth={0.3} strokeOpacity={0.1} />
+          <circle cx={CENTER.x} cy={CENTER.y} r={radarR} fill="none" stroke="#3b82f6" strokeWidth={0.5} strokeOpacity={0.15} />
+          <circle cx={CENTER.x} cy={CENTER.y} r={radarR * 0.6} fill="none" stroke="#3b82f6" strokeWidth={0.3} strokeOpacity={0.1} />
           <line
             x1={CENTER.x} y1={CENTER.y}
             x2={sweepX} y2={sweepY}
-            stroke="#10b981" strokeWidth={1.5} strokeOpacity={0.6}
+            stroke="#3b82f6" strokeWidth={1.5} strokeOpacity={0.6}
           />
-          <circle cx={sweepX} cy={sweepY} r={2} fill="#10b981" opacity={0.8} filter="url(#glow-sm)" />
+          <circle cx={sweepX} cy={sweepY} r={2} fill="#3b82f6" opacity={0.8} filter="url(#glow-sm)" />
           {[10, 20, 30, 45, 60].map((offset) => {
             const trailRad = ((radarAngle.current - offset) * Math.PI) / 180;
             return (
@@ -507,7 +507,7 @@ function CenterNode({ topic, synthesizing, anyActive, allDone }: {
                 cx={CENTER.x + Math.cos(trailRad) * radarR}
                 cy={CENTER.y + Math.sin(trailRad) * radarR}
                 r={1.2}
-                fill="#10b981"
+                fill="#3b82f6"
                 opacity={0.3 - offset * 0.004}
               />
             );
@@ -522,10 +522,10 @@ function CenterNode({ topic, synthesizing, anyActive, allDone }: {
         width={84}
         height={18}
         rx={9}
-        fill="#10b981"
+        fill="#3b82f6"
         opacity={0.12}
       />
-      <text x={CENTER.x} y={CENTER.y - CENTER_H / 2 + 22} textAnchor="middle" fill="#10b981" fontSize={8} fontWeight={600} letterSpacing={1.5}>
+      <text x={CENTER.x} y={CENTER.y - CENTER_H / 2 + 22} textAnchor="middle" fill="#3b82f6" fontSize={8} fontWeight={600} letterSpacing={1.5}>
         {synthesizing ? "SYNTHESIZING" : allDone ? "COMPLETE" : anyActive ? "RECEIVING" : "TARGET"}
       </text>
 
@@ -551,7 +551,7 @@ function CenterNode({ topic, synthesizing, anyActive, allDone }: {
 
       {/* Cycling synth text */}
       {synthesizing && (
-        <text x={CENTER.x} y={CENTER.y + CENTER_H / 2 - 18} textAnchor="middle" fill="#10b981" fontSize={8} opacity={0.6} fontFamily="monospace">
+        <text x={CENTER.x} y={CENTER.y + CENTER_H / 2 - 18} textAnchor="middle" fill="#3b82f6" fontSize={8} opacity={0.6} fontFamily="monospace">
           {synthText}
         </text>
       )}
@@ -566,7 +566,7 @@ function CenterNode({ topic, synthesizing, anyActive, allDone }: {
             height={CENTER_H + 8}
             rx={16}
             fill="none"
-            stroke="#10b981"
+            stroke="#3b82f6"
             strokeWidth={1}
             animate={{ opacity: [0.3, 0], scale: [1, 1.06] }}
             transition={{ duration: 1.5, repeat: Infinity }}
@@ -579,7 +579,7 @@ function CenterNode({ topic, synthesizing, anyActive, allDone }: {
             height={CENTER_H + 16}
             rx={20}
             fill="none"
-            stroke="#10b981"
+            stroke="#3b82f6"
             strokeWidth={0.5}
             animate={{ opacity: [0.15, 0], scale: [1, 1.1] }}
             transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
@@ -622,7 +622,7 @@ export function ProbeNodeGraph({ topic, probes, synthesizing }: ProbeNodeGraphPr
             </marker>
           ))}
           <marker id="arrow-center" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="6" orient="auto">
-            <path d="M 0 0 L 10 4 L 0 8 z" fill="#10b981" opacity={0.7} />
+            <path d="M 0 0 L 10 4 L 0 8 z" fill="#3b82f6" opacity={0.7} />
           </marker>
         </defs>
 
@@ -770,7 +770,7 @@ export function ProbeNodeGraph({ topic, probes, synthesizing }: ProbeNodeGraphPr
             <motion.line
               x1={CENTER.x} y1={CENTER.y + CENTER_H / 2}
               x2={CENTER.x} y2={CENTER.y + CENTER_H / 2 + 35}
-              stroke="#10b981" strokeWidth={2} strokeOpacity={0.3}
+              stroke="#3b82f6" strokeWidth={2} strokeOpacity={0.3}
               filter="url(#glow-sm)"
               strokeDasharray="6 4"
               animate={{ strokeDashoffset: [0, -20] }}
@@ -804,7 +804,7 @@ export function ProbeNodeGraph({ topic, probes, synthesizing }: ProbeNodeGraphPr
         <text x={20} y={535} fill="#71717a" fontSize={8} opacity={0.5} letterSpacing={1}>
           PYXIS // INTELLIGENCE SWARM
         </text>
-        <text x={760} y={535} textAnchor="end" fill={anyActive || synthesizing ? "#10b981" : "#71717a"} fontSize={8} opacity={anyActive || synthesizing ? 0.8 : 0.5} letterSpacing={1}>
+        <text x={760} y={535} textAnchor="end" fill={anyActive || synthesizing ? "#3b82f6" : "#71717a"} fontSize={8} opacity={anyActive || synthesizing ? 0.8 : 0.5} letterSpacing={1}>
           {synthesizing ? "● SYNTHESIZING REPORT" : anyActive ? "● PROBES ACTIVE" : allDone ? "● COMPLETE" : "○ STANDBY"}
         </text>
       </svg>
