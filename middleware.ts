@@ -1,10 +1,12 @@
+import { NextResponse, type NextRequest } from "next/server";
 import { paymentMiddleware } from "x402-next";
 import type { Address } from "viem";
 import { x402Config } from "@/lib/x402";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 const cfg = x402Config();
 
-export const middleware = paymentMiddleware(
+const payment = paymentMiddleware(
   cfg.payTo as Address,
   {
     "/api/research": {
@@ -19,5 +21,19 @@ export const middleware = paymentMiddleware(
   },
   { url: cfg.facilitator as `${string}://${string}` },
 );
+
+export async function middleware(req: NextRequest) {
+  if (req.nextUrl.pathname.startsWith("/api/research")) {
+    const ip = clientIp(req);
+    const { ok, retryAfter } = rateLimit(`research:${ip}`, 30, 60_000);
+    if (!ok) {
+      return NextResponse.json(
+        { error: "rate_limited" },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } },
+      );
+    }
+  }
+  return payment(req);
+}
 
 export const config = { matcher: ["/api/research"] };
