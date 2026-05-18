@@ -22,6 +22,14 @@ interface ProbeNodeGraphProps {
    * When true, `topic`, `probes`, and `synthesizing` are ignored.
    */
   demo?: boolean;
+  /**
+   * Live mode: animates the probe states on a timer while a real research
+   * call is in flight. No external progress signals are wired yet, so it
+   * cycles through the same preset states as `demo` but at a slower pace
+   * timed to expected API latency. `topic`, `probes`, and `synthesizing`
+   * are ignored when set.
+   */
+  live?: boolean;
 }
 
 // Preset cycle for demo mode: idle → searching → complete → synthesizing → reset
@@ -46,15 +54,15 @@ const DEMO_PHASES: DemoPhase[] = [
   { statuses: ["complete", "complete", "complete"], synthesizing: false },
 ];
 
-function useDemoState(active: boolean) {
+function useDemoState(active: boolean, intervalMs = 2000) {
   const [phase, setPhase] = useState(0);
   useEffect(() => {
     if (!active) return;
     const iv = setInterval(() => {
       setPhase((p) => (p + 1) % DEMO_PHASES.length);
-    }, 2000);
+    }, intervalMs);
     return () => clearInterval(iv);
-  }, [active]);
+  }, [active, intervalMs]);
   const current = DEMO_PHASES[phase];
   return {
     topic: DEMO_TOPIC,
@@ -644,11 +652,15 @@ export function ProbeNodeGraph({
   probes: probesProp,
   synthesizing: synthesizingProp,
   demo = false,
+  live = false,
 }: ProbeNodeGraphProps) {
-  const demoState = useDemoState(demo);
-  const topic = demo ? demoState.topic : (topicProp ?? "");
-  const probes = demo ? demoState.probes : (probesProp ?? []);
-  const synthesizing = demo ? demoState.synthesizing : (synthesizingProp ?? false);
+  // Live mode reuses the demo cycle but at a slower pace timed to expected
+  // API latency. No external progress signals are wired yet.
+  const animated = demo || live;
+  const demoState = useDemoState(animated, live ? 3500 : 2000);
+  const topic = animated ? demoState.topic : (topicProp ?? "");
+  const probes = animated ? demoState.probes : (probesProp ?? []);
+  const synthesizing = animated ? demoState.synthesizing : (synthesizingProp ?? false);
   const anyActive = probes.some((p) => p.status === "searching");
   const allDone = probes.length > 0 && probes.every((p) => p.status === "complete");
 
