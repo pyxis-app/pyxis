@@ -1,21 +1,10 @@
 import Link from "next/link";
 import { FlowGraph } from "./flow-graph";
 
-const TICKER_ITEMS = [
-  "01 · Modular DA layers in 2026",
-  "02 · Liquid restaking risks",
-  "03 · Solana payments adoption",
-  "04 · Bitcoin L2 thesis",
-  "05 · MEV redistribution post-PBS",
-  "06 · ETH ETF flow analysis",
-  "07 · Real-world asset tokenization",
-  "08 · Account abstraction adoption",
-];
-
 export function Hero() {
   return (
     <section className="relative overflow-hidden hairline-bottom">
-      <div className="max-w-[1280px] mx-auto px-8 pt-20 pb-10 lg:pt-32 lg:pb-20">
+      <div className="max-w-[1280px] mx-auto px-8 pt-20 pb-24 lg:pt-32 lg:pb-32">
         {/* Top eyebrow row */}
         <div className="reveal reveal-1 flex items-center justify-between mb-16 lg:mb-24">
           <div className="eyebrow flex items-center gap-3">
@@ -86,21 +75,10 @@ export function Hero() {
             </div>
           </div>
 
-          {/* RIGHT — constellation */}
+          {/* RIGHT — animated FlowGraph */}
           <div className="reveal reveal-3 relative aspect-[3/4] w-full max-w-[540px] mx-auto lg:max-w-none">
             <FlowGraph />
           </div>
-        </div>
-      </div>
-
-      {/* Marquee at hero bottom */}
-      <div className="hairline-top hairline-bottom overflow-hidden">
-        <div className="marquee py-4 text-[12px] font-mono uppercase tracking-[0.18em] text-[var(--gold-soft)]">
-          {[...TICKER_ITEMS, ...TICKER_ITEMS, ...TICKER_ITEMS].map((t, i) => (
-            <span key={i} className="px-8 whitespace-nowrap">
-              {t}
-            </span>
-          ))}
         </div>
       </div>
     </section>
