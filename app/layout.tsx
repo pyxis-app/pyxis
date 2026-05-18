@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { NavShell } from "@/components/shared/nav-shell";
 import { DotGridProvider } from "@/components/shared/dot-grid-context";
 import { DotGridCanvas } from "@/components/shared/dot-grid-canvas";
 import { Providers } from "./providers";
@@ -36,7 +35,7 @@ export default function RootLayout({
         <Providers>
           <DotGridProvider>
             <DotGridCanvas />
-            <NavShell>{children}</NavShell>
+            {children}
           </DotGridProvider>
         </Providers>
       </body>
