@@ -4,6 +4,7 @@ import "./globals.css";
 import { NavShell } from "@/components/shared/nav-shell";
 import { DotGridProvider } from "@/components/shared/dot-grid-context";
 import { DotGridCanvas } from "@/components/shared/dot-grid-canvas";
+import { Providers } from "./providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,10 +33,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-screen bg-[var(--background)]">
-        <DotGridProvider>
-          <DotGridCanvas />
-          <NavShell>{children}</NavShell>
-        </DotGridProvider>
+        <Providers>
+          <DotGridProvider>
+            <DotGridCanvas />
+            <NavShell>{children}</NavShell>
+          </DotGridProvider>
+        </Providers>
       </body>
     </html>
   );
