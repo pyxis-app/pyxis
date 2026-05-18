@@ -5,46 +5,86 @@ import { ProbeGraphModal } from "./probe-graph-modal";
 
 const STEPS = [
   {
-    num: "1",
+    roman: "I",
     title: "Decompose",
-    body: "Commander splits the topic into three focused queries.",
+    body: "The Commander reads your topic and splits it into three focused queries — one for facts, one for metrics, one for sentiment.",
+    star: "α",
+    role: "Commander",
   },
   {
-    num: "2",
+    roman: "II",
     title: "Probe",
-    body: "Three specialist probes run web search and market data in parallel.",
+    body: "Scout, Analyst, and Sentinel each run targeted web searches in parallel. Live price and TVL data inject directly into the Analyst's context.",
+    star: "β γ δ",
+    role: "Scout · Analyst · Sentinel",
   },
   {
-    num: "3",
+    roman: "III",
     title: "Synthesize",
-    body: "Findings merged into a structured briefing with confidence and sources.",
+    body: "Findings merge into a single structured briefing with cited sources, a confidence score, and explicit gap notes.",
+    star: "ε",
+    role: "Synthesizer",
   },
 ];
 
 export function HowItWorks() {
   const [open, setOpen] = useState(false);
   return (
-    <section id="how" className="max-w-6xl mx-auto px-6 py-32">
-      <h2 className="text-2xl font-semibold mb-12 text-center">How it works</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {STEPS.map((s) => (
-          <div key={s.num} className="glass-card p-6">
-            <div className="text-xs uppercase tracking-wider text-[var(--muted)]">
-              {s.num}
-            </div>
-            <div className="text-lg font-semibold mt-2 mb-3">{s.title}</div>
-            <p className="text-sm text-[var(--muted)]">{s.body}</p>
+    <section id="method" className="relative hairline-bottom">
+      <div className="max-w-[1280px] mx-auto px-8 py-24 lg:py-32">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-20">
+          <div className="max-w-2xl">
+            <div className="eyebrow mb-5">Method · §01</div>
+            <h2 className="font-display text-[44px] sm:text-[60px] lg:text-[72px] leading-[1.02] tracking-[-0.02em]">
+              How the swarm{" "}
+              <span className="italic" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1, "opsz" 144' }}>
+                works
+              </span>.
+            </h2>
           </div>
-        ))}
+          <p className="max-w-sm text-[15px] text-[var(--muted)]">
+            Three named phases, one orchestrator, six seconds.
+            Designed so every finding traces back to a URL you can audit.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 hairline-top">
+          {STEPS.map((step, i) => (
+            <article
+              key={step.roman}
+              className={`relative py-12 ${i < STEPS.length - 1 ? "md:border-r border-[var(--hair)]" : ""} ${i > 0 ? "border-t md:border-t-0 border-[var(--hair)]" : ""}`}
+            >
+              <div className="px-2 md:px-8">
+                <div className="flex items-baseline justify-between mb-8">
+                  <span
+                    className="font-display text-[68px] leading-none italic text-[var(--gold)] opacity-70"
+                    style={{ fontVariationSettings: '"WONK" 1, "opsz" 144' }}
+                  >
+                    {step.roman}
+                  </span>
+                  <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-[var(--gold-soft)]">
+                    {step.star} &nbsp; {step.role}
+                  </span>
+                </div>
+                <h3 className="font-display text-[32px] leading-tight mb-4">{step.title}</h3>
+                <p className="text-[14px] leading-relaxed text-[var(--muted)] max-w-xs">
+                  {step.body}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <div className="mt-10 text-center">
+          <button
+            onClick={() => setOpen(true)}
+            className="font-mono text-[11px] tracking-[0.22em] uppercase text-[var(--gold-soft)] hover:text-[var(--gold)] editorial-link"
+          >
+            See the swarm animate ↗
+          </button>
+        </div>
       </div>
-      <div className="text-center mt-10">
-        <button
-          onClick={() => setOpen(true)}
-          className="text-sm text-[var(--accent)] hover:underline"
-        >
-          See the swarm graph ↗
-        </button>
-      </div>
+
       {open && <ProbeGraphModal onClose={() => setOpen(false)} />}
     </section>
   );
