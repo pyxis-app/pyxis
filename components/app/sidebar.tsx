@@ -38,7 +38,7 @@ export function AppSidebar() {
   }, [isConnected, address]);
 
   return (
-    <aside className="w-[260px] shrink-0 hairline-x flex flex-col bg-[var(--background)]/40">
+    <aside className="w-[260px] shrink-0 hairline-x flex flex-col bg-[var(--background)]/80 backdrop-blur-md">
       {/* Brand */}
       <Link href="/" className="px-5 py-5 flex items-baseline gap-2 hairline-bottom group">
         <Image src="/logo.png" alt="" width={22} height={22} className="opacity-90 group-hover:opacity-100" />

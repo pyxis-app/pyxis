@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAccount, useChainId, useConfig } from "wagmi";
 import { getWalletClient } from "wagmi/actions";
 import { wrapFetchWithPayment } from "x402-fetch";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { motion, AnimatePresence } from "framer-motion";
 import { TopicInput } from "./topic-input";
 import { BriefingCard, type Briefing } from "./briefing-card";
@@ -135,9 +136,36 @@ export function ResearchWorkspace() {
           />
 
           {!isConnected && (
-            <p className="mt-4 text-[12px] font-mono uppercase tracking-[0.22em] text-[var(--gold-soft)]">
-              Connect wallet in sidebar to begin · $0.25 USDC per briefing
-            </p>
+            <div className="mt-8 hairline-top pt-8 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 items-center">
+              <div>
+                <div className="eyebrow mb-2">Begin</div>
+                <p className="font-display italic text-[17px] leading-snug text-[var(--foreground)]/85 max-w-md" style={{ fontVariationSettings: '"opsz" 9' }}>
+                  Connect a wallet to research any topic. $0.25 USDC per briefing, settled on Base Sepolia. No subscription.
+                </p>
+              </div>
+              <ConnectButton.Custom>
+                {({ openConnectModal, mounted, authenticationStatus }) => {
+                  if (!mounted || authenticationStatus === "loading") {
+                    return (
+                      <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[var(--gold-soft)]">
+                        Loading…
+                      </div>
+                    );
+                  }
+                  return (
+                    <button
+                      onClick={openConnectModal}
+                      className="group inline-flex items-baseline gap-3 px-6 py-4 bg-[var(--gold)] text-[var(--background)] font-mono uppercase text-[11px] tracking-[0.22em] hover:bg-[var(--foreground)] transition-colors duration-300 self-end"
+                    >
+                      Connect wallet
+                      <span className="font-display text-[16px] leading-none translate-y-[1px] group-hover:translate-x-0.5 transition-transform">
+                        →
+                      </span>
+                    </button>
+                  );
+                }}
+              </ConnectButton.Custom>
+            </div>
           )}
 
           {state.kind === "idle" && isConnected && (
