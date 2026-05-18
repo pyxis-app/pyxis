@@ -11,20 +11,42 @@
 export interface DemoBriefing {
   id: string;
   topic: string;
-  briefing: string; // full markdown, matches Synthesizer output shape
-  confidence: number; // 0-100
-  sources: number; // total cited URLs
-  createdAt: string; // ISO 8601
-  partial: boolean; // true if any probe failed in the original run
+  coverTitle: string;     // formatted for cover-style headline (line-broken)
+  briefing: string;       // full markdown, matches Synthesizer output shape
+  confidence: number;     // 0-100
+  sources: number;        // total cited URLs
+  createdAt: string;      // ISO 8601
+  partial: boolean;       // true if any probe failed in the original run
+  // Editorial extras — extracted from briefing for magazine layout
+  featuredStats: Array<{ value: string; label: string }>;
+  pullQuote: string;
+  sourceList: Array<{ url: string; host: string }>;
 }
 
 export const SOLANA_DEMO: DemoBriefing = {
   id: "demo-solana",
   topic: "Solana ecosystem state",
+  coverTitle: "Solana\nEcosystem State",
   confidence: 87,
   sources: 11,
   createdAt: "2026-05-15T09:42:18Z",
   partial: false,
+  featuredStats: [
+    { value: "$214",   label: "SOL price"   },
+    { value: "$103B",  label: "Market cap"  },
+    { value: "$12.1B", label: "DeFi TVL"    },
+    { value: "1,847",  label: "Validators"  },
+    { value: "87",     label: "Confidence"  },
+  ],
+  pullQuote:
+    "FireDancer now serves a meaningful share of stake — materially reducing software-monoculture risk on the validator set.",
+  sourceList: [
+    { url: "https://jumpcrypto.com/firedancer-status",      host: "jumpcrypto.com"   },
+    { url: "https://solanapay.com/case-studies",            host: "solanapay.com"    },
+    { url: "https://solanamobile.com/saga",                 host: "solanamobile.com" },
+    { url: "https://www.coingecko.com/en/coins/solana",     host: "coingecko.com"    },
+    { url: "https://defillama.com/chain/Solana",            host: "defillama.com"    },
+  ],
   briefing: `## Executive Summary
 
 Solana enters mid-2026 with the FireDancer validator client running on
@@ -109,10 +131,28 @@ the most-discussed risks.
 export const ETHEREUM_DEMO: DemoBriefing = {
   id: "demo-ethereum",
   topic: "Ethereum and L2 ecosystem",
+  coverTitle: "Ethereum\n& L2 Ecosystem",
   confidence: 91,
   sources: 13,
   createdAt: "2026-05-16T14:20:05Z",
   partial: false,
+  featuredStats: [
+    { value: "$5,830", label: "ETH price"      },
+    { value: "$702B",  label: "Market cap"     },
+    { value: "$94B",   label: "TVL · L1 + L2"  },
+    { value: "41.2M",  label: "Staked ETH"     },
+    { value: "91",     label: "Confidence"     },
+  ],
+  pullQuote:
+    "Account abstraction adoption reached ~17% of new wallet installations — enabling consumer-grade flows that were impossible on traditional EOAs.",
+  sourceList: [
+    { url: "https://blog.ethereum.org/pectra-recap",        host: "ethereum.org"    },
+    { url: "https://l2beat.com",                            host: "l2beat.com"      },
+    { url: "https://walletbeach.com/aa-tracker",            host: "walletbeach.com" },
+    { url: "https://eigenlayer.xyz/dashboard",              host: "eigenlayer.xyz"  },
+    { url: "https://www.coingecko.com/en/coins/ethereum",   host: "coingecko.com"   },
+    { url: "https://defillama.com/chain/Ethereum",          host: "defillama.com"   },
+  ],
   briefing: `## Executive Summary
 
 Ethereum sits in mid-2026 with the Pectra upgrade fully active, Verkle
