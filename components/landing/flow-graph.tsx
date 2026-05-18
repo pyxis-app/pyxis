@@ -246,44 +246,39 @@ export function FlowGraph() {
             );
           })}
 
-          {/* ── Node labels (Greek + name + role description) ─ */}
+          {/* ── Node labels — α  Commander \n role description ─ */}
           {NODES.map((node) => {
             const bright = nodeBright(node.id, phase);
-            const labelY = node.y + 7;
+            const labelY = node.y + 8;
             return (
               <motion.g
                 key={`label-${node.id}`}
                 animate={{ opacity: bright ? 1 : 0.5 }}
                 transition={{ duration: 0.5 }}
               >
-                {/* Greek identifier — small italic eyebrow above the name */}
+                {/* Greek + Name inline */}
                 <text
                   x={node.x}
-                  y={labelY - 2.5}
+                  y={labelY}
                   textAnchor="middle"
                   fontFamily="var(--font-fraunces), serif"
-                  fontSize="2.8"
-                  fontStyle="italic"
-                  fill="rgba(127, 170, 255, 0.75)"
+                  fontSize="3.6"
                 >
-                  {node.greek}
-                </text>
-                {/* Name */}
-                <text
-                  x={node.x}
-                  y={labelY + 1.6}
-                  textAnchor="middle"
-                  fontFamily="var(--font-fraunces), serif"
-                  fontSize="3.4"
-                  fontWeight="500"
-                  fill="rgba(229, 233, 240, 0.95)"
-                >
-                  {node.name}
+                  <tspan
+                    fontStyle="italic"
+                    fill="rgba(127, 170, 255, 0.95)"
+                    fontWeight="400"
+                  >
+                    {node.greek}
+                  </tspan>
+                  <tspan dx="1" fontWeight="500" fill="rgba(229, 233, 240, 0.98)">
+                    {" "}{node.name}
+                  </tspan>
                 </text>
                 {/* Role description — monospace, smaller */}
                 <text
                   x={node.x}
-                  y={labelY + 5.2}
+                  y={labelY + 4}
                   textAnchor="middle"
                   fontFamily="var(--font-geist-mono), monospace"
                   fontSize="2.1"
