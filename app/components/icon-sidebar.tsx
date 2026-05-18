@@ -2,13 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, History, Eye, Activity, Settings, Zap } from "lucide-react";
+import { Search, History, Settings, Zap } from "lucide-react";
 
 const nav = [
   { href: "/", label: "Research", icon: Search },
   { href: "/history", label: "History", icon: History },
-  { href: "/watchlist", label: "Watchlist", icon: Eye },
-  { href: "/infrastructure", label: "Infrastructure", icon: Activity },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -56,7 +54,7 @@ export function IconSidebar() {
       <div className="flex flex-col items-center gap-1 pb-4">
         <div className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
         <span className="text-[9px] text-[var(--muted)] writing-mode-vertical" style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}>
-          Nosana
+          Pyxis
         </span>
       </div>
     </aside>

@@ -16,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PROBE - Web3 Intelligence Swarm",
+  title: "Pyxis — Web3 Intelligence Swarm",
   description:
-    "Multi-agent Web3 research intelligence powered by ElizaOS and Nosana decentralized GPU network",
+    "Five-agent research pipeline. $0.25 USDC per session on Base Sepolia.",
 };
 
 export default function RootLayout({

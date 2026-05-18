@@ -802,7 +802,7 @@ export function ProbeNodeGraph({ topic, probes, synthesizing }: ProbeNodeGraphPr
 
         {/* Bottom status bar */}
         <text x={20} y={535} fill="#71717a" fontSize={8} opacity={0.5} letterSpacing={1}>
-          PROBE v1.0 // NOSANA NETWORK
+          PYXIS // INTELLIGENCE SWARM
         </text>
         <text x={760} y={535} textAnchor="end" fill={anyActive || synthesizing ? "#10b981" : "#71717a"} fontSize={8} opacity={anyActive || synthesizing ? 0.8 : 0.5} letterSpacing={1}>
           {synthesizing ? "● SYNTHESIZING REPORT" : anyActive ? "● PROBES ACTIVE" : allDone ? "● COMPLETE" : "○ STANDBY"}

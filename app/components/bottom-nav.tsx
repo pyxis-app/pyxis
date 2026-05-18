@@ -2,13 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, History, Eye, Activity, Settings } from "lucide-react";
+import { Search, History, Settings } from "lucide-react";
 
 const nav = [
   { href: "/", label: "Research", icon: Search },
   { href: "/history", label: "History", icon: History },
-  { href: "/watchlist", label: "Watchlist", icon: Eye },
-  { href: "/infrastructure", label: "Infra", icon: Activity },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
