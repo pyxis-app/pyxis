@@ -146,8 +146,10 @@ export async function buildSentinelDossier(
     run: () => Promise<WithFreshness<unknown> | null>;
   }> = [];
 
-  // Macro sentiment always
-  tasks.push({ name: "fng", run: () => getFearGreed(7) });
+  // Macro sentiment — unified to 14-day fetch so it shares cache key with
+  // analyst-dossier's getFearGreed(14). Backtest showed duplicate calls
+  // (limit=14 + limit=7) wasting API budget. Sentinel slices first 7 if needed.
+  tasks.push({ name: "fng", run: () => getFearGreed(14) });
 
   // Tavily narrative search (cached)
   tasks.push({ name: "tavily", run: () => searchTavily(query, 2) });

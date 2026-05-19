@@ -118,7 +118,7 @@ export async function getChainTvl(
 }
 
 export async function getTopYields(
-  opts: { chain?: string; minTvlUsd?: number; limit?: number } = {},
+  opts: { chain?: string; project?: string; minTvlUsd?: number; limit?: number } = {},
 ): Promise<WithFreshness<YieldPool[]> | null> {
   interface RawPool {
     pool: string;
@@ -134,6 +134,7 @@ export async function getTopYields(
       SOURCE,
       "yields",
       opts.chain ?? "all",
+      opts.project ?? "all",
       opts.minTvlUsd ?? 0,
       opts.limit ?? 10,
     ]),
@@ -142,9 +143,17 @@ export async function getTopYields(
   });
   if (!res) return null;
   const all = res.data.data ?? [];
-  const minTvl = opts.minTvlUsd ?? 1_000_000;
+  // Lower minTvl when filtering by project (smaller protocols have smaller pools)
+  const minTvl = opts.minTvlUsd ?? (opts.project ? 100_000 : 1_000_000);
+  // Project name on DefiLlama uses spaces/hyphens — normalize both sides
+  const projectNorm = opts.project?.toLowerCase().replace(/[-_]/g, " ").trim();
   const filtered = all
     .filter((p) => (opts.chain ? p.chain.toLowerCase() === opts.chain.toLowerCase() : true))
+    .filter((p) => {
+      if (!projectNorm) return true;
+      const pn = p.project.toLowerCase().replace(/[-_]/g, " ");
+      return pn.includes(projectNorm) || projectNorm.includes(pn);
+    })
     .filter((p) => (p.tvlUsd ?? 0) >= minTvl)
     .filter((p) => typeof p.apy === "number")
     .sort((a, b) => (b.apy ?? 0) - (a.apy ?? 0))

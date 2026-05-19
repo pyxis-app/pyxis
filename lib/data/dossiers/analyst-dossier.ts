@@ -289,37 +289,114 @@ export async function buildAnalystDossier(
     }
   }
 
-  // Chain path
+  // Chain path — enriched with native token CoinGecko lookup so we get
+  // hard data (price, mcap, supply, ATH) for the chain's L1 token alongside
+  // TVL/yields/trending pools. Before: only chainTvl + trendingPools + binance
+  // ticker + generic yields. Solana state confidence stuck at 35 due to thin
+  // hard data — adding native token CG snapshot gives 8-12 more $ data points.
   if (topicType === "chain") {
-    tasks.push({ name: "chainTvl", run: () => getChainTvl(chainHint ?? query) });
-    const network = hints.geckoNetwork ?? COIN_TO_GECKO_NETWORK[(chainHint ?? query).toLowerCase()];
+    const chainKey = chainHint ?? query;
+    tasks.push({ name: "chainTvl", run: () => getChainTvl(chainKey) });
+
+    // Native token lookup — try chain name directly (e.g. "solana" → SOL coin)
+    tasks.push({
+      name: "coingecko",
+      run: async () => {
+        const hit = await searchCoin(chainKey);
+        if (!hit || !hit.data) return hit ?? null;
+        return getCoinSnapshot(hit.data.id);
+      },
+    });
+
+    const network = hints.geckoNetwork ?? COIN_TO_GECKO_NETWORK[chainKey.toLowerCase()];
     if (network) {
       tasks.push({ name: "trendingPools", run: () => getTrendingPools(network, 10) });
     }
-    const binSym =
-      NETWORK_TO_BINANCE_QUOTE[(chainHint ?? query).toLowerCase()];
+    const binSym = NETWORK_TO_BINANCE_QUOTE[chainKey.toLowerCase()];
     if (binSym) {
       tasks.push({ name: "binance", run: () => getSpotTicker(binSym) });
     }
-    tasks.push({ name: "topYields", run: () => getTopYields({ chain: chainHint ?? query, limit: 5 }) });
+    tasks.push({ name: "topYields", run: () => getTopYields({ chain: chainKey, limit: 5 }) });
   }
 
-  // Protocol path
+  // Protocol path — backtest 2026-05-19 showed this was the weakest path
+  // (EtherFi got 28/100 with only 2 $ values cited). Enriched to fetch
+  // protocol-specific TVL + the protocol's native token (price/supply/liquidity)
+  // since virtually every modern DeFi protocol has a governance token whose
+  // metrics correlate tightly with the protocol's health.
   if (topicType === "protocol") {
-    if (hints.defillamaSlug) {
-      tasks.push({ name: "protocol", run: () => getProtocol(hints.defillamaSlug!) });
-    } else {
-      tasks.push({ name: "protocol", run: () => getProtocol(query.toLowerCase().replace(/\s+/g, "-")) });
+    const slug = hints.defillamaSlug ?? query.toLowerCase().replace(/\s+/g, "-");
+
+    // 1. DefiLlama protocol page — TVL, chain breakdown, growth metrics
+    tasks.push({ name: "protocol", run: () => getProtocol(slug) });
+
+    // 2. Token data via CoinGecko — almost every protocol has a token
+    // (ETHFI for EtherFi, HYPE for Hyperliquid, etc.). Try symbol hint first,
+    // fall back to topic name search.
+    const tokenQuery = hints.symbol ?? query;
+    tasks.push({
+      name: "coingecko",
+      run: async () => {
+        const hit = await searchCoin(tokenQuery);
+        if (!hit || !hit.data) return hit ?? null;
+        return getCoinSnapshot(hit.data.id);
+      },
+    });
+
+    // 3. Binance ticker if we have a specific symbol hint (most protocols listed on Binance)
+    if (hints.binanceSymbol) {
+      tasks.push({
+        name: "binance",
+        run: () => getSpotTicker(hints.binanceSymbol!),
+      });
+    } else if (hints.symbol) {
+      // Best-effort: try the symbol + USDT
+      tasks.push({
+        name: "binance",
+        run: () => getSpotTicker(`${hints.symbol!.toUpperCase()}USDT`),
+      });
     }
-    tasks.push({ name: "topYields", run: () => getTopYields({ limit: 5 }) });
+
+    // 4. DEX pair liquidity for the protocol's token
+    tasks.push({ name: "dexPairs", run: () => searchPairs(tokenQuery, 3) });
+
+    // 5. Contract verification if address known (EVM)
+    if (hints.contractAddress && chainHint && chainHint !== "solana") {
+      tasks.push({
+        name: "contractMeta",
+        run: () => getContractMeta(chainHint, hints.contractAddress!),
+      });
+      tasks.push({
+        name: "tokenSupply",
+        run: () => getTokenSupply(chainHint, hints.contractAddress!),
+      });
+    }
+
+    // 6. Yields filtered to this protocol's project name (DefiLlama uses the same slug)
+    tasks.push({ name: "topYields", run: () => getTopYields({ project: slug, limit: 5 }) });
   }
 
-  // Narrative path
+  // Narrative path — was too generic (just stablecoins/yields/eth-trending).
+  // Enriched with CoinGecko trending categories + DefiLlama protocols-by-category
+  // for sector-specific signal. Also adds DEX pair search if topic suggests a token.
   if (topicType === "narrative") {
     tasks.push({ name: "stablecoins", run: () => getStablecoinOverview(5) });
     tasks.push({ name: "topYields", run: () => getTopYields({ limit: 5 }) });
     // Trending pools on Ethereum mainnet as a baseline for sector activity
     tasks.push({ name: "trendingPools", run: () => getTrendingPools("eth", 5) });
+    // Also pull trending on Solana since memecoin/AI narratives skew there
+    tasks.push({ name: "trendingPoolsSol", run: () => getTrendingPools("solana", 5) });
+    // If the narrative mentions any specific tokens (passed via hints), look them up
+    if (hints.symbol) {
+      tasks.push({
+        name: "coingecko",
+        run: async () => {
+          const hit = await searchCoin(hints.symbol!);
+          if (!hit || !hit.data) return hit ?? null;
+          return getCoinSnapshot(hit.data.id);
+        },
+      });
+    }
   }
 
   // Execute in parallel
