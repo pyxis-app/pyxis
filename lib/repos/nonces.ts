@@ -1,37 +1,50 @@
 import crypto from "node:crypto";
-import { getDb } from "../db";
+import { getSql, ensureMigrations } from "../db";
 
-export function issueAuthNonce(): string {
+export async function issueAuthNonce(): Promise<string> {
+  await ensureMigrations();
   const nonce = crypto.randomBytes(16).toString("hex");
-  getDb()
-    .prepare("INSERT INTO auth_nonces (nonce, issued_at) VALUES (?, ?)")
-    .run(nonce, Date.now());
+  const sql = getSql();
+  await sql`
+    INSERT INTO auth_nonces (nonce, issued_at)
+    VALUES (${nonce}, ${Date.now()})
+  `;
   return nonce;
 }
 
-export function consumeAuthNonce(nonce: string): boolean {
-  const db = getDb();
-  const row = db
-    .prepare("SELECT used, issued_at FROM auth_nonces WHERE nonce = ?")
-    .get(nonce) as { used: number; issued_at: number } | undefined;
-  if (!row) return false;
+export async function consumeAuthNonce(nonce: string): Promise<boolean> {
+  await ensureMigrations();
+  const sql = getSql();
+  const rows = (await sql<
+    Array<{ used: boolean; issued_at: string | number }>
+  >`SELECT used, issued_at FROM auth_nonces WHERE nonce = ${nonce}`) as unknown as Array<{
+    used: boolean;
+    issued_at: string | number;
+  }>;
+  if (rows.length === 0) return false;
+  const row = rows[0];
   if (row.used) return false;
-  if (Date.now() - row.issued_at > 10 * 60 * 1000) return false; // 10 min expiry
-  db.prepare("UPDATE auth_nonces SET used = 1 WHERE nonce = ?").run(nonce);
+  if (Date.now() - Number(row.issued_at) > 10 * 60 * 1000) return false; // 10 min expiry
+  await sql`UPDATE auth_nonces SET used = true WHERE nonce = ${nonce}`;
   return true;
 }
 
-export function recordPaymentNonce(nonce: string, wallet: string): boolean {
+export async function recordPaymentNonce(
+  nonce: string,
+  wallet: string,
+): Promise<boolean> {
+  await ensureMigrations();
+  const sql = getSql();
   try {
-    getDb()
-      .prepare(
-        "INSERT INTO payment_nonces (nonce, wallet_address, seen_at) VALUES (?, ?, ?)",
-      )
-      .run(nonce, wallet.toLowerCase(), Date.now());
+    await sql`
+      INSERT INTO payment_nonces (nonce, wallet_address, seen_at)
+      VALUES (${nonce}, ${wallet.toLowerCase()}, ${Date.now()})
+    `;
     return true;
   } catch (e: unknown) {
+    // Postgres unique violation = SQLSTATE 23505
     const code = (e as { code?: string })?.code;
-    if (code && String(code).includes("CONSTRAINT")) return false;
+    if (code === "23505") return false;
     throw e;
   }
 }

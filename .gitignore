@@ -97,3 +97,4 @@ bun.lockb
 
 # SQLite runtime database + WAL
 /data/
+.env*.local

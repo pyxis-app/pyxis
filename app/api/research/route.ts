@@ -37,7 +37,7 @@ export async function POST(req: Request) {
   const paymentNonce = req.headers.get("X-PAYMENT-NONCE") ?? null;
 
   // Replay protection: payment nonce must be unique
-  if (paymentNonce && !recordPaymentNonce(paymentNonce, payer)) {
+  if (paymentNonce && !(await recordPaymentNonce(paymentNonce, payer))) {
     return NextResponse.json(
       { error: "duplicate payment nonce" },
       { status: 409 },
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
   }
 
   // Idempotency: return existing recent session if same wallet+topic within 60s
-  const recent = findRecentDuplicate(payer, topic, 60_000);
+  const recent = await findRecentDuplicate(payer, topic, 60_000);
   if (recent) {
     logger.info("research.idempotent_hit", { wallet: payer, id: recent.id });
     return NextResponse.json({
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
   logger.info("research.start", { wallet: payer, topic });
   const result = await runPipeline(topic);
 
-  insertSession({
+  await insertSession({
     id: result.id,
     walletAddress: payer,
     topic: result.topic,

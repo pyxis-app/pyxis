@@ -12,11 +12,11 @@ import type { FreshnessMeta } from "../data/freshness";
 let _runCount = 0;
 const PRUNE_EVERY = 100;
 
-function maybePrune(): void {
+async function maybePrune(): Promise<void> {
   _runCount++;
   if (_runCount % PRUNE_EVERY !== 0) return;
   try {
-    const removed = cachePurgeExpired();
+    const removed = await cachePurgeExpired();
     if (removed > 0) logger.debug("cache.pruned", { removed });
   } catch (err) {
     logger.warn("cache.prune_failed", { err: String(err) });
@@ -87,7 +87,7 @@ export async function runPipeline(topic: string): Promise<BriefingResult> {
   const sources = new Set<string>();
   for (const f of findings) for (const u of f.sources) sources.add(u);
 
-  maybePrune();
+  await maybePrune();
 
   return {
     id,

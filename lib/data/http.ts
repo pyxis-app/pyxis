@@ -18,7 +18,7 @@ export async function fetchJson<T>(
   const timeout = opts.timeoutMs ?? 4000;
 
   if (opts.cacheKey) {
-    const hit = cacheGet<T>(opts.cacheKey);
+    const hit = await cacheGet<T>(opts.cacheKey);
     if (hit !== null) {
       logger.debug("data.cache_hit", { source: opts.source, key: opts.cacheKey });
       return wrap(hit, opts.source, url, true);
@@ -46,7 +46,7 @@ export async function fetchJson<T>(
     const data = (await res.json()) as T;
 
     if (opts.cacheKey && opts.ttlMs) {
-      cacheSet(opts.cacheKey, data, opts.ttlMs, opts.source);
+      await cacheSet(opts.cacheKey, data, opts.ttlMs, opts.source);
     }
 
     logger.debug("data.fetch_ok", { source: opts.source, ms });

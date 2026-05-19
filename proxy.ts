@@ -22,7 +22,7 @@ const payment = paymentMiddleware(
   { url: cfg.facilitator as `${string}://${string}` },
 );
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   if (req.nextUrl.pathname.startsWith("/api/research")) {
     const ip = clientIp(req);
     const { ok, retryAfter } = rateLimit(`research:${ip}`, 30, 60_000);

@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     }
 
     const parsed = new SiweMessage(message);
-    if (!consumeAuthNonce(parsed.nonce)) {
+    if (!(await consumeAuthNonce(parsed.nonce))) {
       return NextResponse.json(
         { error: "invalid or used nonce" },
         { status: 401 },

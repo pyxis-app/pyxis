@@ -18,7 +18,7 @@ export async function GET(req: Request) {
   if (!wallet)
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const rows = listByWallet(wallet, 100);
+  const rows = await listByWallet(wallet, 100);
   return NextResponse.json({
     sessions: rows.map((r) => ({
       id: r.id,

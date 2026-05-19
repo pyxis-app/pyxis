@@ -26,7 +26,7 @@ export async function searchTavily(
   if (!key) return null;
 
   const ck = cacheKey([SOURCE, "search", query.toLowerCase(), maxResults]);
-  const hit = cacheGet<TavilyResult[]>(ck);
+  const hit = await cacheGet<TavilyResult[]>(ck);
   if (hit) {
     logger.debug("data.cache_hit", { source: SOURCE, key: ck });
     return wrap(hit, SOURCE, ENDPOINT, true);
@@ -53,7 +53,7 @@ export async function searchTavily(
     }
     const json = (await res.json()) as RawResponse;
     const results = json.results ?? [];
-    cacheSet(ck, results, TTL, SOURCE);
+    await cacheSet(ck, results, TTL, SOURCE);
     logger.debug("data.fetch_ok", { source: SOURCE, ms, count: results.length });
     return wrap(results, SOURCE, ENDPOINT, false);
   } catch (err) {

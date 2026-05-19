@@ -1,25 +1,56 @@
-import Database from "better-sqlite3";
+import postgres from "postgres";
 import fs from "node:fs";
 import path from "node:path";
 
-let _db: Database.Database | null = null;
+let _sql: ReturnType<typeof postgres> | null = null;
+let _migrationsApplied = false;
 
 function migrationsDir(): string {
   return path.join(process.cwd(), "lib", "migrations");
 }
 
-function runMigrations(db: Database.Database) {
+function databaseUrl(): string {
+  const url =
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.POSTGRES_PRISMA_URL;
+  if (!url) {
+    throw new Error(
+      "DATABASE_URL not set — required for Postgres connection (provisioned via Vercel Neon integration).",
+    );
+  }
+  return url;
+}
+
+export function getSql(): ReturnType<typeof postgres> {
+  if (_sql) return _sql;
+  _sql = postgres(databaseUrl(), {
+    max: 5,
+    idle_timeout: 20,
+    connect_timeout: 10,
+    onnotice: () => {},
+  });
+  return _sql;
+}
+
+export async function ensureMigrations(): Promise<void> {
+  if (_migrationsApplied) return;
+  const sql = getSql();
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS _migrations (
+      id          INTEGER PRIMARY KEY,
+      applied_at  BIGINT NOT NULL
+    )
+  `;
+
   const dir = migrationsDir();
-  if (!fs.existsSync(dir)) return;
+  if (!fs.existsSync(dir)) {
+    _migrationsApplied = true;
+    return;
+  }
 
-  // Ensure the tracking table exists before we query it
-  db.exec(
-    "CREATE TABLE IF NOT EXISTS _migrations (id INTEGER PRIMARY KEY, applied_at INTEGER NOT NULL)",
-  );
-
-  const seen = db.prepare("SELECT id FROM _migrations").all() as {
-    id: number;
-  }[];
+  const seen = (await sql<{ id: number }[]>`SELECT id FROM _migrations`) as Array<{ id: number }>;
   const applied = new Set<number>(seen.map((r) => r.id));
 
   const files = fs
@@ -30,34 +61,21 @@ function runMigrations(db: Database.Database) {
   for (const file of files) {
     const id = parseInt(file.split("_")[0], 10);
     if (!id || applied.has(id)) continue;
-    const sql = fs.readFileSync(path.join(dir, file), "utf8");
-    db.exec("BEGIN");
-    try {
-      db.exec(sql);
-      db.prepare(
-        "INSERT INTO _migrations (id, applied_at) VALUES (?, ?)",
-      ).run(id, Date.now());
-      db.exec("COMMIT");
-    } catch (e) {
-      db.exec("ROLLBACK");
-      throw e;
-    }
+    const sqlText = fs.readFileSync(path.join(dir, file), "utf8");
+
+    await sql.begin(async (tx) => {
+      await tx.unsafe(sqlText);
+      await tx`INSERT INTO _migrations (id, applied_at) VALUES (${id}, ${Date.now()})`;
+    });
   }
+
+  _migrationsApplied = true;
 }
 
-export function getDb(): Database.Database {
-  if (_db) return _db;
-  const file =
-    process.env.SQLITE_PATH || path.join(process.cwd(), "data", "probe.db");
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  _db = new Database(file);
-  _db.pragma("journal_mode = WAL");
-  _db.pragma("foreign_keys = ON");
-  runMigrations(_db);
-  return _db;
-}
-
-export function closeDb() {
-  _db?.close();
-  _db = null;
+export async function closeDb(): Promise<void> {
+  if (_sql) {
+    await _sql.end({ timeout: 5 });
+    _sql = null;
+    _migrationsApplied = false;
+  }
 }
