@@ -16,10 +16,11 @@ export function Hero() {
               </span>.
             </h1>
 
-            <p className="mt-10 max-w-[480px] text-[16px] leading-relaxed text-[var(--muted)]">
-              Five autonomous agents pull live market data and the latest
-              news across the open web. Every briefing returns sourced,
-              scored, and verifiable. Settled on-chain, per request.
+            <p className="mt-10 max-w-[500px] text-[16px] leading-relaxed text-[var(--muted)]">
+              Five agents sample market data, on-chain signals, and community
+              pulse in real time. Every number stamped with its source and
+              freshness. A fast, honest starting point —
+              <span className="italic"> not a substitute for due diligence.</span>
             </p>
 
             <div className="mt-12 flex flex-wrap items-center gap-8">

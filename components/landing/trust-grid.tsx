@@ -1,18 +1,18 @@
 const POINTS = [
   {
     n: "01",
-    title: "Source-cited",
-    body: "Every finding includes the URL it came from. No black-box claims; you can audit the trail in seconds.",
+    title: "Source-stamped",
+    body: "Every metric tagged with the API endpoint and sample timestamp. Cache hits disclosed inline. You see exactly when each number was pulled, never silently stale.",
   },
   {
     n: "02",
-    title: "Multi-angle",
-    body: "Three specialist agents for facts, metrics, and sentiment. The Synthesizer cross-references them before writing a word.",
+    title: "Pre-listing coverage",
+    body: "When CoinGecko hasn't listed a token yet, DexScreener picks it up the moment liquidity hits. Day-1 pair data, plus contract verification on Ethereum, Base, Arbitrum, and Solana.",
   },
   {
     n: "03",
-    title: "Pay per use",
-    body: "x402 native. No subscriptions, no quotas, no signups. One payment per research, settled on-chain.",
+    title: "Honest gaps",
+    body: "When an API can't be reached, you see it listed. Numbers are never fabricated; missing data lowers the confidence score, not the briefing's integrity.",
   },
 ];
 
