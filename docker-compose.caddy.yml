@@ -1,0 +1,56 @@
+# Pyxis deployment for VPS with existing Caddy reverse proxy.
+#
+# Use this compose file when the VPS already has Caddy serving TLS for
+# other apps (e.g. afktown-vps). The original docker-compose.yml uses
+# nginx-proxy + acme-companion, which conflicts with an existing Caddy
+# on ports 80/443 — this variant skips that and binds the Pyxis app to
+# 127.0.0.1:3000 instead, letting Caddy handle TLS and reverse proxy.
+#
+# Caddy entry (add to /etc/caddy/Caddyfile):
+#
+#   usepyxis.com {
+#       encode gzip zstd
+#       reverse_proxy localhost:3000
+#       log {
+#           output file /var/log/caddy/pyxis.log {
+#               roll_size 100mb
+#               roll_keep 7
+#           }
+#           format json
+#       }
+#   }
+#
+# Then: systemctl reload caddy
+#
+# Usage:
+#   cd /opt/pyxis
+#   cp .env.example .env  # then populate keys
+#   docker compose -f docker-compose.caddy.yml up -d --build
+#
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "127.0.0.1:3000:3000"   # bound to loopback; Caddy talks via localhost
+    env_file: .env
+    volumes:
+      - ./data:/data
+      - ./backups:/backups
+    mem_limit: 1300m
+    restart: unless-stopped
+
+  backup:
+    image: alpine:3.20
+    volumes:
+      - ./data:/data
+      - ./backups:/backups
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        apk add --no-cache sqlite tzdata && \
+        printf '%s\n' '0 3 * * * sh -c "sqlite3 /data/probe.db \".backup /backups/probe-$$(date +\%Y\%m\%d).db\" && find /backups -mtime +7 -delete"' > /etc/crontabs/root && \
+        crond -f -l 2
+    restart: unless-stopped
