@@ -1,11 +1,15 @@
 import crypto from "node:crypto";
 import { getDb } from "../db";
+import type { FreshnessMeta } from "../data/freshness";
+import type { TopicType } from "../probes/types";
 
 export interface StoredBriefing {
   briefing: string;
   confidence: number;
   sources: number;
   partial: boolean;
+  topicType?: TopicType;
+  freshness?: FreshnessMeta[];
 }
 
 export interface SessionRow {

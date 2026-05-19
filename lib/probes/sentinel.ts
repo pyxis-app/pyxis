@@ -1,34 +1,75 @@
 import { complete } from "../llm";
-import { searchTavily } from "../tavily";
 import { SENTINEL_PERSONA } from "./personas";
 import { withRetry } from "../retry";
-import type { ProbeFinding } from "./types";
+import { buildSentinelDossier } from "../data/dossiers/sentinel-dossier";
+import { logger } from "../logger";
+import type { CommanderHints, ProbeFinding, TopicType } from "./types";
 
 function extractUrls(s: string): string[] {
   return Array.from(new Set(s.match(/https?:\/\/[^\s)]+/g) ?? []));
 }
 
-export async function runSentinel(query: string): Promise<ProbeFinding> {
-  try {
-    const web = await withRetry(() => searchTavily(query, 2), 2, 1000);
-    const webBlock = web.map(r =>
-      `- ${r.title} (${r.url})\n  ${r.content.slice(0, 600)}`
-    ).join("\n\n");
+export interface SentinelInput {
+  query: string;
+  topicType: TopicType;
+  hints: CommanderHints;
+}
 
-    const findings = await withRetry(() => complete({
-      system: SENTINEL_PERSONA.systemPrompt,
-      user: `Query: ${query}\n\nLIVE WEB RESULTS:\n${webBlock}`,
-      maxTokens: 1500,
-    }), 3, 1000);
+export async function runSentinel(input: SentinelInput): Promise<ProbeFinding> {
+  try {
+    const dossier = await buildSentinelDossier(
+      input.query,
+      input.topicType,
+      input.hints,
+    );
+
+    if (dossier.getxapiCallsUsed > 0) {
+      logger.info("sentinel.getxapi_usage", {
+        calls: dossier.getxapiCallsUsed,
+        approxCostUsd: dossier.getxapiCallsUsed * 0.001,
+      });
+    }
+
+    const userMsg = [
+      `Topic / query: ${input.query}`,
+      `Classified as: ${input.topicType}`,
+      "",
+      dossier.markdown,
+    ].join("\n");
+
+    const findings = await withRetry(
+      () =>
+        complete({
+          system: SENTINEL_PERSONA.systemPrompt,
+          user: userMsg,
+          maxTokens: 1500,
+          temperature: 0.5,
+        }),
+      3,
+      1000,
+    );
+
+    const webUrls = dossier.webResults.map((w) => w.url);
+    const sources = Array.from(
+      new Set([...extractUrls(findings), ...webUrls, ...dossier.endpointSources]),
+    );
 
     return {
       probeType: "sentinel",
-      query,
+      query: input.query,
       findings,
-      sources: extractUrls(findings).concat(web.map(w => w.url)),
+      sources,
+      freshness: dossier.freshness,
       failed: false,
     };
   } catch {
-    return { probeType: "sentinel", query, findings: "", sources: [], failed: true };
+    return {
+      probeType: "sentinel",
+      query: input.query,
+      findings: "",
+      sources: [],
+      freshness: [],
+      failed: true,
+    };
   }
 }

@@ -55,6 +55,8 @@ export async function POST(req: Request) {
       confidence: recent.briefing.confidence,
       sources: recent.briefing.sources,
       partial: recent.briefing.partial,
+      topicType: recent.briefing.topicType ?? null,
+      freshness: recent.briefing.freshness ?? [],
       createdAt: new Date(recent.createdAt).toISOString(),
       idempotent: true,
     });
@@ -72,6 +74,8 @@ export async function POST(req: Request) {
       confidence: result.confidence,
       sources: result.sources,
       partial: result.partial,
+      topicType: result.topicType,
+      freshness: result.freshness,
     },
     paymentTx,
   });

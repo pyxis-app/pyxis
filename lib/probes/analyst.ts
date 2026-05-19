@@ -1,48 +1,75 @@
 import { complete } from "../llm";
-import { searchTavily } from "../tavily";
-import { getMarketContext } from "../market";
 import { ANALYST_PERSONA } from "./personas";
 import { withRetry } from "../retry";
-import type { ProbeFinding } from "./types";
+import { buildAnalystDossier } from "../data/dossiers/analyst-dossier";
+import type {
+  CommanderHints,
+  ProbeFinding,
+  TopicType,
+} from "./types";
 
 function extractUrls(s: string): string[] {
   return Array.from(new Set(s.match(/https?:\/\/[^\s)]+/g) ?? []));
 }
 
-export async function runAnalyst(query: string): Promise<ProbeFinding> {
-  try {
-    const [web, market] = await Promise.all([
-      withRetry(() => searchTavily(query, 2), 2, 1000).catch(() => []),
-      getMarketContext(query).catch(() => ""),
-    ]);
+export interface AnalystInput {
+  query: string;
+  topicType: TopicType;
+  chainHint?: string;
+  hints: CommanderHints;
+}
 
-    const webBlock = web.map(r =>
-      `- ${r.title} (${r.url})\n  ${r.content.slice(0, 600)}`
-    ).join("\n\n");
+export async function runAnalyst(input: AnalystInput): Promise<ProbeFinding> {
+  try {
+    const dossier = await buildAnalystDossier(
+      input.query,
+      input.topicType,
+      input.chainHint,
+      input.hints,
+    );
 
     const userMsg = [
-      `Query: ${query}`,
+      `Topic / query: ${input.query}`,
+      `Classified as: ${input.topicType}${input.chainHint ? ` (chain: ${input.chainHint})` : ""}`,
       "",
-      "LIVE WEB RESULTS:",
-      webBlock || "(no results)",
-      "",
-      market || "",
+      dossier.markdown,
     ].join("\n");
 
-    const findings = await withRetry(() => complete({
-      system: ANALYST_PERSONA.systemPrompt,
-      user: userMsg,
-      maxTokens: 1500,
-    }), 3, 1000);
+    const findings = await withRetry(
+      () =>
+        complete({
+          system: ANALYST_PERSONA.systemPrompt,
+          user: userMsg,
+          maxTokens: 1500,
+          temperature: 0.4,
+        }),
+      3,
+      1000,
+    );
+
+    const sources = Array.from(
+      new Set([
+        ...extractUrls(findings),
+        ...dossier.endpointSources,
+      ]),
+    );
 
     return {
       probeType: "analyst",
-      query,
+      query: input.query,
       findings,
-      sources: extractUrls(findings).concat(web.map(w => w.url)),
+      sources,
+      freshness: dossier.freshness,
       failed: false,
     };
   } catch {
-    return { probeType: "analyst", query, findings: "", sources: [], failed: true };
+    return {
+      probeType: "analyst",
+      query: input.query,
+      findings: "",
+      sources: [],
+      freshness: [],
+      failed: true,
+    };
   }
 }

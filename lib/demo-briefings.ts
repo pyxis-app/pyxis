@@ -7,6 +7,8 @@
  * session against the production pipeline before going live.
  */
 
+export const SAMPLE_LABEL = "Sample · Run live for current data";
+
 export interface DemoBriefing {
   id: string;
   topic: string;

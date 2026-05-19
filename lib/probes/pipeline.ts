@@ -5,42 +5,99 @@ import { runAnalyst } from "./analyst";
 import { runSentinel } from "./sentinel";
 import { runSynthesizer } from "./synthesizer";
 import { logger } from "../logger";
-import type { BriefingResult } from "./types";
+import { cachePurgeExpired } from "../data/cache";
+import type { BriefingResult, ProbeFinding } from "./types";
+import type { FreshnessMeta } from "../data/freshness";
+
+let _runCount = 0;
+const PRUNE_EVERY = 100;
+
+function maybePrune(): void {
+  _runCount++;
+  if (_runCount % PRUNE_EVERY !== 0) return;
+  try {
+    const removed = cachePurgeExpired();
+    if (removed > 0) logger.debug("cache.pruned", { removed });
+  } catch (err) {
+    logger.warn("cache.prune_failed", { err: String(err) });
+  }
+}
 
 export async function runPipeline(topic: string): Promise<BriefingResult> {
   const id = uuidv4();
   const createdAt = new Date().toISOString();
 
-  let queries;
+  let cmd;
   try {
-    queries = await runCommander(topic);
+    cmd = await runCommander(topic);
   } catch (err) {
     logger.error("pipeline.commander_failed", { topic, err: String(err) });
     return {
-      id, topic, createdAt,
-      briefing: "## Executive Summary\n\nAll probes unavailable — please retry in a few minutes.\n\n## Confidence Assessment\n- Overall confidence: 0/100",
+      id,
+      topic,
+      createdAt,
+      briefing:
+        "## Executive Summary\n\nAll probes unavailable — please retry in a few minutes.\n\n## Confidence Assessment\n- Overall confidence: 0/100",
       confidence: 0,
       sources: 0,
       partial: true,
+      topicType: "narrative",
+      freshness: [],
     };
   }
 
-  // Run probes sequentially per spec § 8 (keeps load on OpenRouter predictable)
-  const scout    = await runScout(queries.scout);
-  const analyst  = await runAnalyst(queries.analyst);
-  const sentinel = await runSentinel(queries.sentinel);
+  logger.info("pipeline.commander_done", {
+    topic,
+    topicType: cmd.topicType,
+    chainHint: cmd.chainHint,
+    temporalMode: cmd.temporalMode,
+    hints: cmd.hints,
+  });
 
-  const findings = [scout, analyst, sentinel];
-  const synth = await runSynthesizer(topic, findings);
+  // Run probes sequentially (predictable load on OpenRouter)
+  const scout = await runScout({
+    query: cmd.scout,
+    topicType: cmd.topicType,
+    chainHint: cmd.chainHint,
+    hints: cmd.hints,
+  });
+  const analyst = await runAnalyst({
+    query: cmd.analyst,
+    topicType: cmd.topicType,
+    chainHint: cmd.chainHint,
+    hints: cmd.hints,
+  });
+  const sentinel = await runSentinel({
+    query: cmd.sentinel,
+    topicType: cmd.topicType,
+    hints: cmd.hints,
+  });
+
+  const findings: ProbeFinding[] = [scout, analyst, sentinel];
+
+  const freshness: FreshnessMeta[] = findings.flatMap((f) => f.freshness);
+
+  const synth = await runSynthesizer({
+    topic,
+    topicType: cmd.topicType,
+    findings,
+    freshness,
+  });
 
   const sources = new Set<string>();
   for (const f of findings) for (const u of f.sources) sources.add(u);
 
+  maybePrune();
+
   return {
-    id, topic, createdAt,
+    id,
+    topic,
+    createdAt,
     briefing: synth.briefing,
     confidence: synth.confidence,
     sources: sources.size,
     partial: synth.partial,
+    topicType: cmd.topicType,
+    freshness,
   };
 }
