@@ -90,7 +90,7 @@ export async function runCommander(topic: string): Promise<CommanderOutput> {
       complete({
         system: COMMANDER_PROMPT,
         user: `Topic: ${topic}`,
-        maxTokens: 600,
+        maxTokens: 2000,
         temperature: 0.2,
         jsonMode: true,
       }),

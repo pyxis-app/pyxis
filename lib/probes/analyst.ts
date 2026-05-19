@@ -40,7 +40,7 @@ export async function runAnalyst(input: AnalystInput): Promise<ProbeFinding> {
         complete({
           system: ANALYST_PERSONA.systemPrompt,
           user: userMsg,
-          maxTokens: 1500,
+          maxTokens: 4000,
           temperature: 0.4,
         }),
       3,

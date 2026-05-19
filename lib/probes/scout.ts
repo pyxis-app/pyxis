@@ -36,7 +36,7 @@ export async function runScout(input: ScoutInput): Promise<ProbeFinding> {
         complete({
           system: SCOUT_PERSONA.systemPrompt,
           user: userMsg,
-          maxTokens: 1500,
+          maxTokens: 4000,
           temperature: 0.4,
         }),
       3,

@@ -1,10 +1,10 @@
 # Pyxis — Web3 Intelligence Swarm
 
-A five-agent research pipeline that turns any Web3 topic into a sourced, structured briefing. Pay $0.10 USDC per session via the x402 protocol on Base mainnet (early adopter pricing).
+A five-agent research pipeline that turns any Web3 topic into a sourced, structured briefing. **Free during beta** (paywall bypassed via `NEXT_PUBLIC_X402_FREE_MODE=true`). Paid mode resumes at GA: $0.10 USDC per session via x402 on Base mainnet.
 
 ## Stack
 
-Next.js 16 · TypeScript · Tailwind v4 · wagmi v2 + RainbowKit · viem · x402-next + x402-fetch · siwe · better-sqlite3 · openai SDK pointed at OpenRouter (`openai/gpt-4o-mini`, locked) · framer-motion · Lenis · Vitest · Docker.
+Next.js 16 · TypeScript · Tailwind v4 · wagmi v2 + RainbowKit · viem · x402-next + x402-fetch · siwe · postgres · openai SDK pointed at **Opengateway** (gitlawb's OpenAI-compatible gateway, default `mimo-v2.5-pro`) · framer-motion · Lenis · Vitest.
 
 ### Data layer
 
@@ -23,7 +23,7 @@ Each source returns `WithFreshness<T> | null` (silent fail, never throws). Per-s
 ```bash
 cp .env.example .env
 # Required for basic dev:
-#   OPENROUTER_API_KEY, TAVILY_API_KEY, X402_PAY_TO, SIWE_JWT_SECRET, NEXT_PUBLIC_WALLETCONNECT_ID
+#   OPENGATEWAY_API_KEY, TAVILY_API_KEY, X402_PAY_TO, SIWE_JWT_SECRET, NEXT_PUBLIC_WALLETCONNECT_ID
 # Optional (enable richer briefings; data layer falls back gracefully if unset):
 #   CMC_API_KEY, ETHERSCAN_API_KEY, SOLSCAN_API_KEY, GETXAPI_API_KEY, PYXIS_GETXAPI_MAX_CALLS
 npm install

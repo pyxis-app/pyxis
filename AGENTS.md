@@ -1,6 +1,6 @@
 # Pyxis Agents
 
-A research run is **5 LLM calls** orchestrated sequentially by [`lib/probes/pipeline.ts`](lib/probes/pipeline.ts). Each role is a different OpenRouter `gpt-4o-mini` prompt.
+A research run is **5 LLM calls** orchestrated sequentially by [`lib/probes/pipeline.ts`](lib/probes/pipeline.ts). Each role is a different prompt against the default Opengateway model (`mimo-v2.5-pro`). Provider routes through [gitlawb's Opengateway](https://gitlawb.com/opengateway) (OpenAI-compatible, multi-provider).
 
 ## Pipeline
 

@@ -11,25 +11,28 @@ export function Pricing() {
 
       <div className="relative max-w-[1280px] mx-auto px-8 py-24 lg:py-40">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-16 items-end">
-          {/* LEFT — huge editorial price */}
+          {/* LEFT — huge editorial price (strikethrough during beta) */}
           <div>
             <div className="eyebrow mb-8">Cover price · §03</div>
-            <div className="flex items-start gap-2">
+            <div className="relative flex items-start gap-2">
               <span
-                className="font-display text-[140px] sm:text-[200px] lg:text-[260px] leading-[0.82] tracking-[-0.045em] text-[var(--foreground)] tabular"
+                className="font-display text-[140px] sm:text-[200px] lg:text-[260px] leading-[0.82] tracking-[-0.045em] text-[var(--foreground)]/40 tabular line-through decoration-[var(--gold)] decoration-[6px]"
                 style={{ fontVariationSettings: '"opsz" 144' }}
               >
                 0.10
               </span>
-              <span className="font-display text-[42px] sm:text-[60px] lg:text-[80px] leading-none text-[var(--gold)] mt-2">
+              <span className="font-display text-[42px] sm:text-[60px] lg:text-[80px] leading-none text-[var(--gold)]/50 mt-2 line-through decoration-[var(--gold)] decoration-[4px]">
                 $
               </span>
             </div>
-            <div className="mt-6 font-display italic text-[28px] lg:text-[36px] text-[var(--muted)]" style={{ fontVariationSettings: '"opsz" 144' }}>
-              USDC, per research.
+            <div className="mt-4 font-display text-[64px] sm:text-[88px] lg:text-[120px] leading-[0.88] tracking-[-0.04em] text-[var(--gold)] italic" style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "WONK" 1' }}>
+              Free
+            </div>
+            <div className="mt-4 font-display italic text-[22px] lg:text-[28px] text-[var(--muted)]" style={{ fontVariationSettings: '"opsz" 144' }}>
+              During beta. Paid mode resumes later.
             </div>
             <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--gold-soft)]">
-              Early adopter pricing
+              Beta access &middot; usage-based pricing returns at GA
             </div>
           </div>
 
@@ -65,7 +68,7 @@ export function Pricing() {
                 </span>
               </Link>
               <p className="mt-4 text-[11px] text-[var(--muted)] font-mono">
-                Real USDC on Base mainnet. Launch pricing — may increase as load grows.
+                No payment required during beta. Bring a wallet to access the workspace; paid mode (x402 on Base) returns at GA.
               </p>
             </div>
           </div>

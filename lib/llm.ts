@@ -1,17 +1,20 @@
 import OpenAI from "openai";
 import { env } from "./env";
 
-export const MODEL = env.OPENROUTER_MODEL();
+export const MODEL = env.OPENGATEWAY_MODEL();
 
 let _client: OpenAI | null = null;
 function client(): OpenAI {
   if (_client) return _client;
   _client = new OpenAI({
-    baseURL: "https://openrouter.ai/api/v1",
-    apiKey: env.OPENROUTER_API_KEY(),
+    baseURL: env.OPENGATEWAY_BASE_URL(),
+    apiKey: env.OPENGATEWAY_API_KEY(),
     defaultHeaders: {
       "HTTP-Referer": env.APP_URL(),
       "X-Title": "Pyxis - Web3 Intelligence Swarm",
+      // openai SDK v4 bundles node-fetch which corrupts gzip-encoded responses
+      // from Opengateway. Force identity until SDK upgrade.
+      "Accept-Encoding": "identity",
     },
   });
   return _client;

@@ -42,7 +42,8 @@ export default function SettingsPage() {
 
         <Row label="Pricing">
           <span className="font-mono text-[14px] text-[var(--foreground)] tabular">
-            $0.10 USDC per research
+            <span className="line-through opacity-40 mr-2">$0.10 USDC</span>
+            <span className="text-[var(--gold)]">Free during beta</span>
           </span>
         </Row>
 

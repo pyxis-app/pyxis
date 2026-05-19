@@ -2,9 +2,11 @@ import { NextResponse, type NextRequest } from "next/server";
 import { paymentMiddleware } from "x402-next";
 import type { Address } from "viem";
 import { x402Config } from "@/lib/x402";
+import { env } from "@/lib/env";
 import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 const cfg = x402Config();
+const freeMode = env.X402_FREE_MODE();
 
 const payment = paymentMiddleware(
   cfg.payTo as Address,
@@ -33,6 +35,7 @@ export async function proxy(req: NextRequest) {
       );
     }
   }
+  if (freeMode) return NextResponse.next();
   return payment(req);
 }
 

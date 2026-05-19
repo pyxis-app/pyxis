@@ -8,12 +8,16 @@ function optional(name: string, fallback: string): string {
 }
 
 export const env = {
-  OPENROUTER_API_KEY: () => required("OPENROUTER_API_KEY"),
-  OPENROUTER_MODEL: () => optional("OPENROUTER_MODEL", "openai/gpt-4o-mini"),
+  OPENGATEWAY_API_KEY: () => required("OPENGATEWAY_API_KEY"),
+  OPENGATEWAY_BASE_URL: () =>
+    optional("OPENGATEWAY_BASE_URL", "https://opengateway.gitlawb.com/v1"),
+  OPENGATEWAY_MODEL: () => optional("OPENGATEWAY_MODEL", "mimo-v2.5-pro"),
   TAVILY_API_KEY: () => required("TAVILY_API_KEY"),
   X402_NETWORK: () => optional("X402_NETWORK", "base"),
   X402_PAY_TO: () => required("X402_PAY_TO"),
   X402_PRICE_USDC: () => optional("X402_PRICE_USDC", "0.10"),
+  X402_FREE_MODE: () =>
+    optional("NEXT_PUBLIC_X402_FREE_MODE", "false") === "true",
   X402_FACILITATOR: () =>
     optional("X402_FACILITATOR_URL", "https://x402.org/facilitator"),
   SIWE_JWT_SECRET: () => required("SIWE_JWT_SECRET"),

@@ -68,25 +68,31 @@ export function ResearchWorkspace() {
     setState({ kind: "running", startedAt: Date.now() });
 
     try {
+      const freeMode = process.env.NEXT_PUBLIC_X402_FREE_MODE === "true";
       let paidFetch: (input: RequestInfo, init?: RequestInit) => Promise<Response> = (
         input,
         init
       ) => fetch(input, init);
-      try {
-        const walletClient = await getWalletClient(config);
-        if (walletClient) {
-          paidFetch = wrapFetchWithPayment(
-            fetch,
-            walletClient as unknown as Parameters<typeof wrapFetchWithPayment>[1]
-          );
+      if (!freeMode) {
+        try {
+          const walletClient = await getWalletClient(config);
+          if (walletClient) {
+            paidFetch = wrapFetchWithPayment(
+              fetch,
+              walletClient as unknown as Parameters<typeof wrapFetchWithPayment>[1]
+            );
+          }
+        } catch {
+          /* fall back to plain fetch */
         }
-      } catch {
-        /* fall back to plain fetch */
       }
+
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (freeMode) headers["X-PAYER-ADDRESS"] = address;
 
       const res = await paidFetch("/api/research", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ topic }),
       });
       if (!res.ok) throw new Error(`Server returned ${res.status}`);
@@ -140,7 +146,7 @@ export function ResearchWorkspace() {
               <div>
                 <div className="eyebrow mb-2">Begin</div>
                 <p className="font-display italic text-[17px] leading-snug text-[var(--foreground)]/85 max-w-md" style={{ fontVariationSettings: '"opsz" 9' }}>
-                  Connect a wallet to research any topic. $0.10 USDC per research, settled on Base. No subscription.
+                  Connect a wallet to research any topic. <span className="line-through opacity-50">$0.10 USDC per research</span> <span className="not-italic text-[var(--gold)]">Free during beta.</span> Paid mode resumes later.
                 </p>
               </div>
               <ConnectButton.Custom>
@@ -205,7 +211,10 @@ export function ResearchWorkspace() {
                 <div className="mt-6 grid grid-cols-3 gap-4 text-[11px] font-mono">
                   <div>
                     <div className="eyebrow mb-1">Cost</div>
-                    <div className="text-[var(--foreground)] tabular">$0.25</div>
+                    <div className="text-[var(--foreground)] tabular">
+                      <span className="line-through opacity-40 mr-1">$0.1</span>
+                      <span className="text-[var(--gold)]">Free</span>
+                    </div>
                   </div>
                   <div>
                     <div className="eyebrow mb-1">Time</div>
@@ -229,7 +238,7 @@ export function ResearchWorkspace() {
                   <span className="italic text-[var(--gold)]">ε</span>
                 </div>
                 <p className="mt-4 text-[13px] text-[var(--muted)] leading-relaxed max-w-sm">
-                  Commander decomposes; Scout, Analyst, and Sentinel investigate; Synthesizer writes. One briefing, one payment.
+                  Commander decomposes; Scout, Analyst, and Sentinel investigate; Synthesizer writes. One briefing per inquiry &mdash; free during beta.
                 </p>
               </div>
             </motion.div>

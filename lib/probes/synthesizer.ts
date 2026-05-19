@@ -72,7 +72,7 @@ export async function runSynthesizer(
       complete({
         system: SYNTHESIZER_PROMPT,
         user: userMsg,
-        maxTokens: 2500,
+        maxTokens: 8000,
         temperature: 0.5,
       }),
     3,
