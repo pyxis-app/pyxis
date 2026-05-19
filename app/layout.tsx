@@ -21,6 +21,7 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.usepyxis.com"),
   title: "Pyxis — Web3 Intelligence Swarm",
   description:
     "Five-agent research pipeline. Free during beta. Wallet-gated workspace.",
@@ -32,6 +33,29 @@ export const metadata: Metadata = {
     ],
     shortcut: "/icon-192.png",
     apple: "/icon-192.png",
+  },
+  openGraph: {
+    type: "website",
+    url: "https://www.usepyxis.com",
+    siteName: "Pyxis",
+    title: "Pyxis — Web3 Intelligence Swarm",
+    description:
+      "Five-agent research pipeline. Free during beta. Wallet-gated workspace.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Pyxis — Web3 Intelligence Swarm",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pyxis — Web3 Intelligence Swarm",
+    description:
+      "Five-agent research pipeline. Free during beta. Wallet-gated workspace.",
+    images: ["/og-image.png"],
   },
 };
 
