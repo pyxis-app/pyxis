@@ -37,12 +37,12 @@ export default function SettingsPage() {
         </Row>
 
         <Row label="Network">
-          <span className="font-mono text-[14px] text-[var(--foreground)]">Base Sepolia</span>
+          <span className="font-mono text-[14px] text-[var(--foreground)]">Base</span>
         </Row>
 
         <Row label="Pricing">
           <span className="font-mono text-[14px] text-[var(--foreground)] tabular">
-            $0.25 USDC per research
+            $0.10 USDC per research
           </span>
         </Row>
 

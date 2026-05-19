@@ -11,9 +11,9 @@ export const env = {
   OPENROUTER_API_KEY: () => required("OPENROUTER_API_KEY"),
   OPENROUTER_MODEL: () => optional("OPENROUTER_MODEL", "openai/gpt-4o-mini"),
   TAVILY_API_KEY: () => required("TAVILY_API_KEY"),
-  X402_NETWORK: () => optional("X402_NETWORK", "base-sepolia"),
+  X402_NETWORK: () => optional("X402_NETWORK", "base"),
   X402_PAY_TO: () => required("X402_PAY_TO"),
-  X402_PRICE_USDC: () => optional("X402_PRICE_USDC", "0.25"),
+  X402_PRICE_USDC: () => optional("X402_PRICE_USDC", "0.10"),
   X402_FACILITATOR: () =>
     optional("X402_FACILITATOR_URL", "https://x402.org/facilitator"),
   SIWE_JWT_SECRET: () => required("SIWE_JWT_SECRET"),

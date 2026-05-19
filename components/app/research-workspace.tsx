@@ -140,7 +140,7 @@ export function ResearchWorkspace() {
               <div>
                 <div className="eyebrow mb-2">Begin</div>
                 <p className="font-display italic text-[17px] leading-snug text-[var(--foreground)]/85 max-w-md" style={{ fontVariationSettings: '"opsz" 9' }}>
-                  Connect a wallet to research any topic. $0.25 USDC per research, settled on Base Sepolia. No subscription.
+                  Connect a wallet to research any topic. $0.10 USDC per research, settled on Base. No subscription.
                 </p>
               </div>
               <ConnectButton.Custom>

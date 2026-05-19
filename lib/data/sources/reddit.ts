@@ -9,7 +9,7 @@ const POSTS_TTL = 30 * 60 * 1000; // 30 min — new posts move slowly
 const TIMEOUT = 4000;
 
 // Reddit blocks default fetch UA — provide a clear identifier per their policy.
-const HEADERS = { "User-Agent": "Pyxis/0.1 (research swarm; +https://pyxis.app)" };
+const HEADERS = { "User-Agent": "Pyxis/0.1 (research swarm; +https://usepyxis.com)" };
 
 export interface SubredditMeta {
   name: string;

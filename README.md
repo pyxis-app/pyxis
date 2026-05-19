@@ -1,6 +1,6 @@
 # Pyxis — Web3 Intelligence Swarm
 
-A five-agent research pipeline that turns any Web3 topic into a sourced, structured briefing. Pay $0.25 USDC per session via the x402 protocol on Base Sepolia.
+A five-agent research pipeline that turns any Web3 topic into a sourced, structured briefing. Pay $0.10 USDC per session via the x402 protocol on Base mainnet (early adopter pricing).
 
 ## Stack
 
@@ -63,14 +63,17 @@ docker compose exec backup sh -c "sqlite3 /data/probe.db '.backup /backups/probe
 
 Expected: a `probe-YYYYMMDD.db` file appears in `./backups/` on the host. The cron schedule keeps seven days of snapshots and deletes anything older.
 
-## Mainnet flip
+## Network configuration
 
-Three env-var changes, zero code:
+The pipeline is **on Base mainnet** at launch with $0.10 USDC per research as the early-adopter price. To run against Base Sepolia for local testing without spending real USDC, flip these env vars:
+
 ```env
-X402_NETWORK=base
-X402_USDC_ADDRESS=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
-NEXT_PUBLIC_CHAIN=base
+X402_NETWORK=base-sepolia
+X402_USDC_ADDRESS=0x036CbD53842c5426634e7929541eC2318f3dCF7e
+NEXT_PUBLIC_CHAIN=base-sepolia
 ```
+
+Mainnet remains the default in `lib/env.ts` and `.env.example`.
 
 ## Repo layout
 

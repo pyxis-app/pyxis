@@ -23,7 +23,7 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   title: "Pyxis — Web3 Intelligence Swarm",
   description:
-    "Five-agent research pipeline. $0.25 USDC per session on Base Sepolia.",
+    "Five-agent research pipeline. $0.10 USDC per session on Base.",
 };
 
 export default function RootLayout({

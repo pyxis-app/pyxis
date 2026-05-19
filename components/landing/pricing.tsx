@@ -19,7 +19,7 @@ export function Pricing() {
                 className="font-display text-[140px] sm:text-[200px] lg:text-[260px] leading-[0.82] tracking-[-0.045em] text-[var(--foreground)] tabular"
                 style={{ fontVariationSettings: '"opsz" 144' }}
               >
-                0.25
+                0.10
               </span>
               <span className="font-display text-[42px] sm:text-[60px] lg:text-[80px] leading-none text-[var(--gold)] mt-2">
                 $
@@ -28,6 +28,9 @@ export function Pricing() {
             <div className="mt-6 font-display italic text-[28px] lg:text-[36px] text-[var(--muted)]" style={{ fontVariationSettings: '"opsz" 144' }}>
               USDC, per research.
             </div>
+            <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--gold-soft)]">
+              Early adopter pricing
+            </div>
           </div>
 
           {/* RIGHT — metadata + CTA */}
@@ -35,7 +38,7 @@ export function Pricing() {
             <div className="grid grid-cols-2 gap-x-6 gap-y-5 text-[12px] font-mono">
               <div>
                 <div className="eyebrow mb-1">Network</div>
-                <div className="text-[var(--foreground)]">Base Sepolia</div>
+                <div className="text-[var(--foreground)]">Base</div>
               </div>
               <div>
                 <div className="eyebrow mb-1">Protocol</div>
@@ -62,7 +65,7 @@ export function Pricing() {
                 </span>
               </Link>
               <p className="mt-4 text-[11px] text-[var(--muted)] font-mono">
-                Mainnet rollout follows Sepolia stabilization. Same price.
+                Real USDC on Base mainnet. Launch pricing — may increase as load grows.
               </p>
             </div>
           </div>

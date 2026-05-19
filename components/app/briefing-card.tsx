@@ -59,7 +59,7 @@ export function BriefingCard({ b }: { b: Briefing }) {
           <div>
             <div className="eyebrow mb-1.5">Settlement</div>
             <a
-              href={`https://sepolia.basescan.org/tx/${b.paymentTx}`}
+              href={`https://basescan.org/tx/${b.paymentTx}`}
               target="_blank"
               rel="noopener noreferrer"
               className="font-mono text-[11px] text-[var(--gold)] editorial-link"
