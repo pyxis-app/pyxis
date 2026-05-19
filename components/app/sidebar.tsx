@@ -119,7 +119,7 @@ export function AppSidebar() {
           </Link>
         </div>
         <div className="mt-3 font-mono text-[10px] text-[var(--muted)] opacity-60">
-          pyxis v2.0.0 · agpl-3.0
+          pyxis v3.0.0 · agpl-3.0
         </div>
       </div>
     </aside>

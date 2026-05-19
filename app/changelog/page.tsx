@@ -13,7 +13,7 @@ type Release = {
 
 const RELEASES: Release[] = [
   {
-    version: "v2.0.0",
+    version: "v3.0.0",
     date: "2026-05-20",
     codename: "terminal redesign",
     highlight:
@@ -70,21 +70,60 @@ const RELEASES: Release[] = [
     ],
   },
   {
-    version: "v0.4.1",
+    version: "v2.0.0",
+    date: "2026-05-19",
+    codename: "gitlawb migration",
+    highlight:
+      "LLM provider migrated from OpenRouter (gpt-4o-mini) to gitlawb's Opengateway (mimo-v2.5-pro). Repo now mirrored on gitlawb's federated network on every push. Paid mode paused — free during beta. Same five agents over 13 live APIs; cleaner stack underneath.",
+    groups: [
+      {
+        label: "changed",
+        items: [
+          "LLM provider: OpenRouter (openai/gpt-4o-mini) → gitlawb Opengateway (mimo-v2.5-pro)",
+          "Opengateway base URL → https://opengateway.gitlawb.com/v1 (OpenAI-compatible)",
+          "Auth flow: API key + UCAN-scoped delegation tied to gitlawb DID did:key:z6MkpbZk… (UCAN renewal 2026-06-18)",
+        ],
+      },
+      {
+        label: "added",
+        items: [
+          "Auto-mirror workflow: every push to GitHub main also mirrors to gitlawb's federated network (DHT peer replication)",
+          "NEXT_PUBLIC_X402_FREE_MODE flag — bypasses x402 micropayment paywall during beta (sends X-PAYER-ADDRESS header instead of signed authorization)",
+          "Profile presence at gitlawb.com/z6MkpbZk (contributor trust level, peer-mirror visible)",
+        ],
+      },
+      {
+        label: "paused",
+        items: [
+          "x402 micropayment-per-research flow — code paths kept, gated behind NEXT_PUBLIC_X402_FREE_MODE=false. Resume planned at GA exit.",
+        ],
+      },
+      {
+        label: "unchanged",
+        items: [
+          "All 5 agents (Commander → Scout → Analyst → Sentinel → Synthesizer) and all 13 data sources",
+          "Briefing markdown shape + freshness table + SIWE wallet auth + research session persistence",
+        ],
+      },
+    ],
+  },
+  {
+    version: "v1.0.0",
     date: "2026-05-19",
     codename: "initial public beta",
     highlight:
-      "Pyxis went public on usepyxis.com with editorial-celestial design language. Free beta active. 5-agent pipeline (Commander → Scout → Analyst → Sentinel → Synthesizer) wired up against 13 live data sources.",
+      "Pyxis went public on usepyxis.com with editorial-celestial design language. Free beta active. 5-agent pipeline (Commander → Scout → Analyst → Sentinel → Synthesizer) wired up against 13 live data sources. Repo migrated from pyxis-boop/app → pyxis-app/pyxis and flipped public.",
     groups: [
       {
         label: "shipped",
         items: [
-          "5-agent research pipeline orchestrated via lib/probes/pipeline.ts",
-          "13 live data sources (CoinGecko, CMC, DefiLlama, DexScreener, GeckoTerminal, Binance, Etherscan, Solscan, GetXAPI, Reddit, Snapshot, Tavily, Fear & Greed)",
-          "x402 micropayment paywall (paused for free beta via NEXT_PUBLIC_X402_FREE_MODE)",
-          "SIWE wallet-based auth + Postgres research session persistence",
-          "Magazine-spread landing with Fraunces serif typography + star-field animation",
-          "Brand identity: Mariner's Compass constellation theme, cyan-blue logo, @pyxisbase X handle, AGPL-3.0",
+          "5-agent research pipeline orchestrated via lib/probes/pipeline.ts (sequential probe execution: Commander emits queries → Scout/Analyst/Sentinel fetch data → Synthesizer merges)",
+          "13 live data sources: CoinGecko, CoinMarketCap, DefiLlama, DexScreener, GeckoTerminal, Binance, Etherscan, Solscan, GetXAPI (Twitter), Reddit, Snapshot, Tavily, Fear & Greed Index",
+          "x402 micropayment paywall on Base (USDC, settles ~6 seconds, paused during beta)",
+          "SIWE (Sign-In With Ethereum) wallet auth + JWT session + Postgres research session persistence",
+          "Magazine-spread landing with Fraunces serif typography, star-field constellation animation, magazine-style demo briefings",
+          "Brand identity locked: Mariner's Compass constellation theme, cyan-blue logo, @pyxisbase X handle (Blue Verified), AGPL-3.0 license, usepyxis.com domain",
+          "Repo migrated pyxis-boop/app → pyxis-app/pyxis (fresh public push, no hackathon-era PR history carried over)",
         ],
       },
     ],

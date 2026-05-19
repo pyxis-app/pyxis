@@ -116,7 +116,7 @@ export default function SettingsPage() {
           </div>
           <Row label="version">
             <span className="font-mono text-[13px] text-[var(--foreground)]">
-              pyxis v2.0.0
+              pyxis v3.0.0
             </span>
           </Row>
           <Row label="license">
