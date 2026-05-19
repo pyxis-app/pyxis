@@ -20,11 +20,14 @@ const fraunces = Fraunces({
   display: "swap",
 });
 
+const SITE_TITLE = "Pyxis — Web3 Intelligence Swarm with Live API Citations";
+const SITE_DESCRIPTION =
+  "Five-agent research pipeline for any Web3 topic. Every number sampled from a live API, cited inline with a freshness timestamp. Free during beta.";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.usepyxis.com"),
-  title: "Pyxis — Web3 Intelligence Swarm",
-  description:
-    "Five-agent research pipeline. Free during beta. Wallet-gated workspace.",
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
   icons: {
     icon: [
       { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
@@ -38,9 +41,8 @@ export const metadata: Metadata = {
     type: "website",
     url: "https://www.usepyxis.com",
     siteName: "Pyxis",
-    title: "Pyxis — Web3 Intelligence Swarm",
-    description:
-      "Five-agent research pipeline. Free during beta. Wallet-gated workspace.",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     images: [
       {
         url: "/og-image.png",
@@ -52,9 +54,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pyxis — Web3 Intelligence Swarm",
-    description:
-      "Five-agent research pipeline. Free during beta. Wallet-gated workspace.",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     images: ["/og-image.png"],
   },
 };
