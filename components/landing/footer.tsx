@@ -26,7 +26,7 @@ export function Footer() {
             </p>
             <div className="mt-4">
               <span className="term-chip" style={{ cursor: "default" }}>
-                [ free beta · v0.4.1 ]
+                [ free beta · v2.0.0 ]
               </span>
             </div>
           </div>
@@ -45,6 +45,7 @@ export function Footer() {
               { href: "#method", text: "method" },
               { href: "#briefing", text: "briefing" },
               { href: "#pricing", text: "pricing" },
+              { href: "/changelog", text: "changelog" },
             ]}
           />
           <FooterCol
