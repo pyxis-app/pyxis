@@ -38,14 +38,27 @@ jobs:
           #   ucan.json    b64: 720 chars
           STRIPPED_PEM=$(printf '%s' "$GITLAWB_IDENTITY_PEM" | tr -d '[:space:]')
           STRIPPED_UCAN=$(printf '%s' "$GITLAWB_UCAN_JSON" | tr -d '[:space:]')
-          echo "GITLAWB_IDENTITY_PEM stripped length: ${#STRIPPED_PEM}"
-          echo "  starts: '${STRIPPED_PEM:0:4}...'  ends: '...${STRIPPED_PEM: -4}'"
-          echo "GITLAWB_UCAN_JSON stripped length:    ${#STRIPPED_UCAN}"
-          echo "  starts: '${STRIPPED_UCAN:0:4}...'  ends: '...${STRIPPED_UCAN: -4}'"
+
+          # Re-pad base64 to multiple of 4 — defense against trailing '=' chars
+          # being stripped during paste into GitHub Secrets UI.
+          pad_b64() {
+            local s="$1"
+            local rem=$(( ${#s} % 4 ))
+            case "$rem" in
+              0) printf '%s' "$s" ;;
+              2) printf '%s==' "$s" ;;
+              3) printf '%s=' "$s" ;;
+              *) printf '%s' "$s" ;;  # length % 4 == 1 is invalid b64, fail at decode
+            esac
+          }
+          PADDED_PEM=$(pad_b64 "$STRIPPED_PEM")
+          PADDED_UCAN=$(pad_b64 "$STRIPPED_UCAN")
+          echo "identity.pem b64 length: ${#STRIPPED_PEM} → padded ${#PADDED_PEM}"
+          echo "ucan.json    b64 length: ${#STRIPPED_UCAN} → padded ${#PADDED_UCAN}"
 
           # Decode
-          printf '%s' "$STRIPPED_PEM"  | base64 -d > "$HOME/.gitlawb/identity.pem"
-          printf '%s' "$STRIPPED_UCAN" | base64 -d > "$HOME/.gitlawb/ucan.json"
+          printf '%s' "$PADDED_PEM"  | base64 -d > "$HOME/.gitlawb/identity.pem"
+          printf '%s' "$PADDED_UCAN" | base64 -d > "$HOME/.gitlawb/ucan.json"
           chmod 600 "$HOME/.gitlawb/identity.pem"
 
           # Sanity-check decoded sizes — fail fast if either is empty.
