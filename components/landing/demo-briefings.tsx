@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { DEMOS } from "@/lib/demo-briefings";
+import { DEMOS, SAMPLE_LABEL } from "@/lib/demo-briefings";
 import { MarkdownRenderer } from "@/components/shared/markdown-renderer";
 
 /**
@@ -103,8 +103,13 @@ export function DemoBriefings() {
 
         {/* ── Cover headline ─────────────────────────────── */}
         <div className="py-14 lg:py-20 hairline-bottom">
-          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--gold-soft)] mb-4">
-            Issue {String(active + 1).padStart(2, "0")} · {issueDate}
+          <div className="flex items-baseline justify-between mb-4 gap-4 flex-wrap">
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--gold-soft)]">
+              Issue {String(active + 1).padStart(2, "0")} · {issueDate}
+            </div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--gold)] border border-[var(--gold)]/40 px-2.5 py-1">
+              {SAMPLE_LABEL}
+            </div>
           </div>
           <h3
             className="font-display text-[64px] sm:text-[88px] lg:text-[110px] leading-[0.92] tracking-[-0.03em] whitespace-pre-line"

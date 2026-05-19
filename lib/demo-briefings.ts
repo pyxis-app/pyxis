@@ -3,15 +3,20 @@
  *
  * Dated 17 May 2026 — the day before the site's notional "today". Numbers
  * are realistic mid-2026 projections (growth from late-2024 baselines)
- * rather than aspirational fiction. Regenerate from a real research
- * session against the production pipeline before going live.
+ * rather than aspirational fiction. Structure mirrors the live Synthesizer
+ * output for `topicType: "chain"`, including the auto-appended Data
+ * Freshness table. Regenerate from a real research session against the
+ * production pipeline before going live.
  */
 
 export const SAMPLE_LABEL = "Sample · Run live for current data";
 
+export type DemoTopicType = "token" | "chain" | "protocol" | "narrative";
+
 export interface DemoBriefing {
   id: string;
   topic: string;
+  topicType: DemoTopicType;
   coverTitle: string;     // formatted for cover-style headline (line-broken)
   briefing: string;       // full markdown, matches Synthesizer output shape
   confidence: number;     // 0-100
@@ -27,6 +32,7 @@ export interface DemoBriefing {
 export const SOLANA_DEMO: DemoBriefing = {
   id: "demo-solana",
   topic: "Solana ecosystem state",
+  topicType: "chain",
   coverTitle: "Solana\nEcosystem State",
   confidence: 84,
   sources: 11,
@@ -50,7 +56,7 @@ export const SOLANA_DEMO: DemoBriefing = {
   ],
   briefing: `## Executive Summary
 
-Solana enters mid-2026 in an extended risk-off cycle — SOL is trading near
+Solana enters mid-2026 in an extended risk-off cycle — SOL trades near
 $84 after a multi-quarter drawdown that's also weighed on DeFi TVL,
 holding near $8B. Underneath the price action, structural progress is
 intact: FireDancer is running on a meaningful share of mainnet stake,
@@ -59,33 +65,40 @@ developer commits) has held through the cycle. Liquid staking remains
 concentrated in Jito; validator decentralization and MEV concentration
 are the most-discussed structural risks.
 
-## Key Findings
+## Market Snapshot
+- **SOL spot**: $84.26 USD · 24h −2.6% · 30d −2.9% (CoinGecko, live)
+- **Market cap**: $48.70B · FDV $52.80B
+- **Volume 24h**: $1.40B across CEX + DEX
+- **Macro overlay**: Fear & Greed Index 42 (Fear), 7-day trend deteriorating
+  (Alternative.me, live)
 
-### Information (Scout)
-- **FireDancer in production**, running on a meaningful share of mainnet
-  stake. Jump's rollout has materially reduced software-monoculture risk
-  on the validator set (Source: https://jumpcrypto.com/firedancer)
-- **Solana Pay** merchant integrations continue through major payment
-  processors and Shopify; on-chain settlement at point-of-sale is now a
-  measurable share of crypto-native commerce
-  (Source: https://solanapay.com)
-- **Seeker (Saga 2)** shipped to pre-orders in 2024–2025; device-attached
-  crypto remains a sub-1% contributor to the broader ecosystem but
-  builder mindshare is steady (Source: https://solanamobile.com/seeker)
+## Tokenomics & Supply
+- **Circulating supply**: 578M SOL
+- **Inflation**: ~5% annualised, decaying ~15% per epoch year
+- **Liquid staking dominance**: Jito ~55% of staked SOL, Marinade ~21%,
+  Sanctum and others rounding out the remainder
+- **Validator stake distribution**: top 30 validators hold ~33% of stake
+  (Nakamoto coefficient ~21)
 
-### Data & Metrics (Analyst)
-- **SOL price**: $84.26 | Trend: down | 24h change: −2.6% | 30d: −2.9%
-  (Source: https://www.coingecko.com/en/coins/solana)
-- **Market cap**: $48.7B (Source: CoinGecko)
-- **Total Value Locked**: $8.1B across 130+ protocols
+## On-Chain Health
+- **Validator count**: 1,452 active mainnet validators
+- **Client diversity**: FireDancer (Jump Crypto) now serves a meaningful
+  share of stake; the previous Solana-Labs validator monoculture risk has
+  materially eased (Source: https://jumpcrypto.com/firedancer)
+- **Mainnet uptime**: 14+ months since last halt
+- **Block production latency**: stable post-Dencun-era throughput work
+
+## Network / Protocol Activity
+- **DeFi TVL**: $8.10B across 130+ protocols
   (Source: https://defillama.com/chain/Solana)
-- **Circulating supply**: 578M SOL (fully diluted valuation $52.8B)
-- **Liquid staking dominance**: Jito ~55% of staked SOL,
-  Marinade ~21%, Sanctum and others rounding out the remainder
 - **Daily active addresses**: ~1.0M (60d average) — stable through drawdown
-- **Validator count**: 1,452 — Nakamoto coefficient ~21
+- **Top DEX pools** (GeckoTerminal, live): SOL/USDC on Raydium dominates
+  reserves; mSOL/SOL on Orca anchors LST liquidity; BONK/SOL and WIF/USDC
+  show sustained memecoin retail flow
+- **Top yields** (DefiLlama, live): 18.32% APY on SOL via Marinade ($420M
+  TVL), 14.85% APY on USDC via Kamino, 12.40% APY on mSOL via MarginFi
 
-### Community Sentiment (Sentinel)
+## Social Pulse
 **Overall Sentiment: cautiously constructive**
 
 - Developer activity remains elevated despite price drawdown — commit
@@ -97,40 +110,71 @@ are the most-discussed structural risks.
 - MEV concentration via Jito's auction continues to be a controversial
   topic in core developer channels
 
-## Risk Assessment
-- **Validator centralization**: Nakamoto coefficient ~22 leaves
-  the network vulnerable to coordinated halts; smaller validators
-  cite operating cost as the primary barrier
+_Lexicon-based mention sentiment is indicative only and not used as a
+primary signal in this assessment._
+
+## News & Catalysts
+- **FireDancer in production**, materially reducing software-monoculture
+  risk on the validator set (Source: https://jumpcrypto.com/firedancer)
+- **Solana Pay** merchant integrations through major payment processors
+  and Shopify; on-chain settlement at point-of-sale is now a measurable
+  share of crypto-native commerce (Source: https://solanapay.com)
+- **Seeker (Saga 2)** shipped to pre-orders; device-attached crypto
+  remains a sub-1% contributor but builder mindshare is steady
+  (Source: https://solanamobile.com/seeker)
+- **Institutional staking products**: recent regulatory clarity has
+  unblocked ETP-wrapped staking, potentially absorbing inflows
+- **RWA tokenization**: tokenized money-market products on Solana have
+  crossed multi-hundred-million-dollar thresholds
+
+## Competitive Landscape
+- Solana DeFi TVL ($8.1B) ≈ 14% of Ethereum L1+L2 combined TVL
+- LST yield stack (~18% Marinade) sits well above Ethereum-side
+  equivalents (Lido 4–7%), reflecting higher inflation rather than
+  superior cash flows
+- Memecoin retail volume remains strongest among major L1s; competing
+  L1s (Base, Sui) have closed some of the gap but Solana retains
+  liquidity depth
+
+## Risks
+- **Validator centralization**: Nakamoto coefficient ~21 leaves the
+  network vulnerable to coordinated halts; smaller validators cite
+  operating cost as the primary barrier
 - **MEV capture concentration**: a single auction provider intermediates
   a majority of MEV revenue, creating systemic dependency risk
-- **Liquid staking concentration**: Jito's >50% share of liquid
-  staked SOL is itself a centralization concern, separate from
-  validator-level decentralization
-- **Regulatory tail risk**: the SEC's posture toward LSTs and staking
-  products remains administration-sensitive even with recent clarity
-
-## Opportunities
-- **Payments-rail integration**: on-chain settlement for point-of-sale
-  is a category Solana is well positioned to win on cost and finality
-- **Institutional staking products**: regulatory clarity has unlocked
-  ETP-wrapped staking products that may absorb significant inflows
-- **RWA tokenization**: tokenized money-market and T-bill products on
-  Solana have crossed multi-hundred-million-dollar thresholds,
-  suggesting product-market fit for high-throughput RWA settlement
+- **Liquid staking concentration**: Jito's >50% share of liquid staked
+  SOL is itself a centralization concern, separate from validator-level
+  decentralization
+- **Regulatory tail risk**: SEC posture toward LSTs and staking products
+  remains administration-sensitive
 
 ## Confidence Assessment
 - **Overall confidence**: 84/100
-- **Data quality**: high (price and TVL from canonical APIs;
-  ecosystem activity from on-chain sources)
-- **Information gaps**: precise MEV revenue split is partially
-  obscured; some validator metrics are 30 days old; macro
-  context could shift narrative weight
+- **Data quality**: high — price, TVL, validator metrics, and yields
+  all sampled live from canonical APIs
+- **Information gaps**: precise MEV revenue split is partially obscured;
+  some validator metrics are 30 days old; macro context could shift
+  narrative weight
+
+## Data Freshness
+
+| Source | Endpoint | Sampled | Cache |
+| --- | --- | --- | --- |
+| coingecko | https://api.coingecko.com/api/v3/coins/solana | 2026-05-17T09:42:18Z | live |
+| defillama | https://api.llama.fi/v2/chains | 2026-05-17T09:42:18Z | live |
+| defillama | https://yields.llama.fi/pools | 2026-05-17T09:42:18Z | live |
+| binance | https://api.binance.com/api/v3/ticker/24hr?symbol=SOLUSDT | 2026-05-17T09:42:19Z | live |
+| geckoterminal | https://api.geckoterminal.com/api/v2/networks/solana/trending_pools | 2026-05-17T09:42:19Z | live |
+| alternativeme | https://api.alternative.me/fng/?limit=7 | 2026-05-17T03:00:00Z | cached |
+| reddit | https://www.reddit.com/r/solana/new.json | 2026-05-17T09:38:42Z | live |
+| tavily | https://api.tavily.com/search | 2026-05-17T09:42:20Z | live |
 `,
 };
 
 export const ETHEREUM_DEMO: DemoBriefing = {
   id: "demo-ethereum",
   topic: "Ethereum and L2 ecosystem",
+  topicType: "chain",
   coverTitle: "Ethereum\n& L2 Ecosystem",
   confidence: 86,
   sources: 13,
@@ -165,37 +209,43 @@ EigenLayer carries a real cryptoeconomic role at ~$13B notional. Blob
 fees remain near floor levels post-Dencun, sharpening the L1-versus-L2
 value capture debate. Institutional spot ETF flows have cooled.
 
-## Key Findings
+## Market Snapshot
+- **ETH spot**: $2,096.69 USD · 24h −4.0% · 30d −11.3% (CoinGecko, live)
+- **Market cap**: $252.8B · FDV $252.8B (no future emission)
+- **Volume 24h**: $7.2B across CEX + DEX
+- **Macro overlay**: Fear & Greed Index 42 (Fear), 7-day trend
+  deteriorating (Alternative.me, cached)
 
-### Information (Scout)
-- **Pectra active** since 2025 with EIP-7702 (account abstraction at the
-  EOA layer), validator effective balance lifted to 2,048 ETH, and
-  improved blob throughput. Next hard fork targets Verkle trees and
-  broader stateless client work (Source: https://blog.ethereum.org)
-- **L2 transaction share** is well above 85% of total Ethereum user
-  activity, led by Base, Arbitrum, and Optimism
+## Tokenomics & Supply
+- **Circulating supply**: 120.7M ETH (effectively also max supply post-Merge)
+- **Issuance**: dynamic, currently net-deflationary in low-fee weeks and
+  slightly inflationary during peak L1 demand
+- **Staked ETH**: 34.5M (~29% of supply)
+- **Validator effective balance**: lifted to 2,048 ETH post-Pectra
+- **Restaked ETH (EigenLayer)**: ~$13B USD notional
+
+## On-Chain Health
+- **Network uptime**: post-Pectra mainnet has been stable; client
+  diversity remains healthy with Geth no longer supermajority
+- **Average L1 gas (30d)**: 6 gwei base fee
+- **Average blob fee (30d)**: <0.5 gwei — near floor; blob market is
+  not pricing scarcity right now
+- **L2 transaction share**: >85% of total Ethereum-aligned user activity
   (Source: https://l2beat.com)
-- **Account abstraction adoption** reached ~13% of new wallet
-  installations across major wallet providers, up from single digits
-  pre-Pectra (Source: https://dune.com/queries/aa-adoption)
-- **Restaking AVSs in production**: a growing set of oracles, bridges,
-  and DA layers depend on restaked ETH for cryptoeconomic security
-  (Source: https://eigenlayer.xyz)
 
-### Data & Metrics (Analyst)
-- **ETH price**: $2,096.69 | Trend: down | 24h: −4.0% | 30d: −11.3%
-  (Source: https://www.coingecko.com/en/coins/ethereum)
-- **Market cap**: $252.8B
+## Network / Protocol Activity
 - **Total Value Locked**: $58B across L1 + major L2s
   (Source: https://defillama.com/chain/Ethereum)
-- **Circulating supply**: 120.7M ETH
-- **Staked ETH**: 34.5M ETH (~29% of supply)
-- **Restaked ETH (EigenLayer)**: ~$13B USD notional
-- **Average L1 gas (base fee, 30d)**: 6 gwei
-- **Average blob fee (30d)**: <0.5 gwei — near floor
-- **L2 weekly active addresses**: ~6.5M, Base leading on share
+- **L2 weekly active addresses**: ~6.5M; Base leading on share, Arbitrum
+  and Optimism contesting close behind
+- **AA wallet adoption**: ~13% of new wallet installations are now
+  smart-account-by-default, up from single digits pre-Pectra
+  (Source: https://dune.com/queries/aa-adoption)
+- **Active Restaking AVSs**: a growing set of oracles, bridges, and DA
+  layers depend on restaked ETH for cryptoeconomic security
+  (Source: https://eigenlayer.xyz)
 
-### Community Sentiment (Sentinel)
+## Social Pulse
 **Overall Sentiment: cautiously constructive**
 
 - Builders broadly support the Verkle/stateless-client roadmap, though
@@ -205,10 +255,35 @@ value capture debate. Institutional spot ETF flows have cooled.
   and the price drawdown has intensified the discussion
 - Restaking pulls divergent reactions: applauded as Ethereum's security
   export, criticized as systemic risk reintroduction
-- ETF flow narrative has cooled relative to early-2024 expectations,
+- ETF flow narrative has cooled relative to early-2024 expectations;
   net flows have been muted
 
-## Risk Assessment
+_Lexicon-based mention sentiment is indicative only and not used as a
+primary signal in this assessment._
+
+## News & Catalysts
+- **Pectra active** since 2025 with EIP-7702 (AA at the EOA layer),
+  validator effective balance lifted to 2,048 ETH, and improved blob
+  throughput. Next hard fork targets Verkle trees and broader stateless
+  client work (Source: https://blog.ethereum.org)
+- **L2 transaction share** consistently above 85%, led by Base, Arbitrum,
+  and Optimism (Source: https://l2beat.com)
+- **AA UX wave**: gas sponsorship and session keys are enabling
+  consumer-grade flows that were impossible on traditional EOAs
+- **RWA on L2s**: lower-fee L2s are quietly capturing tokenized
+  money-market funds and short-duration Treasuries
+- **Institutional restaking products**: wrappers for restaked ETH are
+  in early registration
+
+## Competitive Landscape
+- vs. Solana: Ethereum L1+L2 TVL ($58B) ~7× Solana chain TVL; ETH/SOL
+  ratio underperforming Q2-2025 expectations
+- vs. other L1s: alternative monolithic L1s have not closed the
+  TVL gap; sequencer revenue economics keep L2 builders anchored to ETH
+- L2 internal competition: Base leads weekly actives; Arbitrum leads
+  bridged TVL; Optimism leads governance experimentation
+
+## Risks
 - **Restaking systemic risk**: large notional restaked ETH securing
   many AVSs simultaneously creates correlated slashing pathways
 - **L2 value capture vs L1**: if blob fees stay near floor and L2
@@ -219,24 +294,26 @@ value capture debate. Institutional spot ETF flows have cooled.
 - **Verkle execution risk**: client coordination on Verkle is a
   meaningful surface on top of an already large compatibility area
 
-## Opportunities
-- **Account abstraction UX wave**: gas sponsorship and session keys
-  are enabling consumer-grade product flows that were impossible on
-  traditional EOAs
-- **AVS ecosystem buildout**: every infrastructure category — oracles,
-  bridges, DA, coprocessors — now has a credible ETH-secured alternative
-- **Institutional restaking products**: wrappers for restaked ETH are
-  in early registration and could absorb meaningful flow
-- **RWA on L2s**: lower-fee L2s are quietly capturing tokenized
-  money-market funds and short-duration Treasuries
-
 ## Confidence Assessment
 - **Overall confidence**: 86/100
-- **Data quality**: high (L2Beat, DefiLlama, EigenLayer, and
-  CoinGecko all canonical sources with current data)
-- **Information gaps**: precise AVS-by-AVS restaking breakdown
-  is partial; L2 sequencer revenue is reported inconsistently;
-  macro regime could shift narrative weight
+- **Data quality**: high — L2Beat, DefiLlama, EigenLayer, and CoinGecko
+  all canonical sources sampled live
+- **Information gaps**: precise AVS-by-AVS restaking breakdown is partial;
+  L2 sequencer revenue is reported inconsistently; macro regime could
+  shift narrative weight
+
+## Data Freshness
+
+| Source | Endpoint | Sampled | Cache |
+| --- | --- | --- | --- |
+| coingecko | https://api.coingecko.com/api/v3/coins/ethereum | 2026-05-17T14:20:05Z | live |
+| defillama | https://api.llama.fi/v2/chains | 2026-05-17T14:20:05Z | live |
+| defillama | https://yields.llama.fi/pools | 2026-05-17T14:20:06Z | live |
+| binance | https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT | 2026-05-17T14:20:06Z | live |
+| geckoterminal | https://api.geckoterminal.com/api/v2/networks/eth/trending_pools | 2026-05-17T14:20:06Z | live |
+| alternativeme | https://api.alternative.me/fng/?limit=7 | 2026-05-17T03:00:00Z | cached |
+| reddit | https://www.reddit.com/r/ethfinance/new.json | 2026-05-17T14:15:32Z | live |
+| tavily | https://api.tavily.com/search | 2026-05-17T14:20:07Z | live |
 `,
 };
 

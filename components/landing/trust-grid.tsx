@@ -7,7 +7,7 @@ const POINTS = [
   {
     n: "02",
     title: "Pre-listing coverage",
-    body: "When CoinGecko hasn't listed a token yet, DexScreener picks it up the moment liquidity hits. Day-1 pair data, plus contract verification on Ethereum, Base, Arbitrum, and Solana.",
+    body: "When CoinGecko hasn't listed a token yet, DexScreener picks it up the moment liquidity hits. Day-1 pair data, contract verification on EVM chains (Ethereum, Base, Arbitrum, Polygon), and on-chain metadata + holder distribution on Solana.",
   },
   {
     n: "03",
