@@ -27,8 +27,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/pyxis-boop/app:${{ github.sha }}
-            ghcr.io/pyxis-boop/app:latest
+            ghcr.io/pyxis-app/pyxis:${{ github.sha }}
+            ghcr.io/pyxis-app/pyxis:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

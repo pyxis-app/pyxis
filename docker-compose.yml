@@ -23,7 +23,7 @@ services:
     restart: unless-stopped
 
   app:
-    image: ghcr.io/pyxis-boop/app:latest
+    image: ghcr.io/pyxis-app/pyxis:latest
     environment:
       VIRTUAL_HOST: ${PYXIS_DOMAIN}
       LETSENCRYPT_HOST: ${PYXIS_DOMAIN}

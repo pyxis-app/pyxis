@@ -36,7 +36,7 @@ export function Footer() {
           <FooterCol
             label="Connect"
             links={[
-              { href: "https://github.com/pyxis-boop/app", text: "GitHub", external: true },
+              { href: "https://github.com/pyxis-app/pyxis", text: "GitHub", external: true },
               { href: "https://x.com/pyxisbase", text: "X · @pyxisbase", external: true },
             ]}
           />
