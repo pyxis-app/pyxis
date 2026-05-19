@@ -1,5 +1,46 @@
 @import "tailwindcss";
 
+/* ── Scroll behavior ──────────────────────────────────────────
+   Lenis drives the wheel/trackpad momentum scroll (see SmoothScroll
+   component). CSS scroll-behavior is kept as a no-JS fallback. */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+  scrollbar-gutter: stable;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  overscroll-behavior-y: none;
+}
+
+/* Lenis: when the lib mounts it adds .lenis to <html>. These rules let
+   Lenis own the scroll container and disable the native smooth-scroll
+   so the RAF loop is the single source of truth. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal, .marquee, .star, .star-dot, .signal-line, .drift, .probe-active {
+    animation: none !important;
+  }
+}
+
 :root {
   /* Editorial-celestial palette, anchored to the Pyxis logo's cyan→navy gradient.
      Pure cool blues with a single restrained warm accent. Inky deep-space ground. */
