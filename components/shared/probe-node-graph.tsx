@@ -108,7 +108,7 @@ const SCAN_PHRASES: Record<string, string[]> = {
 const SYNTH_PHRASES = [
   "Merging probe data...",
   "Correlating findings...",
-  "Scoring confidence...",
+  "Stamping freshness on every claim...",
   "Structuring briefing...",
   "Generating report...",
 ];

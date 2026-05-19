@@ -3,52 +3,66 @@ import Image from "next/image";
 
 export function Footer() {
   return (
-    <footer className="relative">
-      <div className="max-w-[1280px] mx-auto px-8 py-20 lg:py-28">
-        {/* Top: brand mark + colophon */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr_1fr_1fr] gap-12 lg:gap-16 mb-20">
+    <footer className="relative border-t border-[var(--hair)] mt-12">
+      <div className="max-w-[1080px] mx-auto px-6 lg:px-8 py-16">
+        {/* Top grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] gap-10 lg:gap-12">
+          {/* Brand col */}
           <div>
-            <div className="flex items-center gap-3 mb-5">
-              <Image src="/logo.png" alt="" width={32} height={32} className="opacity-90" />
-              <span className="font-display text-[26px] leading-none">Pyxis</span>
+            <div className="flex items-center gap-2.5 mb-3">
+              <Image
+                src="/logo.png"
+                alt=""
+                width={30}
+                height={30}
+                className="opacity-95"
+              />
+              <span className="font-mono text-[22px] leading-none text-[var(--foreground)]">
+                pyxis
+              </span>
             </div>
-            <p className="font-display italic text-[18px] leading-snug text-[var(--muted)] max-w-xs" style={{ fontVariationSettings: '"opsz" 9' }}>
-              An instrument for navigating Web3 — five agents, one briefing, settled on-chain.
+            <p className="font-mono text-[13px] leading-[1.7] text-[var(--muted)] max-w-xs">
+              an instrument for navigating web3 — five agents, one briefing.
             </p>
+            <div className="mt-4">
+              <span className="term-chip" style={{ cursor: "default" }}>
+                [ free beta · v0.4.1 ]
+              </span>
+            </div>
           </div>
 
           <FooterCol
-            label="Product"
+            label="// product"
             links={[
-              { href: "/research", text: "Research" },
-              { href: "/history", text: "History" },
-              { href: "/settings", text: "Settings" },
+              { href: "/research", text: "research" },
+              { href: "/history", text: "history" },
+              { href: "/settings", text: "settings" },
             ]}
           />
           <FooterCol
-            label="Resources"
+            label="// resources"
             links={[
-              { href: "#method", text: "Method" },
-              { href: "#briefing", text: "Specimen briefing" },
-              { href: "#pricing", text: "Cover price" },
+              { href: "#method", text: "method" },
+              { href: "#briefing", text: "briefing" },
+              { href: "#pricing", text: "pricing" },
             ]}
           />
           <FooterCol
-            label="Connect"
+            label="// connect"
             links={[
-              { href: "https://github.com/pyxis-app/pyxis", text: "GitHub", external: true },
-              { href: "https://x.com/pyxisbase", text: "X · @pyxisbase", external: true },
+              { href: "https://github.com/pyxis-app/pyxis", text: "github", external: true },
+              { href: "https://x.com/pyxisbase", text: "x · @pyxisbase", external: true },
             ]}
           />
         </div>
 
-        {/* Bottom: colophon strip */}
-        <div className="hairline-top pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-[11px] font-mono uppercase tracking-[0.22em] text-[var(--gold-soft)]">
+        {/* Bottom row */}
+        <div className="border-t border-[var(--hair)] pt-6 mt-12 flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">
           <div>
-            Issued by Pyxis &nbsp;·&nbsp; Volume I &nbsp;·&nbsp; MMXXVI
+            issued by pyxis · vol I · MMXXVI · agpl-3.0
           </div>
           <div className="opacity-70">
-            Made for crypto-native researchers
+            made for crypto-native researchers · made with terminal energy
           </div>
         </div>
       </div>
@@ -65,8 +79,10 @@ function FooterCol({
 }) {
   return (
     <div>
-      <div className="eyebrow mb-5">{label}</div>
-      <ul className="space-y-2.5">
+      <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--muted)] mb-4">
+        {label}
+      </div>
+      <ul className="space-y-1">
         {links.map((l) =>
           l.external ? (
             <li key={l.href}>
@@ -74,14 +90,17 @@ function FooterCol({
                 href={l.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[14px] text-[var(--foreground)] editorial-link"
+                className="font-mono text-[13px] text-[var(--foreground)] hover:text-[var(--accent)] block py-1 transition-colors"
               >
                 {l.text}
               </a>
             </li>
           ) : (
             <li key={l.href}>
-              <Link href={l.href} className="text-[14px] text-[var(--foreground)] editorial-link">
+              <Link
+                href={l.href}
+                className="font-mono text-[13px] text-[var(--foreground)] hover:text-[var(--accent)] block py-1 transition-colors"
+              >
                 {l.text}
               </Link>
             </li>

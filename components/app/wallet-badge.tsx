@@ -16,9 +16,9 @@ export function WalletBadge() {
 
         if (!ready) {
           return (
-            <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[var(--gold-soft)]">
-              Loading…
-            </div>
+            <span className="font-mono text-[11px] text-[var(--muted)] tracking-[0.18em]">
+              · · ·
+            </span>
           );
         }
 
@@ -26,12 +26,10 @@ export function WalletBadge() {
           return (
             <button
               onClick={openConnectModal}
-              className="group inline-flex items-baseline gap-2.5 px-3 py-2 w-full justify-center bg-[var(--gold)] text-[var(--background)] font-mono uppercase text-[10px] tracking-[0.22em] hover:bg-[var(--foreground)] transition-colors duration-300"
+              className="term-cta w-full justify-center"
             >
-              Connect wallet
-              <span className="font-display text-[13px] leading-none translate-y-[1px] group-hover:translate-x-0.5 transition-transform">
-                →
-              </span>
+              connect wallet
+              <span className="text-[14px] leading-none translate-y-[-1px]">›</span>
             </button>
           );
         }
@@ -40,27 +38,36 @@ export function WalletBadge() {
           return (
             <button
               onClick={openChainModal}
-              className="text-[10px] font-mono uppercase tracking-[0.22em] text-[var(--danger)] hover:text-[var(--foreground)] editorial-link"
+              className="term-chip w-full justify-center"
+              style={{ borderColor: "var(--danger)", color: "var(--danger)" }}
             >
-              Wrong network · switch
+              wrong network · switch
             </button>
           );
         }
 
         return (
-          <div>
-            <div className="eyebrow mb-1.5">Connected</div>
+          <div className="font-mono text-[12px]">
+            <div className="text-[10px] uppercase tracking-[0.22em] text-[var(--muted)] mb-2">
+              connected
+            </div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--gold)]" />
-              <span className="font-mono text-[12px] text-[var(--foreground)]">
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ background: "var(--success)" }}
+              />
+              <span className="text-[var(--foreground)] truncate">
                 {account.displayName}
+              </span>
+              <span className="text-[var(--muted)] ml-auto text-[10px]">
+                {chain.name?.toLowerCase()}
               </span>
             </div>
             <button
               onClick={() => disconnect()}
-              className="text-[10px] font-mono uppercase tracking-[0.22em] text-[var(--muted)] hover:text-[var(--foreground)] editorial-link"
+              className="text-[10px] font-mono uppercase tracking-[0.22em] text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
             >
-              Disconnect
+              disconnect
             </button>
           </div>
         );

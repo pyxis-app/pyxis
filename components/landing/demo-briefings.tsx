@@ -6,34 +6,10 @@ import { DEMOS, SAMPLE_LABEL } from "@/lib/demo-briefings";
 import { MarkdownRenderer } from "@/components/shared/markdown-renderer";
 
 /**
- * Magazine-spread treatment for the demo briefings section.
- *
- *  ┌── Issue selector tabs ─────────────────────────────────┐
- *  │  ISSUE 01 — May 15    ISSUE 02 — May 16               │
- *  │  Solana               Ethereum                         │
- *  └────────────────────────────────────────────────────────┘
- *  ┌── Cover ───────────────────────────────────────────────┐
- *  │  Solana                                                │
- *  │  Ecosystem State                                       │
- *  └────────────────────────────────────────────────────────┘
- *  ┌── Stats strip ─────────────────────────────────────────┐
- *  │  $214   $103B   $12.1B   1,847   87                   │
- *  │  PRICE  MCAP    TVL      VALS    CONF                  │
- *  └────────────────────────────────────────────────────────┘
- *  ┌── Meta column ──┐  ┌── Body w/ drop-cap + pull-quote ─┐
- *  │ Issued / Conf / │  │ Solana enters mid-2026 …          │
- *  │ Sources / Pipe  │  │ ┌─ pull quote ─────────────────┐  │
- *  │ Editor's note   │  │ │ "FireDancer now serves …"    │  │
- *  └─────────────────┘  │ └──────────────────────────────┘  │
- *                       │ … rest of briefing                │
- *                       └────────────────────────────────────┘
- *  ┌── Sources footer ──────────────────────────────────────┐
- *  │ 01 — jumpcrypto.com   03 — solanamobile.com           │
- *  │ 02 — solanapay.com    04 — coingecko.com  …           │
- *  └────────────────────────────────────────────────────────┘
- *  ┌── Outro CTA ───────────────────────────────────────────┐
- *  │ Run your own briefing →                                │
- *  └────────────────────────────────────────────────────────┘
+ * Terminal-scrollback treatment for the demo briefings section.
+ * Renders one of two demo briefings as a single `term-block.active` with
+ * an ascii block-head, pipeline strip, header, stat chips, pull-quote
+ * sub-block, markdown body (prose-term), source sub-block, and CTA.
  */
 export function DemoBriefings() {
   const [active, setActive] = useState(0);
@@ -47,214 +23,350 @@ export function DemoBriefings() {
     month: "short",
     day: "2-digit",
   });
+  const slug = b.topic.split(/\s+/)[0].toLowerCase();
+  const coverInline = b.coverTitle.replace(/\s*\n\s*/g, " / ");
 
   return (
-    <section id="briefing" className="relative hairline-bottom">
-      <div className="max-w-[1280px] mx-auto px-8 py-24 lg:py-32">
-        {/* Section eyebrow + small intro */}
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16">
-          <div>
-            <div className="eyebrow mb-5">Specimen · §02</div>
-            <h2 className="font-display text-[40px] sm:text-[52px] lg:text-[60px] leading-[1.04] tracking-[-0.02em]">
-              Two sample briefings,{" "}
-              <span className="italic" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1, "opsz" 144' }}>
-                straight from the swarm
-              </span>.
-            </h2>
-          </div>
-          <p className="max-w-sm text-[14px] text-[var(--muted)]">
-            Pulled from the live pipeline. The briefing you run will arrive in the same shape — same headings, same citations, same confidence math.
-          </p>
+    <section id="briefing" className="relative">
+      <div className="max-w-[1080px] mx-auto px-6 lg:px-8 py-20 lg:py-24">
+        {/* Header */}
+        <div className="mb-8 flex items-center gap-3">
+          <span className="term-section-tag">// briefing</span>
+          <span className="font-mono text-[10px] text-[var(--muted)] uppercase tracking-[0.18em]">
+            specimen · {SAMPLE_LABEL.toLowerCase()}
+          </span>
         </div>
+        <h2 className="font-mono text-[26px] lg:text-[32px] tracking-[-0.005em] font-semibold text-[var(--foreground)] lowercase">
+          two sample briefings
+        </h2>
+        <p className="mt-3 font-mono text-[14px] text-[var(--muted)] max-w-[58ch] leading-[1.6]">
+          Pulled from the live pipeline. The briefing you run will arrive in the same shape — same headings, same citations, same data-freshness audit trail.
+        </p>
 
-        {/* ── Issue selector tabs ─────────────────────────── */}
-        <div className="grid grid-cols-2 hairline-top hairline-bottom">
+        {/* Tab selector */}
+        <div className="mt-8 flex flex-wrap gap-2">
           {DEMOS.map((d, i) => {
             const isActive = i === active;
             const tabDate = new Date(d.createdAt).toLocaleDateString("en-US", {
               month: "short",
               day: "2-digit",
             });
+            const tabSlug = d.topic.split(/\s+/)[0];
             return (
               <button
                 key={d.id}
                 onClick={() => setActive(i)}
-                className={`text-left p-6 md:p-8 transition-colors ${
-                  i === 0 ? "border-r border-[var(--hair)]" : ""
-                } ${isActive ? "bg-[var(--hair)]/30" : "hover:bg-[var(--hair)]/15"}`}
+                className="term-chip"
+                style={
+                  isActive
+                    ? {
+                        borderColor: "var(--accent)",
+                        background: "rgba(91, 143, 255, 0.08)",
+                        color: "var(--foreground)",
+                      }
+                    : undefined
+                }
               >
-                <div className="flex items-baseline justify-between mb-2">
-                  <span className={`font-mono text-[10px] uppercase tracking-[0.22em] ${isActive ? "text-[var(--gold)]" : "text-[var(--gold-soft)]"}`}>
-                    Issue {String(i + 1).padStart(2, "0")} · {tabDate}
-                  </span>
-                  {isActive && (
-                    <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--gold)]">
-                      Reading
-                    </span>
-                  )}
-                </div>
-                <div className={`font-display text-[22px] sm:text-[26px] leading-tight ${isActive ? "text-[var(--foreground)]" : "text-[var(--foreground)]/55"}`}>
-                  {d.topic.split(/\s+/).slice(0, 3).join(" ")}
-                </div>
+                <span className={isActive ? "text-[var(--accent)]" : ""}>▸</span>
+                <span className="ml-2">
+                  {tabSlug} · issue {String(i + 1).padStart(2, "0")} · {tabDate.toLowerCase()}
+                </span>
               </button>
             );
           })}
         </div>
 
-        {/* ── Cover headline ─────────────────────────────── */}
-        <div className="py-14 lg:py-20 hairline-bottom">
-          <div className="flex items-baseline justify-between mb-4 gap-4 flex-wrap">
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--gold-soft)]">
-              Issue {String(active + 1).padStart(2, "0")} · {issueDate}
-            </div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--gold)] border border-[var(--gold)]/40 px-2.5 py-1">
-              {SAMPLE_LABEL}
-            </div>
-          </div>
-          <h3
-            className="font-display text-[64px] sm:text-[88px] lg:text-[110px] leading-[0.92] tracking-[-0.03em] whitespace-pre-line"
-            style={{ fontVariationSettings: '"opsz" 144' }}
-          >
-            {b.coverTitle}
-          </h3>
-        </div>
-
-        {/* ── Stats strip ────────────────────────────────── */}
-        <div className="hairline-bottom py-10 lg:py-14">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-8">
-            {b.featuredStats.map((s) => (
-              <div key={s.label}>
-                <div
-                  className="font-display text-[36px] sm:text-[44px] lg:text-[52px] leading-none tracking-[-0.02em] tabular text-[var(--foreground)]"
-                  style={{ fontVariationSettings: '"opsz" 144' }}
-                >
-                  {s.value}
-                </div>
-                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--gold-soft)]">
-                  {s.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Magazine spread: meta + body ────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-10 lg:gap-16 pt-12 lg:pt-16">
-          <aside className="lg:sticky lg:top-24 self-start space-y-6 text-[13px]">
-            <Meta label="Issued"        value={issuedLong} />
-            <Meta label="Confidence"    value={`${b.confidence}/100`} mono />
-            <Meta label="Sources cited" value={String(b.sources)}     mono />
-            <Meta label="Completion"    value={b.partial ? "Partial" : "Full"} />
-            <Meta label="Pipeline"      value="α → β γ δ → ε" />
-            <div className="pt-6 hairline-top">
-              <div className="eyebrow mb-3">From the editor</div>
-              <p
-                className="text-[13px] leading-relaxed italic font-display text-[var(--muted)]"
-                style={{ fontVariationSettings: '"opsz" 9' }}
-              >
-                A specimen briefing on {b.topic.split(/\s+/)[0]}, rendered exactly as the
-                production pipeline would emit it. Run your own to see live output.
-              </p>
-            </div>
-          </aside>
-
-          <article className="prose-pyxis prose-pyxis-drop max-w-3xl">
-            {/* Pull quote rendered as a leading callout above the markdown */}
-            <PullQuote text={b.pullQuote} />
-            <MarkdownRenderer content={b.briefing} />
-          </article>
-        </div>
-
-        {/* ── Sources footer ──────────────────────────────── */}
-        <div className="mt-20 lg:mt-28 hairline-top pt-10">
-          <div className="flex items-baseline justify-between mb-6">
-            <div className="eyebrow">Sources · {b.sources}</div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--gold-soft)]">
-              All citations verifiable
-            </div>
-          </div>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-3 text-[13px]">
-            {b.sourceList.map((s, i) => (
-              <li key={s.url} className="flex items-baseline gap-3">
-                <span className="font-mono text-[11px] tabular text-[var(--gold-soft)] shrink-0">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <a
-                  href={s.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-mono text-[var(--foreground)]/85 hover:text-[var(--gold)] editorial-link truncate"
-                  title={s.url}
-                >
-                  {s.host}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* ── Outro CTA ───────────────────────────────────── */}
-        <div className="mt-20 lg:mt-28 hairline-top pt-10 flex flex-wrap items-baseline justify-between gap-4">
-          <p className="font-display italic text-[18px] text-[var(--muted)] max-w-md" style={{ fontVariationSettings: '"opsz" 9' }}>
-            Static specimen. Yours will be generated live, in seconds.
-          </p>
-          <Link
-            href="/research"
-            className="group inline-flex items-baseline gap-3 px-6 py-3.5 bg-[var(--foreground)] text-[var(--background)] font-mono uppercase text-[11px] tracking-[0.22em] hover:bg-[var(--gold)] transition-colors duration-300"
-          >
-            Run your own briefing
-            <span className="font-display text-[16px] leading-none translate-y-[1px] group-hover:translate-x-0.5 transition-transform">
-              →
+        {/* Briefing block */}
+        <div className="mt-8 term-block active">
+          {/* Block-head */}
+          <div className="term-block-head">
+            <span>
+              <span className="dim">╭─</span> briefing/<b>{slug}</b>{" "}
+              <span className="dim">──────────────</span>
             </span>
-          </Link>
+            <span className="live-pill">[ 5 agents · 1m 04s ]</span>
+          </div>
+
+          {/* Pipeline strip — all done */}
+          <div className="term-pipeline">
+            <span className="term-pipeline-step done">
+              <span className="diamond">◆</span> commander
+            </span>
+            <span className="term-pipeline-step done">
+              <span className="diamond">◆</span> scout
+            </span>
+            <span className="term-pipeline-step done">
+              <span className="diamond">◆</span> analyst
+            </span>
+            <span className="term-pipeline-step done">
+              <span className="diamond">◆</span> sentinel
+            </span>
+            <span className="term-pipeline-step done">
+              <span className="diamond">◆</span> synthesizer
+            </span>
+          </div>
+
+          {/* Cover headline (mono) */}
+          <h3 className="font-mono text-[24px] lg:text-[28px] font-semibold tracking-[-0.01em] text-[var(--foreground)] mt-2">
+            {coverInline}
+          </h3>
+
+          {/* Stats strip — chips */}
+          <div className="mt-5 flex flex-wrap gap-2">
+            {b.featuredStats.map((s) => (
+              <span
+                key={s.label}
+                className="term-chip tabular-nums"
+                style={{ cursor: "default" }}
+              >
+                <span className="text-[var(--foreground)]">{s.value}</span>
+                <span className="ml-2 text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
+                  · {s.label}
+                </span>
+              </span>
+            ))}
+          </div>
+
+          {/* Meta strip */}
+          <div className="mt-5 font-mono text-[12px] text-[var(--muted)] flex flex-wrap gap-x-2 gap-y-1">
+            <span>issued {issuedLong.toLowerCase()}</span>
+            <span className="text-[var(--hair)]">·</span>
+            <span>sources <span className="text-[var(--foreground)] tabular-nums">{b.sources}</span></span>
+            <span className="text-[var(--hair)]">·</span>
+            <span>completion <span className="text-[var(--foreground)]">{b.partial ? "Partial" : "Full"}</span></span>
+            <span className="text-[var(--hair)]">·</span>
+            <span>pipeline <span className="text-[var(--foreground)]">α→βγδ→ε</span></span>
+          </div>
+
+          {/* Pull quote sub-block */}
+          <div className="term-sub mt-6">
+            <div className="term-sub-head">
+              <span className="text-[var(--accent)] uppercase tracking-[0.22em] text-[10px]">
+                [ featured finding ]
+              </span>
+              <span className="text-[var(--hair)]">— from the editor</span>
+            </div>
+            <blockquote className="font-mono text-[15px] leading-[1.7] text-[var(--foreground)] opacity-92">
+              &ldquo;{b.pullQuote}&rdquo;
+            </blockquote>
+          </div>
+
+          {/* Briefing body — scrollable container so the section height
+              stays consistent regardless of briefing length. Mini header
+              shows scroll affordance; bottom fade hints at more content. */}
+          <div className="relative mt-8 border border-[var(--hair)] rounded-lg bg-[var(--background)]/40 overflow-hidden">
+            <div className="sticky top-0 z-10 flex justify-between items-center px-4 py-2 border-b border-[var(--hair)] bg-[var(--background)]/95 backdrop-blur-sm">
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
+                briefing body · {Math.round(b.briefing.length / 5 / 200)} min read
+              </span>
+              <span className="font-mono text-[10px] text-[var(--muted)] flex items-center gap-1">
+                <span>scroll</span>
+                <span className="text-[var(--accent)]">↕</span>
+              </span>
+            </div>
+            <div className="max-h-[640px] overflow-y-auto px-5 lg:px-6 py-6 briefing-scroll">
+              <article className="prose-term">
+                <MarkdownRenderer content={b.briefing} />
+              </article>
+            </div>
+            {/* Bottom fade gradient — visual hint that more content is below */}
+            <div
+              className="pointer-events-none absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-[var(--background)] to-transparent"
+              aria-hidden
+            />
+          </div>
+
+          {/* Sources sub-block */}
+          <div className="term-sub mt-10">
+            <div className="term-sub-head">
+              <span className="text-[var(--foreground)]">── sources cited · {b.sources} ──</span>
+              <span className="text-[var(--muted)]">all citations verifiable</span>
+            </div>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-2 mt-2">
+              {b.sourceList.map((s, i) => (
+                <li key={s.url} className="flex items-baseline gap-2 font-mono text-[12px]">
+                  <span className="text-[var(--muted)] tabular-nums shrink-0">
+                    {String(i + 1).padStart(2, "0")} ▸
+                  </span>
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[var(--foreground)] hover:text-[var(--accent)] truncate underline-offset-2 hover:underline"
+                    title={s.url}
+                  >
+                    {s.host}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Outro CTA */}
+          <div className="mt-10 flex flex-wrap items-baseline justify-between gap-4">
+            <p className="font-mono text-[12px] text-[var(--muted)]">
+              <span className="text-[var(--accent)]">›</span> ready to run your own? · static specimen · yours will be live
+            </p>
+            <Link href="/research" className="term-cta">
+              run your own briefing
+              <span className="text-[16px] leading-none translate-y-[-1px]">›</span>
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Local styles: drop cap + pull quote (scoped via class) */}
+      {/* Terminal prose styles for the markdown body */}
       <style>{`
-        .prose-pyxis-drop > div:first-of-type + :where(h2):first-of-type + p:first-letter,
-        .prose-pyxis-drop > :where(h2):first-of-type + p:first-letter {
-          font-family: var(--font-fraunces), serif;
-          font-size: 64px;
+        .prose-term h2 {
+          font-family: var(--font-geist-mono), ui-monospace, monospace;
+          font-size: 18px;
+          font-weight: 600;
+          color: var(--foreground);
+          margin-top: 32px;
+          margin-bottom: 12px;
+          padding-left: 12px;
+          border-left: 2px solid var(--accent);
+          line-height: 1.4;
+        }
+        .prose-term h3 {
+          font-family: var(--font-geist-mono), ui-monospace, monospace;
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.22em;
+          color: var(--muted);
+          margin-top: 24px;
+          margin-bottom: 8px;
+        }
+        .prose-term p {
+          font-family: var(--font-geist-mono), ui-monospace, monospace;
+          font-size: 14px;
+          line-height: 1.7;
+          color: var(--foreground);
+          opacity: 0.92;
+          margin: 10px 0;
+        }
+        .prose-term strong {
+          color: var(--foreground);
+          opacity: 1;
+          font-weight: 600;
+        }
+        .prose-term ul {
+          list-style: none;
+          padding-left: 0;
+          margin: 12px 0;
+        }
+        .prose-term ul li {
+          font-family: var(--font-geist-mono), ui-monospace, monospace;
+          font-size: 14px;
+          line-height: 1.7;
+          color: var(--foreground);
+          opacity: 0.92;
+          padding-left: 18px;
+          position: relative;
+          margin: 4px 0;
+        }
+        .prose-term ul li::before {
+          content: "•";
+          position: absolute;
+          left: 4px;
+          color: var(--scout);
+        }
+        .prose-term ol {
+          list-style: decimal;
+          padding-left: 24px;
+          margin: 12px 0;
+          color: var(--foreground);
+          font-family: var(--font-geist-mono), ui-monospace, monospace;
+          font-size: 14px;
+          line-height: 1.7;
+        }
+        .prose-term ol li { margin: 4px 0; opacity: 0.92; }
+        .prose-term ol li::marker { color: var(--muted); }
+        .prose-term a {
+          color: var(--accent);
+          text-decoration: underline;
+          text-underline-offset: 2px;
+          text-decoration-thickness: 1px;
+        }
+        .prose-term a:hover { color: var(--scout); }
+        .prose-term code {
+          font-family: var(--font-geist-mono), ui-monospace, monospace;
+          font-size: 12.5px;
+          color: var(--accent);
+          background: var(--hair);
+          padding: 1px 5px;
+          border-radius: 4px;
+        }
+        .prose-term pre {
+          background: var(--hair);
+          border-radius: 6px;
+          padding: 12px;
+          overflow-x: auto;
+          font-size: 12.5px;
+          margin: 12px 0;
+        }
+        .prose-term blockquote {
+          border-left: 2px solid var(--hair);
+          padding-left: 12px;
+          margin: 14px 0;
+          color: var(--muted);
+          font-style: normal;
+        }
+        .prose-term table {
+          font-family: var(--font-geist-mono), ui-monospace, monospace;
+          font-size: 12px;
+          border-collapse: collapse;
+          width: 100%;
+          margin: 14px 0;
+        }
+        .prose-term thead th {
+          text-align: left;
           font-weight: 500;
-          font-style: italic;
-          float: left;
-          line-height: 0.85;
-          padding: 6px 10px 0 0;
-          color: var(--gold);
+          color: var(--muted);
+          text-transform: uppercase;
+          letter-spacing: 0.18em;
+          font-size: 10px;
+          padding: 8px 10px;
+          border-bottom: 1px solid var(--hair);
+        }
+        .prose-term tbody td {
+          padding: 6px 10px;
+          border-bottom: 1px solid var(--hair);
+          color: var(--foreground);
+          opacity: 0.92;
+        }
+        .prose-term hr {
+          border: none;
+          border-top: 1px solid var(--hair);
+          margin: 20px 0;
+        }
+        /* Custom scrollbar for the briefing body container */
+        .briefing-scroll::-webkit-scrollbar {
+          width: 10px;
+        }
+        .briefing-scroll::-webkit-scrollbar-track {
+          background: var(--hair);
+          border-radius: 5px;
+          margin: 4px 0;
+        }
+        .briefing-scroll::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, var(--scout), var(--accent));
+          border-radius: 5px;
+          border: 2px solid var(--background);
+          background-clip: padding-box;
+          box-shadow: 0 0 12px rgba(91, 143, 255, 0.35);
+        }
+        .briefing-scroll::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, var(--scout), var(--scout));
+          background-clip: padding-box;
+          box-shadow: 0 0 18px rgba(34, 211, 238, 0.55);
+        }
+        /* Firefox */
+        .briefing-scroll {
+          scrollbar-width: thin;
+          scrollbar-color: var(--accent) var(--hair);
         }
       `}</style>
     </section>
-  );
-}
-
-function Meta({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div>
-      <div className="eyebrow mb-1.5">{label}</div>
-      <div
-        className={`text-[var(--foreground)] ${
-          mono ? "font-mono tabular text-[13px]" : "font-display text-[15px]"
-        }`}
-      >
-        {value}
-      </div>
-    </div>
-  );
-}
-
-function PullQuote({ text }: { text: string }) {
-  return (
-    <figure className="my-0 mb-10 pl-6 border-l-2 border-[var(--gold)]/60">
-      <blockquote
-        className="font-display italic text-[24px] sm:text-[28px] lg:text-[32px] leading-[1.2] text-[var(--foreground)]/95"
-        style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1, "opsz" 144' }}
-      >
-        &ldquo;{text}&rdquo;
-      </blockquote>
-      <figcaption className="mt-3 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--gold-soft)]">
-        Featured finding
-      </figcaption>
-    </figure>
   );
 }

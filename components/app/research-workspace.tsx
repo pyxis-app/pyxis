@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAccount, useChainId, useConfig } from "wagmi";
 import { getWalletClient } from "wagmi/actions";
 import { wrapFetchWithPayment } from "x402-fetch";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { motion, AnimatePresence } from "framer-motion";
 import { TopicInput } from "./topic-input";
 import { BriefingCard, type Briefing } from "./briefing-card";
-import { ProbeNodeGraph } from "@/components/shared/probe-node-graph";
 import { signInWithEthereum } from "@/lib/siwe-client";
 
 type State =
@@ -18,19 +16,19 @@ type State =
   | { kind: "error"; message: string };
 
 const EXAMPLE_TOPICS = [
-  "Modular DA layers in 2026",
-  "Liquid restaking systemic risk",
-  "Solana payments adoption",
-  "Bitcoin L2 thesis",
-  "MEV redistribution post-PBS",
+  "modular DA layers",
+  "liquid restaking risk",
+  "solana payments",
+  "bitcoin L2 thesis",
+  "MEV post-PBS",
 ];
 
 const RUNNING_PHASES = [
-  { t: 0,     caption: "Commander reading your topic…" },
-  { t: 1500,  caption: "Three agents searching in parallel…" },
-  { t: 4500,  caption: "Cross-referencing market data…" },
-  { t: 7000,  caption: "Synthesizer assembling the briefing…" },
-  { t: 10000, caption: "Almost there — finalising citations…" },
+  { t: 0,     stage: 0, caption: "commander reading your topic…" },
+  { t: 1500,  stage: 1, caption: "three agents searching in parallel…" },
+  { t: 4500,  stage: 2, caption: "cross-referencing market data…" },
+  { t: 7000,  stage: 3, caption: "synthesizer assembling the briefing…" },
+  { t: 10000, stage: 4, caption: "almost there — finalising citations…" },
 ];
 
 function currentPhase(elapsedMs: number) {
@@ -41,13 +39,84 @@ function currentPhase(elapsedMs: number) {
   return p;
 }
 
+function pad(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+function fmtElapsed(ms: number): string {
+  const s = Math.floor(ms / 1000);
+  return `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
+}
+
+function topicSlug(topic: string): string {
+  return (
+    topic
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 32) || "new"
+  );
+}
+
+function probeColorClass(probe: string): string {
+  if (probe === "scout") return "scout";
+  if (probe === "analyst") return "analyst";
+  if (probe === "sentinel") return "sentinel";
+  return "";
+}
+
+function probeTagClass(probe: string): string {
+  if (probe === "scout") return "scout";
+  if (probe === "analyst") return "analyst";
+  if (probe === "sentinel") return "sentinel";
+  if (probe === "synthesizer") return "synth";
+  return "cmd";
+}
+
 export function ResearchWorkspace() {
   const [topic, setTopic] = useState("");
   const [state, setState] = useState<State>({ kind: "idle" });
   const [elapsedMs, setElapsedMs] = useState(0);
+  const [utcClock, setUtcClock] = useState("");
+  // SIWE handshake state — auto-runs once wallet connects so the start button
+  // never has to trigger a wallet-sign popup mid-flow. "idle" before connect,
+  // "signing" while the popup is open, "ready" after verify (or skipped),
+  // "rejected" if the user dismissed the popup.
+  const [auth, setAuth] = useState<"idle" | "signing" | "ready" | "rejected">("idle");
+  // Guards SIWE useEffect against firing before the post-mount cookie check
+  // resolves. Without this, SSR-initialized auth="idle" + connected wallet
+  // would trigger an unnecessary popup for users who already have a session.
+  const [authChecked, setAuthChecked] = useState(false);
+  // In-flight guard. We use a ref (not a closure variable) because the SIWE
+  // useEffect setAuth("signing") inside its own body triggers a re-render that
+  // changes the `auth` dep, which fires the effect's cleanup. A closure-based
+  // `cancelled` flag would then be set to TRUE before the promise resolves,
+  // causing the success/reject callback's `if (!cancelled)` guard to silently
+  // drop the resolution — and the state would stay stuck at "signing" forever
+  // even though the wallet signed successfully and the cookie was set.
+  const signingRef = useRef(false);
+  // Tracks mount status so async callbacks don't setState on unmounted component.
+  const mountedRef = useRef(true);
+  useEffect(() => () => {
+    mountedRef.current = false;
+  }, []);
   const { isConnected, address } = useAccount();
   const chainId = useChainId();
   const config = useConfig();
+
+  // UTC clock tick
+  useEffect(() => {
+    function tick() {
+      const d = new Date();
+      setUtcClock(
+        `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())} UTC`
+      );
+    }
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
 
   // running timer
   useEffect(() => {
@@ -56,13 +125,70 @@ export function ResearchWorkspace() {
     return () => clearInterval(id);
   }, [state]);
 
-  async function start() {
-    if (!isConnected || !address) return;
-    try {
-      await signInWithEthereum({ config, address, chainId });
-    } catch {
-      /* ignore — history won't load without auth, but research can still run */
+  // Post-mount cookie check — runs once, ahead of the SIWE auto-trigger.
+  // If a valid pyxis_session cookie is present, skip the popup entirely.
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      const hasSession = document.cookie
+        .split("; ")
+        .some((c) => c.startsWith("pyxis_session=") && c.length > "pyxis_session=".length);
+      if (hasSession) setAuth("ready");
     }
+    setAuthChecked(true);
+  }, []);
+
+  // Auto-trigger SIWE the moment a wallet connects so the popup happens at
+  // connect-time (a natural place for a sign), not at submit-time (jarring).
+  // Once auth is "ready", the start button submits without any wallet popup.
+  // Guarded by authChecked + signingRef so:
+  //   1. We don't fire before the cookie pre-check resolves (avoids redundant
+  //      popups for users with valid sessions).
+  //   2. We don't double-fire when setAuth("signing") below re-triggers this
+  //      effect (the `auth` dep changes → effect re-runs → guard bails on the
+  //      second run because signingRef.current is TRUE).
+  // No cleanup/cancellation — the promise resolves naturally and the resolve
+  // callbacks check mountedRef before calling setAuth.
+  useEffect(() => {
+    if (!authChecked) return;
+    if (!isConnected || !address) return;
+    if (auth !== "idle") return;
+    if (signingRef.current) return;
+
+    signingRef.current = true;
+    setAuth("signing");
+    signInWithEthereum({ config, address, chainId })
+      .then(() => {
+        signingRef.current = false;
+        if (mountedRef.current) setAuth("ready");
+      })
+      .catch(() => {
+        signingRef.current = false;
+        if (mountedRef.current) setAuth("rejected");
+      });
+  }, [authChecked, isConnected, address, auth, config, chainId]);
+
+  // Reset auth when wallet disconnects
+  useEffect(() => {
+    if (!isConnected) {
+      setAuth("idle");
+      signingRef.current = false;
+    }
+  }, [isConnected]);
+
+  function retryAuth() {
+    signingRef.current = false;
+    setAuth("idle");
+  }
+
+  // Escape hatch — proceed without a server-side session. Research will still
+  // run; only history won't load for this device. Useful when the wallet popup
+  // gets dismissed silently, blocked by an extension, or otherwise hangs.
+  function skipAuth() {
+    setAuth("ready");
+  }
+
+  async function start() {
+    if (!isConnected || !address || auth !== "ready") return;
 
     setElapsedMs(0);
     setState({ kind: "running", startedAt: Date.now() });
@@ -106,247 +232,369 @@ export function ResearchWorkspace() {
     }
   }
 
-  const headerTitle =
-    state.kind === "done"     ? "Briefing delivered."
-    : state.kind === "running"  ? "Researching…"
-    : state.kind === "error"    ? "Something interrupted the swarm."
-    :                            "Pose your inquiry.";
+  const phase = state.kind === "running" ? currentPhase(elapsedMs) : null;
+  const stageIdx = phase?.stage ?? -1;
+  const runSlug =
+    state.kind === "done"
+      ? topicSlug(state.briefing.topic)
+      : topic
+      ? topicSlug(topic)
+      : "new";
+  const breadcrumb = `pyxis://research/${runSlug}`;
+
+  // Stage layout: 0=commander, 1=scout+analyst+sentinel parallel, 2=still parallel, 3=synth, 4=synth
+  function probeStatus(probe: "commander" | "scout" | "analyst" | "sentinel" | "synthesizer"):
+    "done" | "running" | "queued" {
+    if (state.kind === "done") return "done";
+    if (state.kind !== "running") return "queued";
+    const map: Record<typeof probe, number> = {
+      commander: 0,
+      scout: 1,
+      analyst: 1,
+      sentinel: 1,
+      synthesizer: 3,
+    } as const;
+    const startStage = map[probe];
+    if (stageIdx < startStage) return "queued";
+    // synth runs only at stage 3+; everything else done by stage 3
+    if (probe === "synthesizer") {
+      return stageIdx >= 4 ? "done" : "running";
+    }
+    if (probe === "commander") return "done";
+    // scout/analyst/sentinel — running until stage 3
+    return stageIdx >= 3 ? "done" : "running";
+  }
 
   return (
-    <div className="px-8 lg:px-12 py-10 lg:py-12 max-w-[1100px]">
-      {/* Header */}
-      <header className="mb-12">
-        <div className="eyebrow mb-3">Workspace · Volume I</div>
-        <h1 className="font-display text-[34px] sm:text-[44px] lg:text-[52px] leading-[1.05] tracking-[-0.02em]">
-          {state.kind === "done" ? (
-            <>
-              Briefing{" "}
-              <span className="italic" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1, "opsz" 144' }}>
-                delivered
-              </span>.
-            </>
-          ) : (
-            headerTitle
-          )}
-        </h1>
+    <div className="px-6 lg:px-10 py-6 lg:py-8 max-w-[1100px] flex flex-col min-h-screen">
+      {/* Top chrome */}
+      <header className="mb-6 flex items-center gap-3 flex-wrap">
+        <span className="term-section-tag">// research</span>
+        <span className="font-mono text-[11px] text-[var(--foreground)]">
+          <span className="text-[var(--muted)]">pyxis://research/</span>
+          {runSlug}
+        </span>
+        <span className="ml-auto font-mono text-[11px] text-[var(--muted)] tabular-nums">
+          {utcClock}
+        </span>
       </header>
 
-      {/* Input row — present when not viewing a completed briefing */}
-      {state.kind !== "done" && (
-        <>
-          <TopicInput
-            value={topic}
-            onChange={setTopic}
-            onSubmit={start}
-            disabled={state.kind === "running" || !isConnected}
-          />
-
-          {!isConnected && (
-            <div className="mt-8 hairline-top pt-8 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 items-center">
-              <div>
-                <div className="eyebrow mb-2">Begin</div>
-                <p className="font-display italic text-[17px] leading-snug text-[var(--foreground)]/85 max-w-md" style={{ fontVariationSettings: '"opsz" 9' }}>
-                  Connect a wallet to research any topic. <span className="line-through opacity-50">$0.10 USDC per research</span> <span className="not-italic text-[var(--gold)]">Free during beta.</span> Paid mode resumes later.
-                </p>
-              </div>
-              <ConnectButton.Custom>
-                {({ openConnectModal, mounted, authenticationStatus }) => {
-                  if (!mounted || authenticationStatus === "loading") {
-                    return (
-                      <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-[var(--gold-soft)]">
-                        Loading…
-                      </div>
-                    );
-                  }
+      {/* Body — scrollback stack */}
+      <div className="flex-1 space-y-4">
+        {/* Empty state — no run yet, no input value */}
+        {state.kind === "idle" && !isConnected && (
+          <div className="term-block">
+            <div className="term-block-head">
+              <span>
+                <span className="dim">╭─</span> connect <span className="dim">────────────────</span>
+              </span>
+              <span className="live-pill">[ wallet required ]</span>
+            </div>
+            <p className="font-mono text-[14px] leading-[1.6] text-[var(--foreground)] opacity-90 mb-4">
+              <span className="term-p-prefix">P›</span>
+              connect a wallet to begin. research is{" "}
+              <b className="text-[var(--accent)]">free during beta</b> · no card
+              required.
+            </p>
+            <ConnectButton.Custom>
+              {({ openConnectModal, mounted, authenticationStatus }) => {
+                if (!mounted || authenticationStatus === "loading") {
                   return (
-                    <button
-                      onClick={openConnectModal}
-                      className="group inline-flex items-baseline gap-3 px-6 py-4 bg-[var(--gold)] text-[var(--background)] font-mono uppercase text-[11px] tracking-[0.22em] hover:bg-[var(--foreground)] transition-colors duration-300 self-end"
-                    >
-                      Connect wallet
-                      <span className="font-display text-[16px] leading-none translate-y-[1px] group-hover:translate-x-0.5 transition-transform">
-                        →
-                      </span>
-                    </button>
+                    <span className="font-mono text-[11px] text-[var(--muted)] tracking-[0.18em]">
+                      loading…
+                    </span>
                   );
-                }}
-              </ConnectButton.Custom>
-            </div>
-          )}
+                }
+                return (
+                  <button onClick={openConnectModal} className="term-cta">
+                    connect wallet
+                    <span className="text-[16px] leading-none translate-y-[-1px]">›</span>
+                  </button>
+                );
+              }}
+            </ConnectButton.Custom>
+          </div>
+        )}
 
-          {state.kind === "idle" && isConnected && (
-            <div className="mt-6 flex flex-wrap gap-2">
-              {EXAMPLE_TOPICS.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTopic(t)}
-                  className="text-[12px] px-3 py-1.5 hairline-x hairline-bottom border-t border-[var(--hair)] text-[var(--muted)] hover:text-[var(--foreground)] hover:border-[var(--gold-soft)] transition-colors"
-                >
-                  {t}
-                </button>
-              ))}
+        {state.kind === "idle" && isConnected && (
+          <div className={`term-block ${auth === "ready" ? "active" : ""}`}>
+              <div className="term-block-head">
+                <span>
+                  <span className="dim">╭─</span> ready <span className="dim">──────────────────</span>
+                </span>
+                <span className="live-pill">
+                  {auth === "ready" && "[ idle · 5 agents on standby ]"}
+                  {auth === "signing" && "[ verifying wallet… sign in your wallet ]"}
+                  {auth === "rejected" && "[ wallet sign rejected · retry to begin ]"}
+                  {auth === "idle" && "[ preparing handshake… ]"}
+                </span>
+              </div>
+              <p className="font-mono text-[15px] text-[var(--foreground)] mb-5">
+                <span className="term-p-prefix">P›</span>
+                {auth === "ready" && (
+                  <>
+                    ready to research.
+                    <span className="term-cursor" />
+                  </>
+                )}
+                {auth === "signing" && (
+                  <>
+                    awaiting wallet signature…
+                    <span className="term-cursor" />
+                  </>
+                )}
+                {auth === "rejected" && (
+                  <>
+                    sign-in rejected.{" "}
+                    <button
+                      onClick={retryAuth}
+                      className="font-mono text-[var(--accent)] underline underline-offset-2 hover:text-[var(--scout)]"
+                    >
+                      retry verification ›
+                    </button>
+                  </>
+                )}
+                {auth === "idle" && (
+                  <>
+                    preparing handshake…
+                    <span className="term-cursor" />
+                  </>
+                )}
+              </p>
+              <TopicInput
+                value={topic}
+                onChange={setTopic}
+                onSubmit={start}
+                disabled={auth !== "ready"}
+              />
+              <div className="mt-5 flex flex-wrap gap-2">
+                {EXAMPLE_TOPICS.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTopic(t)}
+                    className="term-chip"
+                    disabled={auth !== "ready"}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+              {auth !== "ready" && (
+                <div className="mt-4 font-mono text-[11px] text-[var(--muted)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <span>
+                    {auth === "signing" && "→ check your wallet for a sign-in request"}
+                    {auth === "rejected" && "→ wallet sign is one-time per session; required to load history"}
+                    {auth === "idle" && "→ wallet handshake will start shortly"}
+                  </span>
+                  {(auth === "signing" || auth === "rejected") && (
+                    <span className="flex items-center gap-2">
+                      {auth === "signing" && (
+                        <button
+                          onClick={retryAuth}
+                          className="font-mono text-[11px] text-[var(--muted)] hover:text-[var(--foreground)] underline underline-offset-2"
+                          title="popup stuck? retry"
+                        >
+                          retry ↻
+                        </button>
+                      )}
+                      <button
+                        onClick={skipAuth}
+                        className="font-mono text-[11px] text-[var(--accent)] hover:text-[var(--scout)] underline underline-offset-2"
+                        title="skip wallet sign-in — research still runs, history won't load"
+                      >
+                        skip sign-in ›
+                      </button>
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
-          )}
-        </>
-      )}
+        )}
 
-      {/* Body */}
-      <div className="mt-14">
-        <AnimatePresence mode="wait">
-          {/* ── Idle ─────────────────────────────────────────── */}
-          {state.kind === "idle" && (
-            <motion.div
-              key="idle"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.35 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 hairline-top pt-10"
-            >
-              <div>
-                <div className="eyebrow mb-4">What you&apos;ll receive</div>
-                <p className="font-display italic text-[18px] leading-snug text-[var(--foreground)]/85 max-w-sm" style={{ fontVariationSettings: '"opsz" 9' }}>
-                  An executive summary, key findings by category, risks, opportunities, and a confidence score — every claim cited.
-                </p>
-                <div className="mt-6 grid grid-cols-3 gap-4 text-[11px] font-mono">
-                  <div>
-                    <div className="eyebrow mb-1">Cost</div>
-                    <div className="text-[var(--foreground)] tabular">
-                      <span className="line-through opacity-40 mr-1">$0.1</span>
-                      <span className="text-[var(--gold)]">Free</span>
+        {/* Running — active run block */}
+        {state.kind === "running" && (
+          <div className="term-block active">
+            <div className="term-block-head">
+              <span>
+                <span className="dim">╭─</span> run · <b>{utcClock.slice(0, 5)}</b>{" "}
+                <span className="dim">──────────</span>
+              </span>
+              <span>
+                <span className="dim">[</span>
+                <b className="live-pill">running</b> · <b>{fmtElapsed(elapsedMs)}</b>
+                <span className="dim">]─╮</span>
+              </span>
+            </div>
+
+            {/* 5-agent diamond strip */}
+            <div className="term-pipeline">
+              {(["commander", "scout", "analyst", "sentinel", "synthesizer"] as const).map(
+                (probe, i) => {
+                  const status = probeStatus(probe);
+                  const cls =
+                    status === "done"
+                      ? "done"
+                      : status === "running"
+                      ? "running"
+                      : "queued";
+                  const diamond =
+                    status === "done" ? "◆" : status === "running" ? "◐" : "◇";
+                  return (
+                    <span key={probe} className="contents">
+                      {i > 0 && <span className="dim">·</span>}
+                      <span className={`term-pipeline-step ${cls}`}>
+                        <span className="diamond">{diamond}</span> {probe}
+                      </span>
+                    </span>
+                  );
+                }
+              )}
+            </div>
+
+            {/* User prompt line */}
+            <div className="font-mono text-[15px] text-[var(--foreground)] mb-3">
+              <span className="term-p-prefix">›</span>
+              {topic}
+            </div>
+
+            {/* Probe sub-blocks */}
+            {(["commander", "scout", "analyst", "sentinel", "synthesizer"] as const).map(
+              (probe) => {
+                const status = probeStatus(probe);
+                const colorCls = probeColorClass(probe);
+                const tagCls = probeTagClass(probe);
+                const subClass =
+                  status === "queued"
+                    ? "term-sub queued"
+                    : `term-sub ${colorCls}`;
+                return (
+                  <div key={probe} className={subClass}>
+                    <div className="term-sub-head">
+                      <span>
+                        <span className="dim">┌─</span> {probe}{" "}
+                        <span className="dim">──[</span>
+                        {status === "running" ? (
+                          <>
+                            <span
+                              className={`term-spinner ${colorCls}`}
+                              aria-hidden
+                            />{" "}
+                            {fmtElapsed(elapsedMs)}
+                          </>
+                        ) : status === "done" ? (
+                          <>✓ done</>
+                        ) : (
+                          <>· queued</>
+                        )}
+                        <span className="dim">]─┐</span>
+                      </span>
+                    </div>
+                    <div className="font-mono text-[12.5px] text-[var(--foreground)] opacity-90">
+                      {status === "queued" ? (
+                        <span className="text-[var(--muted)]">waiting…</span>
+                      ) : (
+                        <>
+                          <span className={`term-tag ${tagCls}`}>[{probe}]</span>{" "}
+                          {probe === "commander" && "decomposing topic into 3 probe queries"}
+                          {probe === "scout" && "scanning news, audits, narrative"}
+                          {probe === "analyst" && "fetching price, tvl, liquidity, supply"}
+                          {probe === "sentinel" && "reading social pulse + governance"}
+                          {probe === "synthesizer" && "merging findings into briefing"}
+                        </>
+                      )}
                     </div>
                   </div>
-                  <div>
-                    <div className="eyebrow mb-1">Time</div>
-                    <div className="text-[var(--foreground)] tabular">~6 s</div>
-                  </div>
-                  <div>
-                    <div className="eyebrow mb-1">Sources</div>
-                    <div className="text-[var(--foreground)] tabular">8–14</div>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <div className="eyebrow mb-4">Pipeline</div>
-                <div className="font-display text-[28px] leading-tight">
-                  <span className="italic text-[var(--gold)]">α</span>{" "}
-                  <span className="text-[var(--muted)]">→</span>{" "}
-                  <span className="italic text-[var(--gold)]">β</span>{" "}
-                  <span className="italic text-[var(--gold)]">γ</span>{" "}
-                  <span className="italic text-[var(--gold)]">δ</span>{" "}
-                  <span className="text-[var(--muted)]">→</span>{" "}
-                  <span className="italic text-[var(--gold)]">ε</span>
-                </div>
-                <p className="mt-4 text-[13px] text-[var(--muted)] leading-relaxed max-w-sm">
-                  Commander decomposes; Scout, Analyst, and Sentinel investigate; Synthesizer writes. One briefing per inquiry &mdash; free during beta.
-                </p>
-              </div>
-            </motion.div>
-          )}
+                );
+              }
+            )}
 
-          {/* ── Running ──────────────────────────────────────── */}
-          {state.kind === "running" && (
-            <motion.div
-              key="running"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.35 }}
-            >
-              {/* Status row */}
-              <div className="flex items-baseline justify-between gap-8 mb-10 hairline-bottom pb-6">
-                <div className="min-w-0">
-                  <div className="eyebrow mb-2">Status</div>
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={currentPhase(elapsedMs).t}
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.3 }}
-                      className="font-display italic text-[20px] sm:text-[22px] leading-snug text-[var(--foreground)] truncate"
-                      style={{ fontVariationSettings: '"opsz" 144' }}
-                    >
-                      {currentPhase(elapsedMs).caption}
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="eyebrow mb-2">Elapsed</div>
-                  <div className="font-mono tabular text-[20px] text-[var(--gold)]">
-                    {(elapsedMs / 1000).toFixed(1)}s
-                  </div>
-                </div>
-              </div>
-              {/* Agent flow graph */}
-              <div className="aspect-[3/2] max-w-3xl mx-auto">
-                <ProbeNodeGraph live />
-              </div>
-              <p className="mt-8 text-center text-[12px] font-mono uppercase tracking-[0.22em] text-[var(--gold-soft)]">
-                Researching: {topic}
-              </p>
-            </motion.div>
-          )}
+            <p className="mt-4 font-mono text-[11px] text-[var(--muted)]">
+              {phase?.caption}
+            </p>
+          </div>
+        )}
 
-          {/* ── Done ─────────────────────────────────────────── */}
-          {state.kind === "done" && (
-            <motion.div
-              key="done"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              <BriefingCard b={state.briefing} />
-              <div className="mt-16 hairline-top pt-8 flex flex-wrap items-baseline justify-between gap-4">
-                <p className="text-[13px] text-[var(--muted)] max-w-md">
-                  Briefing saved to your history. Sign in from any device with the same wallet to retrieve it.
-                </p>
+        {/* Done — briefing */}
+        {state.kind === "done" && (
+          <>
+            <BriefingCard b={state.briefing} active />
+            <div className="term-block">
+              <div className="font-mono text-[13px] text-[var(--foreground)] opacity-90 flex flex-wrap items-center justify-between gap-3">
+                <span className="text-[var(--muted)]">
+                  briefing saved · sign in from any device with the same wallet to
+                  retrieve it.
+                </span>
                 <button
                   onClick={() => {
                     setState({ kind: "idle" });
                     setTopic("");
                   }}
-                  className="group inline-flex items-baseline gap-2.5 px-5 py-3 bg-[var(--foreground)] text-[var(--background)] font-mono uppercase text-[10px] tracking-[0.22em] hover:bg-[var(--gold)] transition-colors duration-300"
+                  className="term-cta"
                 >
-                  New research
-                  <span className="font-display text-[14px] leading-none translate-y-[1px] group-hover:translate-x-0.5 transition-transform">
-                    →
-                  </span>
+                  new run
+                  <span className="text-[16px] leading-none translate-y-[-1px]">›</span>
                 </button>
               </div>
-            </motion.div>
-          )}
+            </div>
+          </>
+        )}
 
-          {/* ── Error ────────────────────────────────────────── */}
-          {state.kind === "error" && (
-            <motion.div
-              key="error"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.35 }}
-              className="hairline-x hairline-bottom border-t border-[var(--hair)] p-8 max-w-xl"
+        {/* Error */}
+        {state.kind === "error" && (
+          <div
+            className="term-block"
+            style={{ borderColor: "var(--danger)" }}
+          >
+            <div className="term-block-head">
+              <span>
+                <span className="dim">╭─</span> error{" "}
+                <span className="dim">──────────────</span>
+              </span>
+              <span style={{ color: "var(--danger)" }}>[ pipeline interrupted ]</span>
+            </div>
+            <p className="font-mono text-[14px] leading-[1.6] text-[var(--foreground)] opacity-90 mb-2">
+              the swarm didn&apos;t complete. your payment, if it settled, is logged
+              — try again or check your wallet.
+            </p>
+            <p className="font-mono text-[12px] text-[var(--muted)] break-all mb-4">
+              {state.message}
+            </p>
+            <button
+              onClick={() => setState({ kind: "idle" })}
+              className="term-cta outline"
             >
-              <div className="eyebrow mb-3 text-[var(--danger)]">Pipeline error</div>
-              <p className="font-display italic text-[18px] leading-snug text-[var(--foreground)]/90 mb-3" style={{ fontVariationSettings: '"opsz" 9' }}>
-                The swarm didn&apos;t complete. Your payment, if it settled, is logged — try again or check your wallet.
-              </p>
-              <p className="text-[12px] font-mono text-[var(--muted)] break-all">
-                {state.message}
-              </p>
-              <button
-                onClick={() => setState({ kind: "idle" })}
-                className="mt-6 group inline-flex items-baseline gap-2.5 px-4 py-2.5 hairline-x hairline-bottom border-t border-[var(--hair)] font-mono uppercase text-[10px] tracking-[0.22em] text-[var(--gold-soft)] hover:text-[var(--gold)] hover:border-[var(--gold-soft)] transition-colors"
-              >
-                Try again
-                <span className="font-display text-[12px] leading-none translate-y-[1px] group-hover:translate-x-0.5 transition-transform">
-                  →
-                </span>
-              </button>
-            </motion.div>
+              try again
+              <span className="text-[14px] leading-none translate-y-[-1px]">›</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Sticky statusline */}
+      <div className="mt-6 -mx-6 lg:-mx-10">
+        <div className="term-statusline">
+          <span className="crumb">{breadcrumb}</span>
+          {state.kind === "running" && phase && (
+            <>
+              <span className="dim">·</span>
+              <span>
+                <span className={`term-spinner ${probeColorClass("analyst")}`} aria-hidden />{" "}
+                stage {stageIdx + 1}/5 · {fmtElapsed(elapsedMs)}
+              </span>
+            </>
           )}
-        </AnimatePresence>
+          {state.kind === "done" && (
+            <>
+              <span className="dim">·</span>
+              <span>briefing · {state.briefing.sources} sources</span>
+            </>
+          )}
+          <span className="ml-auto flex items-center gap-2">
+            <span className="chip">⌘K commands</span>
+            <span className="chip">? help</span>
+            <span className="chip">↑ history</span>
+          </span>
+        </div>
       </div>
     </div>
   );

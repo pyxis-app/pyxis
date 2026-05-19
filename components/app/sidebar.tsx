@@ -38,56 +38,67 @@ export function AppSidebar() {
   }, [isConnected, address]);
 
   return (
-    <aside className="w-[260px] shrink-0 hairline-x flex flex-col bg-[var(--background)]/80 backdrop-blur-md">
+    <aside className="w-[240px] shrink-0 border-r border-[var(--hair)] flex flex-col bg-[var(--background)]/85 backdrop-blur-md">
       {/* Brand */}
-      <Link href="/" className="px-5 py-5 flex items-baseline gap-2 hairline-bottom group">
-        <Image src="/logo.png" alt="" width={22} height={22} className="opacity-90 group-hover:opacity-100" />
-        <span className="font-display text-[18px] leading-none">Pyxis</span>
-        <span className="eyebrow text-[9px] opacity-60 ml-auto">Vol. I</span>
-      </Link>
-
-      {/* New research */}
-      <div className="px-5 py-5 hairline-bottom">
-        <Link
-          href="/research"
-          className="group inline-flex items-baseline gap-3 w-full justify-between px-3 py-2.5 bg-[var(--foreground)] text-[var(--background)] font-mono uppercase text-[10px] tracking-[0.22em] hover:bg-[var(--gold)] transition-colors duration-300"
-        >
-          New research
-          <span className="font-display text-[14px] leading-none translate-y-[1px] group-hover:translate-x-0.5 transition-transform">
-            →
+      <div className="px-5 py-5 border-b border-[var(--hair)]">
+        <Link href="/" className="flex items-center gap-2 group">
+          <Image
+            src="/logo.png"
+            alt=""
+            width={22}
+            height={22}
+            className="opacity-95 group-hover:opacity-100 transition-opacity"
+          />
+          <span className="font-mono text-[15px] text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors">
+            pyxis
+          </span>
+          <span
+            className="ml-auto font-mono text-[9px] uppercase tracking-[0.18em] text-[var(--muted)] border border-[var(--hair)] px-1.5 py-0.5 rounded"
+            style={{ borderRadius: 4 }}
+          >
+            free beta
           </span>
         </Link>
       </div>
 
+      {/* New research */}
+      <div className="px-5 py-4 border-b border-[var(--hair)]">
+        <Link href="/research" className="term-cta w-full justify-center">
+          + new run
+          <span className="text-[14px] leading-none translate-y-[-1px]">›</span>
+        </Link>
+      </div>
+
       {/* History list */}
-      <div className="flex-1 overflow-auto px-5 py-5">
-        <div className="eyebrow mb-4">Recent</div>
+      <div className="flex-1 overflow-auto py-4">
+        <div className="px-5 mb-3 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">
+          // history
+        </div>
         {!isConnected ? (
-          <div className="text-[12px] text-[var(--muted)] italic font-display" style={{ fontVariationSettings: '"opsz" 9' }}>
-            Connect a wallet to begin tracking research.
+          <div className="px-5 font-mono text-[12px] text-[var(--muted)] leading-[1.6]">
+            connect a wallet to begin tracking research.
           </div>
         ) : history === null ? (
-          <div className="text-[12px] text-[var(--muted)]">Loading…</div>
+          <div className="px-5 font-mono text-[12px] text-[var(--muted)]">loading…</div>
         ) : history.length === 0 ? (
-          <div className="text-[12px] text-[var(--muted)] italic font-display" style={{ fontVariationSettings: '"opsz" 9' }}>
-            No briefings yet. Your first session will appear here.
+          <div className="px-5 font-mono text-[12px] text-[var(--muted)] leading-[1.6]">
+            no briefings yet. your first session will appear here.
           </div>
         ) : (
-          <ul className="space-y-3">
+          <ul>
             {history.map((h) => (
               <li key={h.id}>
                 <Link
                   href={`/history#${h.id}`}
-                  className="block group"
+                  className="block px-5 py-2 group hover:bg-[var(--hair)]/40 transition-colors"
                   title={h.topic}
                 >
-                  <div className="flex items-baseline justify-between gap-2 mb-0.5">
-                    <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--gold-soft)]">
-                      {relativeTime(h.createdAt)}
-                    </span>
-                  </div>
-                  <div className="font-display text-[13.5px] leading-tight text-[var(--foreground)]/85 group-hover:text-[var(--foreground)] truncate">
+                  <div className="font-mono text-[13px] text-[var(--foreground)] opacity-85 group-hover:opacity-100 truncate">
+                    <span className="text-[var(--muted)] mr-1">▸</span>
                     {h.topic}
+                  </div>
+                  <div className="font-mono text-[10px] text-[var(--muted)] mt-0.5 pl-3">
+                    {relativeTime(h.createdAt)}
                   </div>
                 </Link>
               </li>
@@ -97,15 +108,18 @@ export function AppSidebar() {
       </div>
 
       {/* Footer — wallet + settings */}
-      <div className="px-5 py-5 hairline-top">
+      <div className="px-5 py-4 border-t border-[var(--hair)]">
         <WalletBadge />
-        <div className="mt-4 flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.22em] text-[var(--gold-soft)]">
-          <Link href="/settings" className="editorial-link hover:text-[var(--gold)]">
-            Settings
+        <div className="mt-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">
+          <Link href="/settings" className="hover:text-[var(--accent)] transition-colors">
+            settings
           </Link>
-          <Link href="/" className="editorial-link hover:text-[var(--gold)]">
-            Landing ↗
+          <Link href="/" className="hover:text-[var(--accent)] transition-colors">
+            landing ↗
           </Link>
+        </div>
+        <div className="mt-3 font-mono text-[10px] text-[var(--muted)] opacity-60">
+          pyxis v0.4.1 · agpl-3.0
         </div>
       </div>
     </aside>

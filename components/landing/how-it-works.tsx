@@ -1,109 +1,202 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { useEffect, useState } from "react";
 import { ProbeGraphModal } from "./probe-graph-modal";
 
-interface Agent { greek: string; name: string; }
+interface Agent { greek: string; name: string; color?: "scout" | "analyst" | "sentinel" | "cmd" | "synth"; }
 interface Step {
-  roman: string;
+  index: string;
+  slug: string;
   title: string;
   body: string;
   agents: Agent[];
+  variant?: "scout" | "analyst" | "sentinel" | "default";
+}
+
+type ProbeKey = "cmd" | "scout" | "analyst" | "sentinel" | "synth";
+type ProbeState = "queued" | "running" | "done";
+
+const PIPELINE_PROBES: { key: ProbeKey; greek: string; name: string }[] = [
+  { key: "cmd", greek: "α", name: "commander" },
+  { key: "scout", greek: "β", name: "scout" },
+  { key: "analyst", greek: "γ", name: "analyst" },
+  { key: "sentinel", greek: "δ", name: "sentinel" },
+  { key: "synth", greek: "ε", name: "synthesizer" },
+];
+
+// 5-phase cycle for the animated flow (~7s total, then restart).
+// Phase 0: commander running
+// Phase 1: scout/analyst/sentinel running in parallel
+// Phase 2: still parallel (1st half done)
+// Phase 3: synthesizer running
+// Phase 4: complete — brief moment of all-done before restart
+const FLOW_PHASES = [
+  { caption: "α commander · classifying topic into 3 probe queries" },
+  { caption: "β γ δ · scout, analyst, sentinel searching in parallel" },
+  { caption: "  …pulling live data from 13 sources" },
+  { caption: "ε synthesizer · merging findings + freshness table" },
+  { caption: "✓ briefing ready · cited, timestamped, audit-friendly" },
+];
+
+function getProbeState(probeKey: ProbeKey, phase: number): ProbeState {
+  if (probeKey === "cmd") return phase === 0 ? "running" : "done";
+  if (probeKey === "synth") {
+    if (phase < 3) return "queued";
+    if (phase === 3) return "running";
+    return "done";
+  }
+  // scout / analyst / sentinel
+  if (phase === 0) return "queued";
+  if (phase === 1 || phase === 2) return "running";
+  return "done";
 }
 
 const STEPS: Step[] = [
   {
-    roman: "I",
+    index: "01",
+    slug: "decompose",
     title: "Decompose",
     body: "The Commander reads your topic and splits it into three focused queries — one for facts, one for metrics, one for sentiment.",
-    agents: [{ greek: "α", name: "Commander" }],
+    agents: [{ greek: "α", name: "commander", color: "cmd" }],
+    variant: "default",
   },
   {
-    roman: "II",
+    index: "02",
+    slug: "investigate",
     title: "Investigate",
     body: "Scout, Analyst, and Sentinel each run targeted web searches in parallel. Live price and TVL data inject directly into the Analyst's context.",
     agents: [
-      { greek: "β", name: "Scout" },
-      { greek: "γ", name: "Analyst" },
-      { greek: "δ", name: "Sentinel" },
+      { greek: "β", name: "scout", color: "scout" },
+      { greek: "γ", name: "analyst", color: "analyst" },
+      { greek: "δ", name: "sentinel", color: "sentinel" },
     ],
+    variant: "scout",
   },
   {
-    roman: "III",
+    index: "03",
+    slug: "synthesize",
     title: "Synthesize",
-    body: "Findings merge into a single structured briefing with cited sources, a confidence score, and explicit gap notes.",
-    agents: [{ greek: "ε", name: "Synthesizer" }],
+    body: "Findings merge into a single structured briefing with cited sources, freshness timestamps, and explicit gap notes — no confidence theater, just data you can verify.",
+    agents: [{ greek: "ε", name: "synthesizer", color: "synth" }],
+    variant: "default",
   },
 ];
 
 export function HowItWorks() {
   const [open, setOpen] = useState(false);
-  return (
-    <section id="method" className="relative hairline-bottom">
-      <div className="max-w-[1280px] mx-auto px-8 py-24 lg:py-32">
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-20">
-          <div className="max-w-2xl">
-            <div className="eyebrow mb-5">Method · §01</div>
-            <h2 className="font-display text-[44px] sm:text-[60px] lg:text-[72px] leading-[1.02] tracking-[-0.02em]">
-              How the swarm{" "}
-              <span className="italic" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1, "opsz" 144' }}>
-                works
-              </span>.
-            </h2>
-          </div>
-          <p className="max-w-sm text-[15px] text-[var(--muted)]">
-            Three named phases, one orchestrator, six seconds.
-            Designed so every finding traces back to a URL you can audit.
-          </p>
-        </div>
+  const [phase, setPhase] = useState(0);
 
-        <div className="grid grid-cols-1 md:grid-cols-3 hairline-top">
-          {STEPS.map((step, i) => (
-            <article
-              key={step.roman}
-              className={`relative py-12 ${i < STEPS.length - 1 ? "md:border-r border-[var(--hair)]" : ""} ${i > 0 ? "border-t md:border-t-0 border-[var(--hair)]" : ""}`}
-            >
-              <div className="px-2 md:px-8">
-                <div className="flex items-start justify-between mb-8 gap-3">
-                  <span
-                    className="font-display text-[68px] leading-none italic text-[var(--gold)] opacity-70"
-                    style={{ fontVariationSettings: '"WONK" 1, "opsz" 144' }}
-                  >
-                    {step.roman}
+  // Cycle through 5 phases. Durations sum to ~7s, then phase 4 holds slightly
+  // longer so the "✓ ready" beat lands before restart.
+  useEffect(() => {
+    const durations = [1200, 2000, 1400, 1600, 1800]; // ms per phase
+    const id = window.setTimeout(
+      () => setPhase((p) => (p + 1) % FLOW_PHASES.length),
+      durations[phase]
+    );
+    return () => clearTimeout(id);
+  }, [phase]);
+
+  return (
+    <section id="method" className="relative">
+      <div className="max-w-[1080px] mx-auto px-6 lg:px-8 py-20 lg:py-24">
+        {/* Header */}
+        <div className="mb-8 flex items-center gap-3">
+          <span className="term-section-tag">// method</span>
+          <span className="font-mono text-[10px] text-[var(--muted)] uppercase tracking-[0.18em]">
+            three phases · one orchestrator
+          </span>
+        </div>
+        <h2 className="font-mono text-[26px] lg:text-[32px] tracking-[-0.005em] font-semibold text-[var(--foreground)] lowercase">
+          how the swarm works
+        </h2>
+        <p className="mt-3 font-mono text-[14px] text-[var(--muted)] max-w-[58ch] leading-[1.6]">
+          Three named phases, one orchestrator, six seconds. Designed so every finding traces back to a URL you can audit.
+        </p>
+
+        {/* Main block */}
+        <div className="mt-10 term-block active">
+          <div className="term-block-head">
+            <span>
+              <span className="dim">╭─</span> pipeline/live <span className="dim">────────────────</span>
+            </span>
+            <span className="live-pill">
+              [ <span className="text-[var(--accent)]">live</span> · cycling demo · phase {phase + 1}/5 ]
+            </span>
+          </div>
+
+          {/* Animated 5-agent flow strip */}
+          <div className="term-pipeline term-flow">
+            {PIPELINE_PROBES.map((p, i) => {
+              const state = getProbeState(p.key, phase);
+              return (
+                <span key={p.key} className="term-flow-cell">
+                  <span className={`term-pipeline-step ${state} ${p.key}`}>
+                    <span className="diamond">◆</span>
+                    <span className="font-mono text-[10px] text-[var(--muted)] mr-1">
+                      {p.greek}
+                    </span>
+                    {p.name}
                   </span>
-                  <div className="flex flex-wrap items-baseline justify-end gap-x-3 gap-y-2 text-right pt-3">
-                    {step.agents.map((agent, idx) => (
-                      <Fragment key={idx}>
-                        {idx > 0 && (
-                          <span className="text-[var(--gold-soft)] opacity-50">·</span>
-                        )}
-                        <span className="inline-flex items-baseline gap-2 whitespace-nowrap">
-                          <span className="font-display italic text-[17px] leading-none text-[var(--gold)]">
-                            {agent.greek}
-                          </span>
-                          <span className="font-mono text-[11px] tracking-[0.22em] uppercase text-[var(--gold-soft)]">
-                            {agent.name}
-                          </span>
-                        </span>
-                      </Fragment>
-                    ))}
-                  </div>
-                </div>
-                <h3 className="font-display text-[32px] leading-tight mb-4">{step.title}</h3>
-                <p className="text-[14px] leading-relaxed text-[var(--muted)] max-w-xs">
-                  {step.body}
-                </p>
+                  {i < PIPELINE_PROBES.length - 1 && (
+                    <span
+                      className={`term-flow-arrow ${
+                        state === "done" ? "active" : ""
+                      }`}
+                      aria-hidden
+                    >
+                      →
+                    </span>
+                  )}
+                </span>
+              );
+            })}
+          </div>
+
+          {/* Live caption line — height-stable to prevent layout shift */}
+          <div className="mt-3 font-mono text-[12px] text-[var(--muted)] text-center min-h-[20px]">
+            <span className="opacity-70">›</span>{" "}
+            <span
+              key={phase}
+              className="inline-block animate-[term-fade-in_280ms_ease-out_both]"
+            >
+              {FLOW_PHASES[phase].caption}
+            </span>
+          </div>
+
+          {/* 3 step sub-blocks */}
+          {STEPS.map((step) => (
+            <div
+              key={step.index}
+              className={`term-sub ${step.variant === "scout" ? "scout" : ""}`}
+            >
+              <div className="term-sub-head">
+                <span className="text-[var(--foreground)]">
+                  [{step.index}] {step.slug}
+                </span>
+                <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1 justify-end">
+                  {step.agents.map((agent, idx) => (
+                    <span key={idx} className="inline-flex items-baseline gap-1">
+                      {idx > 0 && <span className="text-[var(--hair)]">·</span>}
+                      <span className={`term-tag ${agent.color ?? ""}`}>
+                        {agent.greek} {agent.name}
+                      </span>
+                    </span>
+                  ))}
+                </span>
               </div>
-            </article>
+              <div className="font-mono text-[14px] leading-[1.7] text-[var(--foreground)] opacity-90 mt-2 max-w-[62ch]">
+                <span className="font-semibold text-[var(--foreground)]">{step.title}.</span>{" "}
+                <span className="text-[var(--muted)]">{step.body}</span>
+              </div>
+            </div>
           ))}
         </div>
 
-        <div className="mt-10 text-center">
-          <button
-            onClick={() => setOpen(true)}
-            className="font-mono text-[11px] tracking-[0.22em] uppercase text-[var(--gold-soft)] hover:text-[var(--gold)] editorial-link"
-          >
-            See the swarm animate ↗
+        {/* See-the-swarm CTA */}
+        <div className="mt-8 text-center">
+          <button onClick={() => setOpen(true)} className="term-chip">
+            see the swarm animate ↗
           </button>
         </div>
       </div>

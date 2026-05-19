@@ -20,6 +20,12 @@ const fraunces = Fraunces({
   display: "swap",
 });
 
+// JetBrains Mono loaded via raw <link> below, NOT next/font/google.
+// Reason: next/font/google subsets the woff2 to ["latin"] only, which
+// strips box-drawing chars (U+2500-U+257F) needed for the PYXIS wordmark.
+// Google's regular CSS endpoint serves multiple unicode-range woff2 files
+// including the box-drawing range, so chars like ╔╗╝╚═║ render correctly.
+
 const SITE_TITLE = "Pyxis — Web3 Intelligence Swarm with Live API Citations";
 const SITE_DESCRIPTION =
   "Five-agent research pipeline for any Web3 topic. Every number sampled from a live API, cited inline with a freshness timestamp. Free during beta.";
@@ -70,6 +76,14 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased dark`}
     >
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap"
+        />
+      </head>
       <body
         className="min-h-screen bg-[var(--background)]"
         suppressHydrationWarning

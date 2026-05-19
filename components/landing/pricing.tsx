@@ -2,75 +2,92 @@ import Link from "next/link";
 
 export function Pricing() {
   return (
-    <section id="pricing" className="relative hairline-bottom overflow-hidden">
-      {/* Single radial glow far up-left */}
-      <div
-        className="absolute -top-32 -left-32 w-[600px] h-[600px] celestial-glow rounded-full opacity-60"
-        aria-hidden
-      />
+    <section id="pricing" className="relative">
+      <div className="max-w-[1080px] mx-auto px-6 lg:px-8 py-20 lg:py-24">
+        {/* Header */}
+        <div className="mb-8 flex items-center gap-3">
+          <span className="term-section-tag">// pricing</span>
+          <span className="font-mono text-[10px] text-[var(--muted)] uppercase tracking-[0.18em]">
+            cover price · 03
+          </span>
+        </div>
+        <h2 className="font-mono text-[26px] lg:text-[32px] tracking-[-0.005em] font-semibold text-[var(--foreground)] lowercase">
+          pricing
+        </h2>
 
-      <div className="relative max-w-[1280px] mx-auto px-8 py-24 lg:py-40">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-16 items-end">
-          {/* LEFT — huge editorial price (strikethrough during beta) */}
-          <div>
-            <div className="eyebrow mb-8">Cover price · §03</div>
-            <div className="relative flex items-start gap-2">
-              <span
-                className="font-display text-[140px] sm:text-[200px] lg:text-[260px] leading-[0.82] tracking-[-0.045em] text-[var(--foreground)]/40 tabular line-through decoration-[var(--gold)] decoration-[6px]"
-                style={{ fontVariationSettings: '"opsz" 144' }}
-              >
-                0.10
-              </span>
-              <span className="font-display text-[42px] sm:text-[60px] lg:text-[80px] leading-none text-[var(--gold)]/50 mt-2 line-through decoration-[var(--gold)] decoration-[4px]">
-                $
-              </span>
-            </div>
-            <div className="mt-4 font-display text-[64px] sm:text-[88px] lg:text-[120px] leading-[0.88] tracking-[-0.04em] text-[var(--gold)] italic" style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "WONK" 1' }}>
-              Free
-            </div>
-            <div className="mt-4 font-display italic text-[22px] lg:text-[28px] text-[var(--muted)]" style={{ fontVariationSettings: '"opsz" 144' }}>
-              During beta. Paid mode resumes later.
-            </div>
-            <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--gold-soft)]">
-              Beta access &middot; usage-based pricing returns at GA
-            </div>
+        {/* Main pricing block */}
+        <div className="mt-8 term-block active">
+          {/* Block-head */}
+          <div className="term-block-head">
+            <span>
+              <span className="dim">╭─</span> <b>free beta</b>{" "}
+              <span className="dim">─────────────</span>
+            </span>
+            <span className="live-pill">[ active · paid resumes at GA ]</span>
           </div>
 
-          {/* RIGHT — metadata + CTA */}
-          <div className="max-w-xs lg:max-w-sm space-y-8">
-            <div className="grid grid-cols-2 gap-x-6 gap-y-5 text-[12px] font-mono">
-              <div>
-                <div className="eyebrow mb-1">Network</div>
-                <div className="text-[var(--foreground)]">Base</div>
-              </div>
-              <div>
-                <div className="eyebrow mb-1">Protocol</div>
-                <div className="text-[var(--foreground)]">x402</div>
-              </div>
-              <div>
-                <div className="eyebrow mb-1">Settles in</div>
-                <div className="text-[var(--foreground)] tabular">~6 sec</div>
-              </div>
-              <div>
-                <div className="eyebrow mb-1">Subscription</div>
-                <div className="text-[var(--foreground)]">None</div>
-              </div>
-            </div>
+          {/* Price treatment */}
+          <div className="mt-4 flex flex-wrap items-baseline gap-x-5 gap-y-2">
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">
+              [s]
+            </span>
+            <span
+              className="font-mono text-[34px] lg:text-[42px] text-[var(--muted)] line-through tabular-nums"
+              style={{
+                textDecorationColor: "var(--accent)",
+                textDecorationThickness: "2px",
+              }}
+            >
+              $0.10
+            </span>
+            <span className="font-mono text-[18px] text-[var(--muted)]">→</span>
+            <span className="font-mono text-[64px] lg:text-[88px] font-semibold text-[var(--accent)] leading-none tracking-tighter">
+              free
+            </span>
+          </div>
+          <p className="mt-4 font-mono text-[14px] text-[var(--muted)]">
+            during beta. paid mode resumes at GA.
+          </p>
 
-            <div className="pt-6 hairline-top">
-              <Link
-                href="/research"
-                className="group inline-flex items-baseline gap-3 px-7 py-4 bg-[var(--gold)] text-[var(--background)] font-mono uppercase text-[12px] tracking-[0.22em] hover:bg-[var(--foreground)] transition-colors duration-300"
-              >
-                Connect wallet
-                <span className="font-display text-[18px] leading-none translate-y-[2px] group-hover:translate-x-1 transition-transform">
-                  →
-                </span>
-              </Link>
-              <p className="mt-4 text-[11px] text-[var(--muted)] font-mono">
-                No payment required during beta. Bring a wallet to access the workspace; paid mode (x402 on Base) returns at GA.
-              </p>
+          {/* Metadata sub-block */}
+          <div className="term-sub mt-6">
+            <div className="term-sub-head">
+              <span className="text-[var(--foreground)]">[ specs ]</span>
+              <span className="text-[var(--muted)]">x402 · base · usdc</span>
             </div>
+            <ul className="mt-2 space-y-1.5 font-mono text-[13px]">
+              <li className="flex items-baseline gap-3">
+                <span className="text-[var(--accent)]">▸</span>
+                <span className="text-[var(--muted)] w-[120px] shrink-0">network</span>
+                <span className="text-[var(--foreground)]">base</span>
+              </li>
+              <li className="flex items-baseline gap-3">
+                <span className="text-[var(--accent)]">▸</span>
+                <span className="text-[var(--muted)] w-[120px] shrink-0">protocol</span>
+                <span className="text-[var(--foreground)]">x402</span>
+              </li>
+              <li className="flex items-baseline gap-3">
+                <span className="text-[var(--accent)]">▸</span>
+                <span className="text-[var(--muted)] w-[120px] shrink-0">settlement</span>
+                <span className="text-[var(--foreground)] tabular-nums">~6 seconds</span>
+              </li>
+              <li className="flex items-baseline gap-3">
+                <span className="text-[var(--accent)]">▸</span>
+                <span className="text-[var(--muted)] w-[120px] shrink-0">subscription</span>
+                <span className="text-[var(--foreground)]">none</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* CTA row */}
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <Link href="/research" className="term-cta">
+              connect wallet
+              <span className="text-[16px] leading-none translate-y-[-1px]">›</span>
+            </Link>
+            <p className="font-mono text-[11px] text-[var(--muted)] max-w-md leading-[1.6]">
+              no payment required during beta. bring a wallet to access the workspace; paid mode (x402 on Base) returns at GA.
+            </p>
           </div>
         </div>
       </div>

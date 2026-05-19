@@ -340,3 +340,382 @@ body {
 
 @keyframes skeleton-pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.15; } }
 .skeleton { background: var(--hair); border-radius: 8px; animation: skeleton-pulse 1.5s ease-in-out infinite; }
+
+/* ═══════════════════════════════════════════════════════════════
+   TERMINAL v5 UTILITIES — block-prompt scrollback aesthetic
+   Hybrid of v2 (TUI depth) + v3 (Warp-style polish). Ported from
+   /tmp/pyxis-previews/v5-hybrid.html + v5-landing.html.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── PYXIS ANSI block-shadow wordmark — port byte-for-byte from
+   /tmp/pyxis-previews/v5-landing.html .pyxis-mark recipe.
+   Font-family pins to 'JetBrains Mono' loaded via raw <link> in
+   layout.tsx (NOT next/font/google — that subsets to Latin only and
+   strips box-drawing chars U+2500-U+257F). */
+.term-pyxis-mark {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+  margin: 8px auto 4px;
+  text-align: center;
+  background: linear-gradient(180deg, var(--scout) 0%, var(--accent) 55%, var(--accent-dark) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  white-space: pre;
+  user-select: none;
+  filter: drop-shadow(0 0 22px var(--accent-glow))
+          drop-shadow(0 0 6px rgba(34, 211, 238, 0.30));
+  letter-spacing: 0;
+  animation: pyxis-glow 4.2s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 720px) {
+  .term-pyxis-mark { font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .term-pyxis-mark { animation: none; }
+}
+@keyframes pyxis-glow {
+  0%, 100% { filter: drop-shadow(0 0 22px var(--accent-glow))
+                     drop-shadow(0 0 6px rgba(34, 211, 238, 0.30)); }
+  50%      { filter: drop-shadow(0 0 30px var(--accent-glow))
+                     drop-shadow(0 0 10px rgba(34, 211, 238, 0.45)); }
+}
+.term-pyxis-mark-wrap {
+  position: relative;
+  padding: 24px 16px 6px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.term-pyxis-mark-wrap::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(91, 143, 255, 0.04) 0px,
+    rgba(91, 143, 255, 0.04) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+@media (max-width: 720px) {
+  .term-pyxis-mark { font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .term-pyxis-mark { animation: none; }
+}
+
+/* ── P› gradient prompt prefix ───────────────────────────────── */
+.term-p-prefix {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-weight: 700;
+  background: linear-gradient(180deg, var(--scout), var(--accent-dark));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  display: inline-block;
+  margin-right: 0.5em;
+  letter-spacing: -0.01em;
+}
+
+/* ── Breathing hairline grid background (replaces star-field) ─ */
+.term-grid-bg {
+  background-color: var(--background);
+  background-image:
+    linear-gradient(rgba(91, 143, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91, 143, 255, 0.045) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ── Run block (core terminal scrollback element) ────────────── */
+.term-block {
+  position: relative;
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0));
+  padding: 14px 16px 12px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+  animation: term-block-in 220ms ease-out both;
+}
+.term-block.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 32px var(--accent-glow);
+}
+.term-block + .term-block { margin-top: 14px; }
+@keyframes term-block-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .term-block { animation: none; }
+}
+
+/* ── Sub-block (one per probe, nested inside run block) ──────── */
+.term-sub {
+  position: relative;
+  border: 1px solid var(--hair);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.term-sub-head {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.term-sub.scout    { border-color: rgba(34, 211, 238, 0.30); }
+.term-sub.analyst  { border-color: rgba(167, 139, 250, 0.30); box-shadow: 0 0 16px rgba(167, 139, 250, 0.08); }
+.term-sub.sentinel { border-color: rgba(245, 158, 11, 0.30); }
+.term-sub.queued   { border-color: var(--hair); opacity: 0.55; }
+
+/* ── Probe color log prefix tag ──────────────────────────────── */
+.term-tag {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+.term-tag.scout    { color: var(--scout); }
+.term-tag.analyst  { color: var(--analyst); }
+.term-tag.sentinel { color: var(--sentinel); }
+.term-tag.cmd      { color: var(--muted); }
+.term-tag.synth    { color: var(--accent); }
+
+/* ── Braille spinner (per-probe color) ───────────────────────── */
+@keyframes braille-spin-content {
+  0%   { content: "⠋"; }
+  10%  { content: "⠙"; }
+  20%  { content: "⠹"; }
+  30%  { content: "⠸"; }
+  40%  { content: "⠼"; }
+  50%  { content: "⠴"; }
+  60%  { content: "⠦"; }
+  70%  { content: "⠧"; }
+  80%  { content: "⠇"; }
+  90%  { content: "⠏"; }
+  100% { content: "⠋"; }
+}
+.term-spinner::before {
+  content: "⠋";
+  display: inline-block;
+  animation: braille-spin-content 0.8s steps(10, end) infinite;
+}
+.term-spinner.scout::before    { color: var(--scout); }
+.term-spinner.analyst::before  { color: var(--analyst); }
+.term-spinner.sentinel::before { color: var(--sentinel); }
+
+/* ── Terminal cursor blink (530ms cadence) ───────────────────── */
+@keyframes term-blink {
+  0%, 50%      { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+.term-cursor {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  background: var(--accent);
+  vertical-align: text-bottom;
+  margin-left: 2px;
+  animation: term-blink 530ms steps(2, start) infinite;
+}
+
+/* ── Pipeline strip (5 diamonds) ─────────────────────────────── */
+.term-pipeline {
+  display: flex; gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 6px 0 10px;
+  border-bottom: 1px solid var(--hair);
+  margin-bottom: 12px;
+  letter-spacing: 0.02em;
+}
+.term-pipeline-step { display: inline-flex; gap: 6px; align-items: center; }
+.term-pipeline-step.done    { color: var(--foreground); }
+.term-pipeline-step.done    .diamond { color: var(--scout); }
+.term-pipeline-step.running .diamond { color: var(--accent); }
+.term-pipeline-step.queued  .diamond { color: var(--hair); }
+
+/* ── Section chip (// name) ──────────────────────────────────── */
+.term-section-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--hair);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+/* ── Statusline (sticky bottom in workspace) ─────────────────── */
+.term-statusline {
+  position: sticky;
+  bottom: 0;
+  background: rgba(7, 9, 13, 0.92);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--hair);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 6px 16px;
+  display: flex; gap: 18px; align-items: center;
+  flex-wrap: wrap;
+  z-index: 40;
+}
+.term-statusline .crumb { color: var(--foreground); }
+.term-statusline .chip {
+  color: var(--accent);
+  border: 1px solid var(--hair);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* ── Sample-topic chip + primary CTA ─────────────────────────── */
+.term-chip {
+  display: inline-flex; align-items: center;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--muted);
+  border: 1px solid var(--hair);
+  padding: 5px 11px;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 160ms ease;
+  text-decoration: none;
+}
+.term-chip:hover {
+  color: var(--foreground);
+  border-color: var(--accent);
+  background: rgba(91, 143, 255, 0.04);
+}
+.term-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--background);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 9px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 200ms ease;
+  box-shadow: 0 0 24px var(--accent-glow);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.term-cta:hover {
+  background: var(--scout);
+  border-color: var(--scout);
+  box-shadow: 0 0 36px var(--accent-glow);
+}
+.term-cta.outline {
+  background: transparent;
+  color: var(--accent);
+  box-shadow: none;
+}
+.term-cta.outline:hover {
+  background: rgba(91, 143, 255, 0.06);
+  color: var(--scout);
+  border-color: var(--scout);
+}
+
+/* ── ASCII block-head row (╭─ session ───[live]─╮ style) ─────── */
+.term-block-head {
+  display: flex; justify-content: space-between;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.term-block-head .dim { color: var(--hair); }
+.term-block-head b { color: var(--foreground); font-weight: 600; }
+.term-block-head .live-pill { color: var(--accent); }
+
+
+/* ── Method section animated flow ──────────────────────────────
+   Per-probe color states + pulse glow on running diamonds +
+   arrows that brighten as data flows left→right through the
+   pipeline. Used by /components/landing/how-it-works.tsx. */
+
+.term-flow {
+  flex-wrap: wrap;
+  gap: 0;
+  align-items: center;
+}
+.term-flow-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.term-flow-arrow {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 13px;
+  color: var(--hair);
+  padding: 0 4px;
+  transition: color 320ms ease, text-shadow 320ms ease;
+}
+.term-flow-arrow.active {
+  color: var(--accent);
+  text-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* Pipeline step state colors — probe-specific tinting */
+.term-pipeline-step.queued  .diamond { color: var(--hair); }
+.term-pipeline-step.done.cmd      .diamond { color: var(--accent); }
+.term-pipeline-step.done.scout    .diamond { color: var(--scout); }
+.term-pipeline-step.done.analyst  .diamond { color: var(--analyst); }
+.term-pipeline-step.done.sentinel .diamond { color: var(--sentinel); }
+.term-pipeline-step.done.synth    .diamond { color: var(--accent); }
+
+.term-pipeline-step.running.cmd      .diamond { color: var(--accent); }
+.term-pipeline-step.running.scout    .diamond { color: var(--scout); }
+.term-pipeline-step.running.analyst  .diamond { color: var(--analyst); }
+.term-pipeline-step.running.sentinel .diamond { color: var(--sentinel); }
+.term-pipeline-step.running.synth    .diamond { color: var(--accent); }
+
+.term-pipeline-step.running .diamond {
+  animation: pipeline-pulse 1.1s ease-in-out infinite;
+  text-shadow: 0 0 12px currentColor;
+}
+@keyframes pipeline-pulse {
+  0%, 100% { opacity: 1;   text-shadow: 0 0 10px currentColor; }
+  50%      { opacity: 0.65; text-shadow: 0 0 18px currentColor; }
+}
+
+/* Step label color follows state */
+.term-pipeline-step { transition: color 200ms ease; }
+.term-pipeline-step.queued  { color: var(--muted); opacity: 0.6; }
+.term-pipeline-step.running { color: var(--foreground); }
+.term-pipeline-step.done    { color: var(--foreground); opacity: 0.85; }
+
+/* Caption fade-in (keyed by phase to retrigger) */
+@keyframes term-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .term-pipeline-step.running .diamond { animation: none; }
+  .term-flow-arrow { transition: none; }
+}
