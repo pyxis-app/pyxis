@@ -90,4 +90,12 @@ See [AGENTS.md](./AGENTS.md) for the 5-agent pipeline architecture.
 
 ## License
 
-MIT.
+Copyright (C) 2026 Pyxis Authors
+
+Pyxis is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License, version 3, as published by the Free Software Foundation. See [LICENSE](./LICENSE) for the full text.
+
+This program is distributed **without warranty** — see the AGPL for details.
+
+The AGPL's network-use clause (Section 13) is load-bearing here: if you host a modified version of Pyxis as a service accessible to others over a network, you must make the modified source code available to those users.
+
+For commercial licensing inquiries (e.g. proprietary derivative work, alternate terms), contact [admin@usepyxis.com](mailto:admin@usepyxis.com).
