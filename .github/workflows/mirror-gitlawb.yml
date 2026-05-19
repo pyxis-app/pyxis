@@ -31,9 +31,15 @@ jobs:
         run: |
           mkdir -p "$HOME/.gitlawb"
           chmod 700 "$HOME/.gitlawb"
-          printf '%s' "$GITLAWB_IDENTITY_PEM" | base64 -d > "$HOME/.gitlawb/identity.pem"
-          printf '%s' "$GITLAWB_UCAN_JSON" | base64 -d > "$HOME/.gitlawb/ucan.json"
+          # Strip whitespace (CR/LF/spaces) before decode — defense against
+          # paste artifacts in GitHub Secrets UI.
+          printf '%s' "$GITLAWB_IDENTITY_PEM" | tr -d '[:space:]' | base64 -d > "$HOME/.gitlawb/identity.pem"
+          printf '%s' "$GITLAWB_UCAN_JSON" | tr -d '[:space:]' | base64 -d > "$HOME/.gitlawb/ucan.json"
           chmod 600 "$HOME/.gitlawb/identity.pem"
+          # Sanity-check decoded sizes — fail fast if either is empty.
+          [ -s "$HOME/.gitlawb/identity.pem" ] || { echo "identity.pem decoded to empty"; exit 1; }
+          [ -s "$HOME/.gitlawb/ucan.json" ]    || { echo "ucan.json decoded to empty";    exit 1; }
+          wc -c "$HOME/.gitlawb/identity.pem" "$HOME/.gitlawb/ucan.json"
 
       - name: Verify identity
         env:
