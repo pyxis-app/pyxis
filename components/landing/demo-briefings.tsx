@@ -56,14 +56,14 @@ export function DemoBriefings() {
           <div>
             <div className="eyebrow mb-5">Specimen · §02</div>
             <h2 className="font-display text-[40px] sm:text-[52px] lg:text-[60px] leading-[1.04] tracking-[-0.02em]">
-              Two briefings the swarm{" "}
+              Two sample briefings,{" "}
               <span className="italic" style={{ fontVariationSettings: '"SOFT" 100, "WONK" 1, "opsz" 144' }}>
-                already wrote
+                straight from the swarm
               </span>.
             </h2>
           </div>
           <p className="max-w-sm text-[14px] text-[var(--muted)]">
-            Pulled straight from the live pipeline. The briefing you run will arrive in the same shape — same headings, same citations, same confidence math.
+            Pulled from the live pipeline. The briefing you run will arrive in the same shape — same headings, same citations, same confidence math.
           </p>
         </div>
 
