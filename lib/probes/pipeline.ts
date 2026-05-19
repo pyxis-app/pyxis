@@ -52,6 +52,7 @@ export async function runPipeline(topic: string): Promise<BriefingResult> {
     chainHint: cmd.chainHint,
     temporalMode: cmd.temporalMode,
     hints: cmd.hints,
+    subTopics: cmd.subTopics,
   });
 
   // Run probes sequentially (predictable load on OpenRouter)
@@ -66,6 +67,7 @@ export async function runPipeline(topic: string): Promise<BriefingResult> {
     topicType: cmd.topicType,
     chainHint: cmd.chainHint,
     hints: cmd.hints,
+    subTopics: cmd.subTopics,
   });
   const sentinel = await runSentinel({
     query: cmd.sentinel,

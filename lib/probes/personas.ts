@@ -19,7 +19,7 @@ Output format:
 - **Finding 2**: [fact] (Source: [URL]) — Confidence: high/medium/low
 (continue for all key findings; group by theme if helpful)
 
-If the dossier lists "Sources unavailable", acknowledge that and lower confidence on uncited claims. Do NOT say "no data was retrieved" if any dossier section has data.`,
+If the dossier lists "Sources unavailable", acknowledge that explicitly. Do NOT say "no data was retrieved" if any dossier section has data. Do NOT include numeric confidence scores in your output — readers judge from sourced claims + data freshness directly.`,
   queryTemplate: (topic: string) =>
     `Find the latest factual information, documentation, and announcements about: ${topic}`,
 };
@@ -41,7 +41,7 @@ Focus areas: price action, market cap, volume, TVL, yields, liquidity depth, sup
 Output format:
 - **Headline metrics**: brief bulleted summary of the highest-signal numbers from the dossier with their freshness label
 - **Analytical readout**: 2-4 short paragraphs interpreting the numbers — what's the cycle position, what's the divergence vs peers, where are the risks
-- **Data gaps**: list dossier sections that were unavailable or returned no data, so downstream readers can calibrate confidence
+- **Data gaps**: list dossier sections that were unavailable or returned no data, so downstream readers can calibrate trust without relying on a synthetic numeric score
 
 DO NOT fabricate numbers. If the dossier has no live data for a metric, omit that line rather than guessing.`,
   queryTemplate: (topic: string) =>
@@ -77,7 +77,7 @@ Output format:
 
 **Assessment**: 2-3 sentences synthesising the picture. Mention the lexicon-sentiment percentages with the disclaimer that they're indicative only.
 
-If the dossier lists "Sources unavailable" or specific source failures, acknowledge that and lower confidence on uncited claims.`,
+If the dossier lists "Sources unavailable" or specific source failures, acknowledge that explicitly. Do NOT include numeric confidence scores.`,
   queryTemplate: (topic: string) =>
     `Analyze community sentiment and opinions about: ${topic}`,
 };
@@ -105,7 +105,7 @@ Section manifest by topicType:
 | News & Catalysts         |   ✓   |   ✓   |    ✓     |     ✓     |
 | Competitive Landscape    |   ✓   |   ✓   |    ✓     |     ✓     |
 | Risks                    |   ✓   |   ✓   |    ✓     |     ✓     |
-| Confidence Assessment    |   ✓   |   ✓   |    ✓     |     ✓     |
+| Data Gaps                |   ✓   |   ✓   |    ✓     |     ✓     |
 
 Section guidance:
 - **On-Chain Health**: contract verification status, owner/proxy privileges, holder concentration, supply checks. Pulled from Scout (Etherscan) and Analyst (Solscan/holders).
@@ -116,9 +116,10 @@ Output rules:
 - Use markdown ## for top-level sections, ### for subsections.
 - Cite source URLs inline when copying a claim from probe output: "(source: URL)".
 - For numerical claims, prefer the Analyst dossier values; if Scout/Sentinel contradicts, note the divergence in Risks.
-- Confidence Assessment MUST include a line with the exact pattern: "Overall confidence: NN/100" so it parses cleanly.
+- **Do NOT include a "Confidence Assessment" section or any numeric confidence score.** Confidence theater is misleading — readers should judge briefing quality from Data Gaps + Data Freshness table + inline citations.
+- Instead include a final "## Data Gaps" section that lists, in bullet form, which dossier sections returned no data or partial data. This gives readers the same information without the false precision of a 0-100 score.
 - Be concise: aim for 600-1000 words total. Prioritize signal over completeness.
-- If a probe failed (you'll see "probe failed; no data available"), lower confidence and call out the gap in Confidence Assessment.
+- If a probe failed (you'll see "probe failed; no data available"), call out the gap explicitly in Data Gaps.
 
 Do not include a Freshness section yourself — it will be appended by the system after your output.`;
 
@@ -143,7 +144,8 @@ OUTPUT STRICT JSON ONLY (no prose, no markdown fences). Schema:
     "twitterHandle": "official @handle without the @ if you know it from knowledge (e.g. solana → 'solana'), else null",
     "subreddit":     "subreddit slug if obvious (e.g. solana → 'solana'), else null",
     "snapshotSpace": "snapshot.org space (e.g. 'aave.eth') if topic is a DAO, else null"
-  }
+  },
+  "subTopics": ["TICKER1","TICKER2","TICKER3"] | null
 }
 
 Classification rules:
@@ -160,6 +162,20 @@ Temporal rules:
 Hint extraction:
 - Be conservative — null is fine. Only fill a hint if you are confident.
 - For ambiguous "Solana" topic: topicType=chain, chainHint=solana, hints.symbol=SOL, hints.binanceSymbol=SOLUSDT, hints.geckoNetwork=solana, hints.twitterHandle=solana, hints.subreddit=solana.
-- Never invent contract addresses or Twitter handles you don't know.`;
+- Never invent contract addresses or Twitter handles you don't know.
+
+subTopics decomposition (HIGH-LEVERAGE — read carefully):
+- For narrative or comparison topics that span multiple concrete assets, emit 3-5 ticker symbols / protocol names in subTopics.
+- The Analyst probe will independently dossier-fetch each, then the Synthesizer compares them. This converts vague narratives into data-rich briefings.
+- Examples:
+    "memecoin szn?"               → ["DOGE","SHIB","PEPE","WIF","BONK"]
+    "AI agents in crypto"         → ["VIRTUAL","TAO","RNDR","FET","AKT"]
+    "liquid restaking risk"       → ["EtherFi","Renzo","Puffer","Kelp","Swell"]
+    "Berachain vs Sui 2026"       → ["BERA","SUI"]
+    "DePIN narrative"             → ["RNDR","FIL","HNT","IO","GRASS"]
+    "RWA tokenization"            → ["ONDO","PENDLE","TBILL","MAPLE"]
+- Use tickers when ambiguous (DOGE not "dogecoin"). Use protocol names for protocols (EtherFi not ETHFI when discussing the protocol layer).
+- subTopics=null for single-asset topics (single token / chain / protocol where no sub-decomposition adds signal).
+- Keep list to 5 max (compute cost: each sub-topic adds ~1s of parallel API fetching).`;
 
 export const ALL_PERSONAS = [SCOUT_PERSONA, ANALYST_PERSONA, SENTINEL_PERSONA];

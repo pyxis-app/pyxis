@@ -17,22 +17,72 @@ export interface AnalystInput {
   topicType: TopicType;
   chainHint?: string;
   hints: CommanderHints;
+  /** When set (narrative/comparison topics), fan out the dossier composition
+   * across these concrete assets — each is dossier'd as topicType=token, then
+   * concatenated under the parent dossier. Single LLM call digests the lot. */
+  subTopics?: string[];
 }
 
 export async function runAnalyst(input: AnalystInput): Promise<ProbeFinding> {
   try {
-    const dossier = await buildAnalystDossier(
+    // 1. Main dossier — the umbrella topic (may be a narrative; analyst-dossier
+    // narrative path still pulls sector-level data like stablecoins/trending)
+    const mainDossier = await buildAnalystDossier(
       input.query,
       input.topicType,
       input.chainHint,
       input.hints,
     );
 
+    let combinedMarkdown = mainDossier.markdown;
+    let combinedFreshness = [...mainDossier.freshness];
+    let combinedSources = [...mainDossier.endpointSources];
+
+    // 2. Sub-topic fan-out (parallel) — each ticker/name gets a token-path
+    // dossier with symbol hint set, so it routes to coin-specific endpoints.
+    if (input.subTopics && input.subTopics.length >= 2) {
+      const subDossiers = await Promise.all(
+        input.subTopics.map((st) => {
+          // Normalize symbol: strip leading $, uppercase. Some sub-topics are
+          // protocol names (EtherFi), not tickers — for those we let the
+          // analyst-dossier's searchCoin() fallback resolve the right CG id.
+          const looksLikeTicker = /^\$?[A-Za-z0-9]{2,8}$/.test(st);
+          return buildAnalystDossier(
+            st,
+            looksLikeTicker ? "token" : "protocol",
+            input.chainHint,
+            {
+              symbol: st.toUpperCase().replace(/^\$/, ""),
+            },
+          );
+        }),
+      );
+
+      const subBlocks = subDossiers
+        .map((d, i) => `\n\n### Sub-asset · ${input.subTopics![i]}\n${d.markdown}`)
+        .join("");
+      combinedMarkdown = `${mainDossier.markdown}${subBlocks}`;
+      combinedFreshness = [
+        ...combinedFreshness,
+        ...subDossiers.flatMap((d) => d.freshness),
+      ];
+      combinedSources = [
+        ...combinedSources,
+        ...subDossiers.flatMap((d) => d.endpointSources),
+      ];
+    }
+
+    // 3. Single LLM digest of (main + all sub) dossier — keeps cost manageable
+    const subTopicNote =
+      input.subTopics && input.subTopics.length >= 2
+        ? `\nNOTE: This dossier contains per-asset sub-sections (### Sub-asset · X). When you write findings, give a brief per-asset readout for each, then a cross-asset summary highlighting common patterns + divergences.\n`
+        : "";
+
     const userMsg = [
       `Topic / query: ${input.query}`,
       `Classified as: ${input.topicType}${input.chainHint ? ` (chain: ${input.chainHint})` : ""}`,
-      "",
-      dossier.markdown,
+      subTopicNote,
+      combinedMarkdown,
     ].join("\n");
 
     const findings = await withRetry(
@@ -48,10 +98,7 @@ export async function runAnalyst(input: AnalystInput): Promise<ProbeFinding> {
     );
 
     const sources = Array.from(
-      new Set([
-        ...extractUrls(findings),
-        ...dossier.endpointSources,
-      ]),
+      new Set([...extractUrls(findings), ...combinedSources]),
     );
 
     return {
@@ -59,7 +106,7 @@ export async function runAnalyst(input: AnalystInput): Promise<ProbeFinding> {
       query: input.query,
       findings,
       sources,
-      freshness: dossier.freshness,
+      freshness: combinedFreshness,
       failed: false,
     };
   } catch {

@@ -42,6 +42,16 @@ function coerceNum(v: unknown): number | undefined {
   return typeof v === "number" && Number.isFinite(v) ? v : undefined;
 }
 
+function coerceSubTopics(v: unknown): string[] | undefined {
+  if (!Array.isArray(v)) return undefined;
+  const list = v
+    .filter((x): x is string => typeof x === "string" && x.length > 0 && x.length < 30)
+    .map((x) => x.trim())
+    .slice(0, 5);
+  // Require at least 2 sub-topics to make decomposition worthwhile
+  return list.length >= 2 ? list : undefined;
+}
+
 function coerceHints(raw: unknown): CommanderHints {
   if (!raw || typeof raw !== "object") return {};
   const r = raw as Record<string, unknown>;
@@ -121,5 +131,6 @@ export async function runCommander(topic: string): Promise<CommanderOutput> {
     temporalMode: coerceTemporal(parsed.temporalMode),
     lookbackDays: coerceNum(parsed.lookbackDays),
     hints: coerceHints(parsed.hints),
+    subTopics: coerceSubTopics(parsed.subTopics),
   };
 }

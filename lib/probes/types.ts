@@ -44,6 +44,10 @@ export interface CommanderOutput {
   temporalMode: TemporalMode;
   lookbackDays?: number;
   hints: CommanderHints;
+  /** For narrative or comparison topics — 3-5 concrete asset names whose
+   * individual dossiers the Analyst should pull alongside the parent topic.
+   * Enables data-rich narratives (e.g. "memecoin szn?" → ["DOGE","PEPE","WIF"]). */
+  subTopics?: string[];
 }
 
 export interface BriefingResult {
