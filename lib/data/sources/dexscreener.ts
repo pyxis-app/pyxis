@@ -73,25 +73,3 @@ export async function searchPairs(
   return { data: pairs, meta: res.meta };
 }
 
-export async function getTokenPairs(
-  chain: string,
-  address: string,
-  limit = 3,
-): Promise<WithFreshness<PairSummary[]> | null> {
-  const res = await fetchJson<{ pairs?: RawPair[] }>(
-    `${BASE}/tokens/${address}`,
-    {
-      source: SOURCE,
-      cacheKey: cacheKey([SOURCE, "token", chain, address.toLowerCase(), limit]),
-      ttlMs: PAIR_TTL,
-      timeoutMs: TIMEOUT,
-    },
-  );
-  if (!res) return null;
-  const pairs = (res.data.pairs ?? [])
-    .filter((p) => (p.chainId ?? "").toLowerCase() === chain.toLowerCase())
-    .sort((a, b) => (b.liquidity?.usd ?? 0) - (a.liquidity?.usd ?? 0))
-    .slice(0, limit)
-    .map(normalize);
-  return { data: pairs, meta: res.meta };
-}

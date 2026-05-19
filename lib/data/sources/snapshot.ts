@@ -94,10 +94,3 @@ export async function getActiveProposals(
 ): Promise<WithFreshness<SnapshotProposal[]> | null> {
   return fetchProposals(space, "active", first);
 }
-
-export async function getRecentProposals(
-  space: string,
-  first = 5,
-): Promise<WithFreshness<SnapshotProposal[]> | null> {
-  return fetchProposals(space, undefined, first);
-}

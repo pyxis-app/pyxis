@@ -118,35 +118,3 @@ export async function getSubredditNewPosts(
   return { data: posts, meta: res.meta };
 }
 
-export async function searchSubreddit(
-  subreddit: string,
-  query: string,
-  limit = 10,
-): Promise<WithFreshness<RedditPost[]> | null> {
-  const sub = subreddit.replace(/^r\//, "");
-  const res = await fetchJson<RawListing>(
-    `${BASE}/r/${encodeURIComponent(sub)}/search.json?q=${encodeURIComponent(query)}&restrict_sr=on&sort=new&limit=${limit}`,
-    {
-      source: SOURCE,
-      cacheKey: cacheKey([SOURCE, "search", sub.toLowerCase(), query.toLowerCase(), limit]),
-      ttlMs: POSTS_TTL,
-      timeoutMs: TIMEOUT,
-      headers: HEADERS,
-    },
-  );
-  if (!res) return null;
-  const posts = (res.data.data?.children ?? [])
-    .map((c) => c.data)
-    .filter((d): d is NonNullable<typeof d> => Boolean(d?.title))
-    .map((d) => ({
-      title: d.title ?? "",
-      author: d.author ?? "",
-      score: d.score ?? 0,
-      numComments: d.num_comments ?? 0,
-      url: d.url ?? "",
-      permalink: d.permalink ? `https://reddit.com${d.permalink}` : "",
-      selftext: (d.selftext ?? "").slice(0, 280),
-      createdUtc: d.created_utc ?? 0,
-    }));
-  return { data: posts, meta: res.meta };
-}

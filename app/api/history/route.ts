@@ -27,6 +27,8 @@ export async function GET(req: Request) {
       confidence: r.briefing.confidence,
       sources: r.briefing.sources,
       partial: r.briefing.partial,
+      topicType: r.briefing.topicType ?? null,
+      freshness: r.briefing.freshness ?? [],
       createdAt: new Date(r.createdAt).toISOString(),
     })),
   });
