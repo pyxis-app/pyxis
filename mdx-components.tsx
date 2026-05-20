@@ -2,7 +2,7 @@ import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 import { Callout, AgentCard, AgentGrid, HonestGap } from "@/components/docs/mdx-ui";
 
-export function useMDXComponents(components: MDXComponents): MDXComponents {
+export function useMDXComponents(): MDXComponents {
   return {
     h1: (p) => (
       <h1
@@ -25,6 +25,12 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     ol: (p) => <ol className="mb-4 max-w-[64ch] list-decimal space-y-1.5 pl-5 text-[var(--foreground)]/80" {...p} />,
     li: (p) => <li className="leading-relaxed" {...p} />,
     strong: (p) => <strong className="font-semibold text-[var(--foreground)]" {...p} />,
+    pre: (p) => (
+      <pre
+        className="my-5 overflow-x-auto rounded-lg border border-[var(--hair)] bg-[var(--card)] p-4 text-[13px] [&>code]:bg-transparent [&>code]:p-0 [&>code]:text-[var(--foreground)]/90"
+        {...p}
+      />
+    ),
     code: (p) => (
       <code className="rounded bg-[var(--card)] px-1.5 py-0.5 font-mono text-[0.85em] text-[var(--scout)]" {...p} />
     ),
@@ -41,6 +47,5 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     AgentCard,
     AgentGrid,
     HonestGap,
-    ...components,
   };
 }
