@@ -45,6 +45,18 @@ function elapsedFromNow(iso: string): string {
 
 export function BriefingCard({ b, active }: { b: Briefing; active?: boolean }) {
   const [readMode, setReadMode] = useState(true);
+  const [copied, setCopied] = useState<"md" | "link" | null>(null);
+
+  function flashCopied(which: "md" | "link", text: string) {
+    if (typeof navigator === "undefined" || !navigator.clipboard) return;
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopied(which);
+        setTimeout(() => setCopied(null), 1800);
+      })
+      .catch(() => {});
+  }
 
   const fresh = freshnessSummary(b.freshness);
   const topicType = b.topicType ?? "topic";
@@ -130,9 +142,13 @@ export function BriefingCard({ b, active }: { b: Briefing; active?: boolean }) {
 
       {readMode ? (
         <>
-          <div className="font-mono text-[12px] text-[var(--muted)] mb-3">
+          <button
+            type="button"
+            onClick={() => setReadMode(false)}
+            className="font-mono text-[12px] text-[var(--muted)] hover:text-[var(--accent)] transition-colors mb-3 block text-left"
+          >
             ▸ show 5 agents (commander · scout · analyst · sentinel · synth)
-          </div>
+          </button>
           <article className="prose-term">
             <MarkdownRenderer content={b.briefing} />
           </article>
@@ -200,26 +216,22 @@ export function BriefingCard({ b, active }: { b: Briefing; active?: boolean }) {
       <div className="mt-6 pt-4 border-t border-[var(--hair)] flex flex-wrap gap-2">
         <button
           type="button"
-          onClick={() => {
-            if (typeof navigator !== "undefined" && navigator.clipboard) {
-              navigator.clipboard.writeText(b.briefing).catch(() => {});
-            }
-          }}
+          onClick={() => flashCopied("md", b.briefing)}
           className="term-chip"
         >
-          copy md
+          {copied === "md" ? "copied ✓" : "copy md"}
         </button>
         <button
           type="button"
-          onClick={() => {
-            if (typeof navigator !== "undefined" && navigator.clipboard) {
-              const url = `${typeof window !== "undefined" ? window.location.origin : ""}/history#${b.id}`;
-              navigator.clipboard.writeText(url).catch(() => {});
-            }
-          }}
+          onClick={() =>
+            flashCopied(
+              "link",
+              `${typeof window !== "undefined" ? window.location.origin : "https://usepyxis.com"}/b/${b.id}`,
+            )
+          }
           className="term-chip"
         >
-          share link
+          {copied === "link" ? "link copied ✓" : "share link"}
         </button>
         <button
           type="button"

@@ -87,6 +87,38 @@ export async function listByWallet(
   return rows.map(rowToSession);
 }
 
+/**
+ * Fetch a single session by id, no wallet filter. Used by the PUBLIC briefing
+ * view (`/b/[id]`) — ids are unguessable UUIDs and briefings are research
+ * output, not secrets, so this is intentionally not auth-gated.
+ */
+export async function getById(id: string): Promise<SessionRow | null> {
+  await ensureMigrations();
+  const sql = getSql();
+  const rows = (await sql<RawRow[]>`
+    SELECT * FROM research_sessions WHERE id = ${id} LIMIT 1
+  `) as unknown as RawRow[];
+  return rows.length > 0 ? rowToSession(rows[0]) : null;
+}
+
+/**
+ * Delete a session, scoped to its owner wallet so one wallet can't delete
+ * another's rows. Returns true if a row was actually removed.
+ */
+export async function deleteByIdForWallet(
+  id: string,
+  wallet: string,
+): Promise<boolean> {
+  await ensureMigrations();
+  const sql = getSql();
+  const rows = (await sql<Array<{ id: string }>>`
+    DELETE FROM research_sessions
+    WHERE id = ${id} AND wallet_address = ${wallet.toLowerCase()}
+    RETURNING id
+  `) as unknown as Array<{ id: string }>;
+  return rows.length > 0;
+}
+
 export async function findRecentDuplicate(
   wallet: string,
   topic: string,

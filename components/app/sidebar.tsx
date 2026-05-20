@@ -28,13 +28,24 @@ function relativeTime(iso: string): string {
 export function AppSidebar() {
   const { isConnected, address } = useAccount();
   const [history, setHistory] = useState<HistoryEntry[] | null>(null);
+  const [needsAuth, setNeedsAuth] = useState(false);
 
   useEffect(() => {
     if (!isConnected) return;
     fetch("/api/history")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j) => setHistory(j?.sessions?.slice(0, 12) ?? null))
-      .catch(() => setHistory(null));
+      .then(async (r) => {
+        // 401 = wallet connected but no SIWE session. Distinct from "loading"
+        // so the UI can prompt sign-in instead of spinning forever.
+        if (r.status === 401) {
+          setNeedsAuth(true);
+          return;
+        }
+        if (!r.ok) return;
+        const j = await r.json();
+        setNeedsAuth(false);
+        setHistory(j?.sessions?.slice(0, 12) ?? []);
+      })
+      .catch(() => {});
   }, [isConnected, address]);
 
   return (
@@ -78,6 +89,13 @@ export function AppSidebar() {
           <div className="px-5 font-mono text-[12px] text-[var(--muted)] leading-[1.6]">
             connect a wallet to begin tracking research.
           </div>
+        ) : needsAuth ? (
+          <Link
+            href="/history"
+            className="block px-5 font-mono text-[12px] text-[var(--accent)] hover:text-[var(--scout)] leading-[1.6] transition-colors"
+          >
+            sign in to view your research history ↗
+          </Link>
         ) : history === null ? (
           <div className="px-5 font-mono text-[12px] text-[var(--muted)]">loading…</div>
         ) : history.length === 0 ? (

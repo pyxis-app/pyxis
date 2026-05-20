@@ -41,6 +41,23 @@ export function HistoryGrid() {
       .then(setSessions);
   }, [isConnected, address]);
 
+  // When arriving via /history#<id> (sidebar links, self-shared anchors),
+  // auto-expand that briefing and scroll to it once sessions have loaded.
+  useEffect(() => {
+    if (!sessions || sessions.length === 0) return;
+    const hash =
+      typeof window !== "undefined"
+        ? decodeURIComponent(window.location.hash.slice(1))
+        : "";
+    if (!hash || !sessions.some((s) => s.id === hash)) return;
+    setExpanded((prev) => ({ ...prev, [hash]: true }));
+    requestAnimationFrame(() => {
+      document
+        .getElementById(hash)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [sessions]);
+
   async function authenticate() {
     if (!address) return;
     await signInWithEthereum({ config, address, chainId });
@@ -51,6 +68,18 @@ export function HistoryGrid() {
 
   function toggle(id: string) {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  }
+
+  async function del(id: string) {
+    if (
+      typeof window !== "undefined" &&
+      !window.confirm("Delete this briefing? This can't be undone.")
+    )
+      return;
+    const r = await fetch(`/api/history/${id}`, { method: "DELETE" });
+    if (r.ok) {
+      setSessions((prev) => (prev ? prev.filter((s) => s.id !== id) : prev));
+    }
   }
 
   return (
@@ -99,45 +128,66 @@ export function HistoryGrid() {
             return (
               <div key={s.id} id={s.id}>
                 {!isExpanded ? (
-                  <button
-                    type="button"
-                    onClick={() => toggle(s.id)}
-                    className="term-block w-full text-left"
-                    style={{ cursor: "pointer" }}
-                  >
-                    <div className="term-block-head">
-                      <span>
-                        <span className="dim">╭─</span> <b>{s.topic}</b>{" "}
-                        <span className="dim">·</span> {topicType}{" "}
-                        <span className="dim">·</span> {relativeTime(s.createdAt)}{" "}
-                        <span className="dim">──[</span>
-                        {s.sources} sources · 5 agents · ▾ expand
-                        <span className="dim">]─╮</span>
-                      </span>
+                  <div className="term-block w-full">
+                    <div className="flex items-start justify-between gap-3">
+                      <button
+                        type="button"
+                        onClick={() => toggle(s.id)}
+                        className="flex-1 min-w-0 text-left"
+                        style={{ cursor: "pointer" }}
+                      >
+                        <div className="term-block-head">
+                          <span>
+                            <span className="dim">╭─</span> <b>{s.topic}</b>{" "}
+                            <span className="dim">·</span> {topicType}{" "}
+                            <span className="dim">·</span> {relativeTime(s.createdAt)}{" "}
+                            <span className="dim">──[</span>
+                            {s.sources} sources · 5 agents · ▾ expand
+                            <span className="dim">]─╮</span>
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-2 font-mono text-[11px]">
+                          <span className="term-chip" style={{ cursor: "default" }}>
+                            {s.sources} sources
+                          </span>
+                          <span className="term-chip" style={{ cursor: "default" }}>
+                            {s.partial ? "partial" : "full"}
+                          </span>
+                          {fresh > 0 && (
+                            <span className="term-chip" style={{ cursor: "default" }}>
+                              {fresh} sources tracked
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => del(s.id)}
+                        className="term-chip shrink-0"
+                        title="delete briefing"
+                        style={{ color: "var(--danger)" }}
+                      >
+                        ✕
+                      </button>
                     </div>
-                    <div className="flex flex-wrap gap-2 font-mono text-[11px]">
-                      <span className="term-chip" style={{ cursor: "default" }}>
-                        {s.sources} sources
-                      </span>
-                      <span className="term-chip" style={{ cursor: "default" }}>
-                        {s.partial ? "partial" : "full"}
-                      </span>
-                      {fresh > 0 && (
-                        <span className="term-chip" style={{ cursor: "default" }}>
-                          {fresh} sources tracked
-                        </span>
-                      )}
-                    </div>
-                  </button>
+                  </div>
                 ) : (
                   <div>
-                    <div className="mb-2">
+                    <div className="mb-2 flex gap-2">
                       <button
                         type="button"
                         onClick={() => toggle(s.id)}
                         className="term-chip"
                       >
                         ▴ collapse
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => del(s.id)}
+                        className="term-chip"
+                        style={{ color: "var(--danger)" }}
+                      >
+                        ✕ delete
                       </button>
                     </div>
                     <BriefingCard b={s} />
