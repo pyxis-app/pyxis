@@ -63,16 +63,7 @@ Optional (enrich briefings, fail silently if unset): `CMC_API_KEY`, `ETHERSCAN_A
 
 ## Network configuration
 
-x402 paywall code defaults to **Base mainnet** at $0.10 USDC per research, but is currently bypassed by `NEXT_PUBLIC_X402_FREE_MODE=true` during beta. To exercise the paid flow against Base Sepolia for local testing without real USDC:
-
-```env
-NEXT_PUBLIC_X402_FREE_MODE=false
-X402_NETWORK=base-sepolia
-X402_USDC_ADDRESS=0x036CbD53842c5426634e7929541eC2318f3dCF7e
-NEXT_PUBLIC_CHAIN=base-sepolia
-```
-
-Mainnet remains the default in `lib/env.ts` and `.env.example`.
+The x402 paywall runs on **Base mainnet** ($0.10 USDC per research), currently bypassed by `NEXT_PUBLIC_X402_FREE_MODE=true` during beta. Base mainnet is the only supported network (`X402_NETWORK=base`). To run the paid flow locally, set `NEXT_PUBLIC_X402_FREE_MODE=false`.
 
 ## Repo layout
 

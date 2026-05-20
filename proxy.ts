@@ -20,7 +20,7 @@ function getPayment() {
       {
         "/api/research": {
           price: cfg.price,
-          network: cfg.network as "base" | "base-sepolia",
+          network: cfg.network as "base",
           config: {
             description: "Pyxis research session",
             mimeType: "application/json",
