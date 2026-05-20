@@ -16,6 +16,53 @@ import {
 // Reads cookies + DB → always dynamic, never cached/prerendered.
 export const dynamic = "force-dynamic";
 
+const PER_PAGE = 25;
+
+// Page numbers with ellipses: [1, …, 4, 5, 6, …, 20]. Collapses to a flat list
+// when there are few pages.
+function pageWindow(current: number, total: number): Array<number | "…"> {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const out: Array<number | "…"> = [1];
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+  if (start > 2) out.push("…");
+  for (let i = start; i <= end; i++) out.push(i);
+  if (end < total - 1) out.push("…");
+  out.push(total);
+  return out;
+}
+
+function PageLink({
+  page,
+  label,
+  current = false,
+  disabled = false,
+}: {
+  page: number;
+  label: string;
+  current?: boolean;
+  disabled?: boolean;
+}) {
+  if (disabled)
+    return (
+      <span className="px-2 py-1 text-[var(--muted)] opacity-40">{label}</span>
+    );
+  if (current)
+    return (
+      <span className="px-2 py-1 rounded border border-[var(--accent)]/50 text-[var(--accent)] tabular-nums">
+        {label}
+      </span>
+    );
+  return (
+    <Link
+      href={`/admin?page=${page}`}
+      className="px-2 py-1 rounded border border-[var(--hair)] text-[var(--muted)] hover:text-[var(--foreground)] hover:border-[var(--accent)]/40 transition-colors tabular-nums"
+    >
+      {label}
+    </Link>
+  );
+}
+
 function shortWallet(w: string): string {
   return w.length > 12 ? `${w.slice(0, 6)}…${w.slice(-4)}` : w;
 }
@@ -39,7 +86,11 @@ function StatCard({ label, value }: { label: string; value: number }) {
   );
 }
 
-export default async function AdminPage() {
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   // Gate: only the configured admin wallet, verified via the SIWE session.
   // notFound() (not 403) so the route's existence isn't revealed. Fail-closed:
   // unset ADMIN_WALLET → admin is "" → nobody matches.
@@ -48,11 +99,21 @@ export default async function AdminPage() {
   const wallet = jwt ? verifyJwt(jwt) : null;
   if (!admin || wallet !== admin) notFound();
 
+  const { page } = await searchParams;
+  const pageNum = Math.max(1, Number.parseInt(page ?? "1", 10) || 1);
+  const offset = (pageNum - 1) * PER_PAGE;
+
   const [stats, recent, top] = await withRetry(
-    () => Promise.all([getAdminStats(), listRecentAll(20), topWallets(10)]),
+    () =>
+      Promise.all([
+        getAdminStats(),
+        listRecentAll(PER_PAGE, offset),
+        topWallets(10),
+      ]),
     2,
     300,
   );
+  const totalPages = Math.max(1, Math.ceil(stats.total / PER_PAGE));
 
   return (
     <main className="relative term-grid-bg min-h-screen flex flex-col">
@@ -82,11 +143,13 @@ export default async function AdminPage() {
               <span className="dim">╭─</span> recent runs{" "}
               <span className="dim">──────────</span>
             </span>
-            <span className="live-pill">[ last {recent.length} ]</span>
+            <span className="live-pill">
+              [ page {pageNum}/{totalPages} · {stats.total} total ]
+            </span>
           </div>
           {recent.length === 0 ? (
             <p className="font-mono text-[13px] text-[var(--muted)]">
-              no runs yet.
+              {pageNum > 1 ? "no runs on this page." : "no runs yet."}
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -131,6 +194,31 @@ export default async function AdminPage() {
                 </tbody>
               </table>
             </div>
+          )}
+
+          {totalPages > 1 && (
+            <nav className="mt-5 flex flex-wrap items-center gap-1.5 font-mono text-[12px]">
+              <PageLink page={pageNum - 1} label="‹" disabled={pageNum <= 1} />
+              {pageWindow(pageNum, totalPages).map((p, i) =>
+                p === "…" ? (
+                  <span key={`e${i}`} className="px-1 text-[var(--muted)]">
+                    …
+                  </span>
+                ) : (
+                  <PageLink
+                    key={p}
+                    page={p}
+                    label={String(p)}
+                    current={p === pageNum}
+                  />
+                ),
+              )}
+              <PageLink
+                page={pageNum + 1}
+                label="›"
+                disabled={pageNum >= totalPages}
+              />
+            </nav>
           )}
         </div>
 

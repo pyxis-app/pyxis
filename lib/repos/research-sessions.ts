@@ -178,7 +178,10 @@ export interface AdminRecentRow {
 }
 
 /** Most recent runs across ALL wallets. Admin-only — callers must gate. */
-export async function listRecentAll(limit = 20): Promise<AdminRecentRow[]> {
+export async function listRecentAll(
+  limit = 20,
+  offset = 0,
+): Promise<AdminRecentRow[]> {
   await ensureMigrations();
   const sql = getSql();
   const rows = (await sql<
@@ -193,7 +196,7 @@ export async function listRecentAll(limit = 20): Promise<AdminRecentRow[]> {
     SELECT id, wallet_address, topic, partial, created_at
     FROM research_sessions
     ORDER BY created_at DESC
-    LIMIT ${limit}
+    LIMIT ${limit} OFFSET ${offset}
   `) as unknown as Array<{
     id: string;
     wallet_address: string;
