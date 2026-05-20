@@ -36,4 +36,8 @@ export const env = {
     }
   },
   APP_URL: () => optional("NEXT_PUBLIC_APP_URL", "http://localhost:3000"),
+  // Wallet allowed to view /admin (lowercase). Unset → no admin (fail closed,
+  // /admin 404s for everyone). Not NEXT_PUBLIC_ — server-only, never shipped to
+  // the client bundle.
+  ADMIN_WALLET: () => (process.env.ADMIN_WALLET ?? "").toLowerCase(),
 };

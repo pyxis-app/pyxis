@@ -135,6 +135,103 @@ export async function deleteByIdForWallet(
   return rows.length > 0;
 }
 
+export interface AdminStats {
+  total: number;
+  wallets: number;
+  last24h: number;
+  last7d: number;
+  partial: number;
+}
+
+/** Aggregate counts across ALL wallets. Admin-only — callers must gate. */
+export async function getAdminStats(): Promise<AdminStats> {
+  await ensureMigrations();
+  const sql = getSql();
+  const now = Date.now();
+  const day = now - 24 * 60 * 60 * 1000;
+  const week = now - 7 * 24 * 60 * 60 * 1000;
+  const rows = (await sql<Array<Record<string, string>>>`
+    SELECT
+      count(*)                                     AS total,
+      count(DISTINCT wallet_address)               AS wallets,
+      count(*) FILTER (WHERE created_at > ${day})  AS last24h,
+      count(*) FILTER (WHERE created_at > ${week}) AS last7d,
+      count(*) FILTER (WHERE partial)              AS partial
+    FROM research_sessions
+  `) as unknown as Array<Record<string, string>>;
+  const r = rows[0] ?? {};
+  return {
+    total: Number(r.total ?? 0),
+    wallets: Number(r.wallets ?? 0),
+    last24h: Number(r.last24h ?? 0),
+    last7d: Number(r.last7d ?? 0),
+    partial: Number(r.partial ?? 0),
+  };
+}
+
+export interface AdminRecentRow {
+  id: string;
+  walletAddress: string;
+  topic: string;
+  partial: boolean;
+  createdAt: number;
+}
+
+/** Most recent runs across ALL wallets. Admin-only — callers must gate. */
+export async function listRecentAll(limit = 20): Promise<AdminRecentRow[]> {
+  await ensureMigrations();
+  const sql = getSql();
+  const rows = (await sql<
+    Array<{
+      id: string;
+      wallet_address: string;
+      topic: string;
+      partial: boolean;
+      created_at: string | number;
+    }>
+  >`
+    SELECT id, wallet_address, topic, partial, created_at
+    FROM research_sessions
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `) as unknown as Array<{
+    id: string;
+    wallet_address: string;
+    topic: string;
+    partial: boolean;
+    created_at: string | number;
+  }>;
+  return rows.map((r) => ({
+    id: r.id,
+    walletAddress: r.wallet_address,
+    topic: r.topic,
+    partial: r.partial,
+    createdAt: Number(r.created_at),
+  }));
+}
+
+export interface AdminWalletCount {
+  walletAddress: string;
+  count: number;
+}
+
+/** Top wallets by run count. Admin-only — callers must gate. */
+export async function topWallets(limit = 10): Promise<AdminWalletCount[]> {
+  await ensureMigrations();
+  const sql = getSql();
+  const rows = (await sql<Array<{ wallet_address: string; count: string }>>`
+    SELECT wallet_address, count(*) AS count
+    FROM research_sessions
+    GROUP BY wallet_address
+    ORDER BY count DESC
+    LIMIT ${limit}
+  `) as unknown as Array<{ wallet_address: string; count: string }>;
+  return rows.map((r) => ({
+    walletAddress: r.wallet_address,
+    count: Number(r.count),
+  }));
+}
+
 export async function findRecentDuplicate(
   wallet: string,
   topic: string,
