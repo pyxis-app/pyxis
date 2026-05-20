@@ -61,12 +61,28 @@ interface RawRow {
   created_at: string | number; // BIGINT may come as string
 }
 
+// briefing_json was written via `${JSON.stringify(obj)}::jsonb`, which the
+// `postgres` driver double-encodes — the column holds a JSONB *scalar string*
+// containing the JSON, not a JSONB object. So on read it comes back as a
+// string and needs one more parse. Tolerate both shapes (string = legacy
+// double-encoded; object = if the write is ever corrected).
+function parseBriefing(v: unknown): StoredBriefing {
+  if (typeof v === "string") {
+    try {
+      return JSON.parse(v) as StoredBriefing;
+    } catch {
+      /* fall through — return as-is below */
+    }
+  }
+  return v as StoredBriefing;
+}
+
 function rowToSession(r: RawRow): SessionRow {
   return {
     id: r.id,
     walletAddress: r.wallet_address,
     topic: r.topic,
-    briefing: r.briefing_json,
+    briefing: parseBriefing(r.briefing_json),
     paymentTx: r.payment_tx,
     createdAt: Number(r.created_at),
   };

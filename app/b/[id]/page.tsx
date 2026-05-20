@@ -5,23 +5,28 @@ import Link from "next/link";
 import { LandingNav } from "@/components/landing/nav";
 import { Footer } from "@/components/landing/footer";
 import { BriefingCard, type Briefing } from "@/components/app/briefing-card";
+import { BackToTop } from "@/components/shared/back-to-top";
 import { getById } from "@/lib/repos/research-sessions";
+import { withRetry } from "@/lib/retry";
 
 // Dedupe the DB read between generateMetadata and the page render.
-const load = cache(async (id: string) => getById(id));
+// Retry transient failures (Neon serverless cold-start / connection blips) so
+// a shared link doesn't 500 on first hit. A genuine miss returns null (→ 404);
+// only a persistent DB error after retries throws (→ honest 500 + reload).
+const load = cache((id: string) => withRetry(() => getById(id), 2, 300));
 
 function toBriefing(row: NonNullable<Awaited<ReturnType<typeof getById>>>): Briefing {
   return {
     id: row.id,
     topic: row.topic,
-    briefing: row.briefing.briefing,
-    confidence: row.briefing.confidence,
-    sources: row.briefing.sources,
-    partial: row.briefing.partial,
+    briefing: row.briefing?.briefing ?? "",
+    confidence: row.briefing?.confidence ?? 0,
+    sources: row.briefing?.sources ?? 0,
+    partial: row.briefing?.partial ?? false,
     createdAt: new Date(row.createdAt).toISOString(),
     paymentTx: row.paymentTx,
-    topicType: row.briefing.topicType ?? null,
-    freshness: row.briefing.freshness ?? [],
+    topicType: row.briefing?.topicType ?? null,
+    freshness: row.briefing?.freshness ?? [],
   };
 }
 
@@ -35,7 +40,7 @@ export async function generateMetadata({
   if (!row) return { title: "briefing not found · pyxis" };
 
   const title = `${row.topic} · pyxis briefing`;
-  const description = row.briefing.briefing
+  const description = (row.briefing?.briefing ?? "")
     .replace(/[#*`>_\-\[\]()]/g, "")
     .replace(/\s+/g, " ")
     .trim()
@@ -88,6 +93,7 @@ export default async function PublicBriefingPage({
       </section>
 
       <Footer />
+      <BackToTop />
     </main>
   );
 }
