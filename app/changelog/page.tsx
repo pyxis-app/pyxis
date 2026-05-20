@@ -13,6 +13,66 @@ type Release = {
 
 const RELEASES: Release[] = [
   {
+    version: "v3.2.0",
+    date: "2026-05-21",
+    codename: "hardening & observability",
+    highlight:
+      "Production hardening plus the operational surfaces a live product needs: a health endpoint with a live status pill, a private usage dashboard, an on-brand 404, and a security sweep across auth, payments, and every external API call.",
+    groups: [
+      {
+        label: "added",
+        items: [
+          "Public health endpoint /api/health — timeout-raced Neon round-trip, returns 200/503; backs a live status pill on the landing footer + research header (polls every 60s)",
+          "Private admin dashboard at /admin — wallet-gated usage view: total runs, unique wallets, 24h/7d activity, partial-run count, recent runs, and top wallets, with numbered pagination (25/page)",
+          "On-brand custom 404 page (terminal/compass aesthetic) replacing the default Next.js not-found",
+        ],
+      },
+      {
+        label: "security",
+        items: [
+          "SIWE sign-in is now bound to the server domain + carries an expiry; JWT verification pinned to HS256",
+          "Auth-nonce consumption made atomic (single compare-and-swap) to close a replay race",
+          "Research is attributed only to the cryptographically-verified session — the client-supplied payer header is no longer trusted, and /api/research now requires sign-in",
+          "On-chain USDC payment verification before a tx is ever stored (active when paid mode returns)",
+          "Snapshot GraphQL queries parameterized; all external-API params now format-validated + URL-encoded",
+          "Rate limiter keyed on the platform-trusted client IP instead of a spoofable forwarded header",
+        ],
+      },
+    ],
+  },
+  {
+    version: "v3.1.0",
+    date: "2026-05-20",
+    codename: "shareable briefings",
+    highlight:
+      "Briefings became shareable and the history surface grew up: every run now has a public read-only link, history gained working actions + per-session delete, and a systemic JSONB read bug that silently emptied shared briefings was fixed.",
+    groups: [
+      {
+        label: "added",
+        items: [
+          "Public shareable briefing links — every research run gets a read-only /b/[id] URL (no login, unguessable UUID, OG + Twitter preview cards)",
+          "Per-session delete (owner-scoped) + working copy-markdown / copy-link actions on every briefing card",
+          "/history#id deep links auto-expand and scroll to the target briefing",
+          "Floating back-to-top button on long briefings",
+          "gitlawb network link in the footer connect column",
+        ],
+      },
+      {
+        label: "fixed",
+        items: [
+          "Shared + history briefings rendered empty — every briefing_json row was a double-encoded JSONB scalar string, so the body read back as a string and lost its fields; now coerced on read",
+          "Sidebar + history stuck on 'loading…' for wallets without a session — both now prompt sign-in on 401, and the sidebar re-fetches automatically after SIWE sign-in",
+        ],
+      },
+      {
+        label: "changed",
+        items: [
+          "Hero example queries refreshed to 2026-current topics across tokens / chains / protocols / narratives",
+        ],
+      },
+    ],
+  },
+  {
     version: "v3.0.0",
     date: "2026-05-20",
     codename: "terminal redesign",
