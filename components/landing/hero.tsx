@@ -8,32 +8,32 @@ import { useEffect, useState } from "react";
 const EXAMPLE_GROUPS: { label: string; queries: string[] }[] = [
   {
     label: "tokens",
-    queries: ["$BERA", "is HYPE overvalued?", "ETH supply 2026"],
+    queries: ["$HYPE", "is $ENA sustainable?", "$VIRTUAL outlook"],
   },
   {
     label: "chains",
-    queries: ["berachain mainnet state", "solana TPS this week", "Base L2 stack"],
+    queries: ["Monad mainnet pulse", "Hyperliquid L1 status", "BTC L2s 2026"],
   },
   {
     label: "protocols",
-    queries: ["Hyperliquid TVL trend", "EigenLayer restaking risk", "Uniswap v4 adoption"],
+    queries: ["Pendle yield wars", "Polymarket post-election", "Morpho vs Aave v4"],
   },
   {
     label: "narratives",
-    queries: ["memecoin szn?", "AI tokens fundamentals", "RWA tokenization"],
+    queries: ["AI agents narrative", "LRT consolidation", "DePIN tokens 2026"],
   },
 ];
 
 // Cycling placeholder — richer than just token tickers
 const PLACEHOLDER_CYCLE = [
-  "is HYPE overvalued?",
-  "berachain mainnet state",
-  "memecoin szn?",
-  "Hyperliquid TVL trend",
-  "$BERA",
-  "EigenLayer restaking risk",
-  "AI tokens fundamentals",
-  "ETH supply 2026",
+  "is $ENA sustainable?",
+  "Monad mainnet pulse",
+  "AI agents narrative",
+  "Pendle yield wars",
+  "$HYPE",
+  "Polymarket post-election",
+  "LRT consolidation",
+  "BTC L2s 2026",
 ];
 
 export function Hero() {
