@@ -1,0 +1,33 @@
+export const metadata = { title: "Data sources & freshness" };
+
+# Data sources & freshness
+
+Pyxis composes its briefings from a wide set of free, public crypto data
+sources, including CoinGecko, CoinMarketCap, DefiLlama, DexScreener,
+GeckoTerminal, Binance, the Fear & Greed Index, Etherscan, Solscan, Reddit, and
+Snapshot, plus news search.
+
+## Freshness markers
+
+Each data point is tagged so you can judge it:
+
+- `[live]` — fetched fresh for this run.
+- `[cached]` — served from a short-lived cache (prices cache for about a minute;
+  slower-moving data such as TVL or yields caches longer).
+
+Every briefing ends with a **Data Freshness** table listing each source, its
+endpoint, when it was sampled, and whether it was live or cached.
+
+## Pre-listing coverage
+
+Because DexScreener is queried for every token, Pyxis can often say something
+useful about a token the day liquidity appears — before the big aggregators list
+it. Coverage is thinner for those tokens, and the briefing reflects that.
+
+<HonestGap title="A note on Solana">
+On EVM chains (Ethereum, Base, Arbitrum, Polygon, Optimism, BSC) Pyxis can check
+**verified contract source code**. On Solana it reports **on-chain metadata and
+holder distribution only** — not source-code verification.
+</HonestGap>
+
+Next: [Sentiment methodology](/docs/sentiment) →

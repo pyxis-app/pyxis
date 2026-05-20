@@ -1,0 +1,19 @@
+export const metadata = { title: "The five agents" };
+
+# The five agents
+
+Pyxis runs five specialized agents in a fixed sequence. Each consumes a curated
+bundle of data and hands its findings to the next.
+
+<AgentGrid>
+  <AgentCard agent="commander">**Commander** — decomposes your topic into agent-specific queries and classifies it as a token, chain, protocol, or narrative. This classification shapes the rest of the run.</AgentCard>
+  <AgentCard agent="scout">**Scout** — the information and narrative agent. Surfaces news, announcements, and contract-verification signals.</AgentCard>
+  <AgentCard agent="analyst">**Analyst** — the quantitative agent. Reads price, TVL, liquidity, supply, yields, and holder concentration from structured data only.</AgentCard>
+  <AgentCard agent="sentinel">**Sentinel** — the social agent. Reads sentiment across Twitter and Reddit, governance proposals, and a macro overlay.</AgentCard>
+  <AgentCard agent="synthesizer" full>**Synthesizer** — merges the three findings into a single briefing with sections adapted to the topic type, and appends the Data Freshness table.</AgentCard>
+</AgentGrid>
+
+The pipeline is always exactly these five calls. Pyxis adds new data dimensions
+by expanding what each agent reads — not by adding more agents.
+
+Next: [How a briefing is built](/docs/how-briefings-work) →

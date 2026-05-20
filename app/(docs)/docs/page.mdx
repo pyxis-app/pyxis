@@ -1,0 +1,40 @@
+export const metadata = { title: "Introduction" };
+
+# What is Pyxis?
+
+Pyxis is a Web3 intelligence swarm. Five autonomous agents research any token,
+chain, protocol, or narrative in parallel, then merge their findings into a
+single, source-stamped briefing.
+
+<Callout>
+Pyxis is **a fast, honest starting point — not a substitute for due diligence.**
+Every number is stamped with its source and timestamp, and gaps are disclosed
+rather than guessed.
+</Callout>
+
+## The swarm at a glance
+
+A research run is five sequential LLM calls. Each agent has one job and reads its
+own bundle of live data:
+
+<AgentGrid>
+  <AgentCard agent="commander">Reads your topic, classifies it, and writes focused queries for the other agents.</AgentCard>
+  <AgentCard agent="scout">Information & narrative — news, announcements, contract-verification flags.</AgentCard>
+  <AgentCard agent="analyst">Quantitative readout — price, TVL, liquidity, supply, yields, holder concentration.</AgentCard>
+  <AgentCard agent="sentinel">Social pulse & sentiment — Twitter, Reddit, governance, macro overlay.</AgentCard>
+  <AgentCard agent="synthesizer" full>Merges the three findings into one briefing with sections adapted to the topic, then appends a Data Freshness table.</AgentCard>
+</AgentGrid>
+
+## Source-stamped, always
+
+Every data point carries a freshness marker — `[live]` or `[cached]` — and the
+briefing ends with a table listing each source, the endpoint, and when it was
+sampled. You always know where a number came from.
+
+<HonestGap>
+Not institutional-grade research. No buy/sell recommendations, no price
+predictions, no whale-tracking or vesting analysis. When a source is
+unavailable, Pyxis says so — it never fabricates a number.
+</HonestGap>
+
+Next: [Quickstart](/docs/quickstart) →

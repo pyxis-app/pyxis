@@ -1,0 +1,30 @@
+export const metadata = { title: "How a briefing is built" };
+
+# How a briefing is built
+
+## The pipeline
+
+The agents run in order: **Commander → Scout → Analyst → Sentinel →
+Synthesizer.** The Commander goes first to classify your topic; Scout, Analyst,
+and Sentinel each gather their own data; the Synthesizer writes the final
+briefing. A full run takes roughly 30–40 seconds.
+
+## Adaptive sections
+
+The Commander classifies every topic into one of four types, and the briefing's
+sections adapt accordingly:
+
+| Topic type | What the briefing emphasizes |
+| --- | --- |
+| Token | Price, liquidity, supply, holders, contract checks |
+| Chain | Total value locked, native asset, ecosystem activity |
+| Protocol | Protocol TVL, yields, governance |
+| Narrative | Trending assets, flows, and the wider story |
+
+## Honest by construction
+
+When a data source is slow or unavailable, the agent simply skips it and the
+briefing notes the gap. Confidence drops when fewer sources respond. Pyxis never
+invents a fallback number.
+
+Next: [Data sources & freshness](/docs/data-sources) →
