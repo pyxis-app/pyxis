@@ -1,6 +1,10 @@
 # Pyxis — Web3 Intelligence Swarm
 
-A five-agent research pipeline that turns any Web3 topic into a sourced, structured briefing. **Free during beta** (paywall bypassed via `NEXT_PUBLIC_X402_FREE_MODE=true`). Paid mode resumes at GA: $0.10 USDC per session via x402 on Base mainnet.
+A five-agent research pipeline that turns any Web3 topic into a sourced, structured briefing. **Free during beta** — wallet-gated workspace, no paywall. LLM inference routes through [gitlawb's Opengateway](https://gitlawb.com/opengateway) (`mimo-v2.5-pro` by default).
+
+x402 micropayment code paths (Base mainnet, $0.10 USDC/session) are kept gated behind `NEXT_PUBLIC_X402_FREE_MODE=false` and will resume at GA exit.
+
+Live at **[usepyxis.com](https://www.usepyxis.com)** · Changelog at **[usepyxis.com/changelog](https://www.usepyxis.com/changelog)**
 
 ## Stack
 
@@ -40,34 +44,25 @@ npm run test:watch
 
 ## Deploy
 
-Build runs on GitHub Actions, image pushed to GHCR, VPS pulls via Docker Compose. Required GitHub secrets:
+Production runs on **Vercel** with **Neon Postgres** for session persistence. Pushes to `main` auto-deploy via Vercel's GitHub integration; pushes also mirror to gitlawb's federated network via [`.github/workflows/mirror-gitlawb.yml`](.github/workflows/mirror-gitlawb.yml).
 
-- `VPS_HOST`
-- `VPS_USER`
-- `VPS_SSH_KEY`
+Required Vercel environment variables:
 
-On the VPS:
-```bash
-cd /opt/pyxis
-cp .env.example .env  # fill in
-docker compose up -d
-```
+- `OPENGATEWAY_API_KEY` — LLM inference
+- `TAVILY_API_KEY` — news/narrative search
+- `DATABASE_URL` — Neon Postgres connection string
+- `SIWE_JWT_SECRET` — session cookie signing
+- `NEXT_PUBLIC_WALLETCONNECT_ID` — RainbowKit project ID
+- `NEXT_PUBLIC_X402_FREE_MODE=true` — beta flag (set to `false` at GA exit)
 
-### Backup smoke test
-
-After at least one `docker compose up -d`, wait until 03:00 UTC or manually trigger:
-
-```bash
-docker compose exec backup sh -c "sqlite3 /data/probe.db '.backup /backups/probe-$(date +%Y%m%d).db' && ls /backups/"
-```
-
-Expected: a `probe-YYYYMMDD.db` file appears in `./backups/` on the host. The cron schedule keeps seven days of snapshots and deletes anything older.
+Optional (enrich briefings, fail silently if unset): `CMC_API_KEY`, `ETHERSCAN_API_KEY`, `SOLSCAN_API_KEY`, `GETXAPI_API_KEY`, `PYXIS_GETXAPI_MAX_CALLS`.
 
 ## Network configuration
 
-The pipeline is **on Base mainnet** at launch with $0.10 USDC per research as the early-adopter price. To run against Base Sepolia for local testing without spending real USDC, flip these env vars:
+x402 paywall code defaults to **Base mainnet** at $0.10 USDC per research, but is currently bypassed by `NEXT_PUBLIC_X402_FREE_MODE=true` during beta. To exercise the paid flow against Base Sepolia for local testing without real USDC:
 
 ```env
+NEXT_PUBLIC_X402_FREE_MODE=false
 X402_NETWORK=base-sepolia
 X402_USDC_ADDRESS=0x036CbD53842c5426634e7929541eC2318f3dCF7e
 NEXT_PUBLIC_CHAIN=base-sepolia
@@ -81,9 +76,10 @@ Mainnet remains the default in `lib/env.ts` and `.env.example`.
 app/                # Next.js routes (landing + (app) group)
 components/         # landing/, app/, shared/
 lib/                # llm, probes/, data/{sources,dossiers}, x402, siwe, db, repos, ...
+lib/migrations/     # Postgres schema migrations (applied at boot)
 public/             # logo, icons, og
-data/               # SQLite (Docker volume)
-backups/            # nightly snapshots (Docker volume)
+docs/               # internal specs (gitignored from public mirror)
+.github/workflows/  # gitlawb auto-mirror
 ```
 
 See [AGENTS.md](./AGENTS.md) for the 5-agent pipeline architecture.
