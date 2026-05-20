@@ -14,6 +14,9 @@ describe("docsRewrite", () => {
   it("returns null when already under /docs (no double prefix)", () => {
     expect(docsRewrite("docs.usepyxis.com", "/docs/agents")).toBeNull();
   });
+  it("returns null for the exact /docs path (no double prefix)", () => {
+    expect(docsRewrite("docs.usepyxis.com", "/docs")).toBeNull();
+  });
   it("returns null for the apex host", () => {
     expect(docsRewrite("usepyxis.com", "/research")).toBeNull();
   });
