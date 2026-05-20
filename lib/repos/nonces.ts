@@ -15,18 +15,19 @@ export async function issueAuthNonce(): Promise<string> {
 export async function consumeAuthNonce(nonce: string): Promise<boolean> {
   await ensureMigrations();
   const sql = getSql();
-  const rows = (await sql<
-    Array<{ used: boolean; issued_at: string | number }>
-  >`SELECT used, issued_at FROM auth_nonces WHERE nonce = ${nonce}`) as unknown as Array<{
-    used: boolean;
-    issued_at: string | number;
-  }>;
-  if (rows.length === 0) return false;
-  const row = rows[0];
-  if (row.used) return false;
-  if (Date.now() - Number(row.issued_at) > 10 * 60 * 1000) return false; // 10 min expiry
-  await sql`UPDATE auth_nonces SET used = true WHERE nonce = ${nonce}`;
-  return true;
+  // Atomic compare-and-swap: flip used→true only if currently unused and
+  // within the 10-min window, in a single statement. A separate SELECT-then-
+  // UPDATE leaves a TOCTOU window where two concurrent /verify calls both pass
+  // the `used === false` check and both succeed (nonce replay). RETURNING tells
+  // us whether THIS call won the row.
+  const cutoff = Date.now() - 10 * 60 * 1000;
+  const rows = (await sql<Array<{ nonce: string }>>`
+    UPDATE auth_nonces
+    SET used = true
+    WHERE nonce = ${nonce} AND used = false AND issued_at > ${cutoff}
+    RETURNING nonce
+  `) as unknown as Array<{ nonce: string }>;
+  return rows.length > 0;
 }
 
 export async function recordPaymentNonce(

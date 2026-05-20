@@ -180,13 +180,6 @@ export function ResearchWorkspace() {
     setAuth("idle");
   }
 
-  // Escape hatch — proceed without a server-side session. Research will still
-  // run; only history won't load for this device. Useful when the wallet popup
-  // gets dismissed silently, blocked by an extension, or otherwise hangs.
-  function skipAuth() {
-    setAuth("ready");
-  }
-
   async function start() {
     if (!isConnected || !address || auth !== "ready") return;
 
@@ -213,8 +206,10 @@ export function ResearchWorkspace() {
         }
       }
 
+      // Identity travels via the pyxis_session cookie (same-origin fetch sends
+      // it automatically). The server derives the payer from the verified JWT —
+      // we no longer send a spoofable X-PAYER-ADDRESS header.
       const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (freeMode) headers["X-PAYER-ADDRESS"] = address;
 
       const res = await paidFetch("/api/research", {
         method: "POST",
@@ -383,26 +378,17 @@ export function ResearchWorkspace() {
                 <div className="mt-4 font-mono text-[11px] text-[var(--muted)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <span>
                     {auth === "signing" && "→ check your wallet for a sign-in request"}
-                    {auth === "rejected" && "→ wallet sign is one-time per session; required to load history"}
+                    {auth === "rejected" && "→ wallet sign is one-time per session; required to research"}
                     {auth === "idle" && "→ wallet handshake will start shortly"}
                   </span>
-                  {(auth === "signing" || auth === "rejected") && (
+                  {auth === "signing" && (
                     <span className="flex items-center gap-2">
-                      {auth === "signing" && (
-                        <button
-                          onClick={retryAuth}
-                          className="font-mono text-[11px] text-[var(--muted)] hover:text-[var(--foreground)] underline underline-offset-2"
-                          title="popup stuck? retry"
-                        >
-                          retry ↻
-                        </button>
-                      )}
                       <button
-                        onClick={skipAuth}
-                        className="font-mono text-[11px] text-[var(--accent)] hover:text-[var(--scout)] underline underline-offset-2"
-                        title="skip wallet sign-in — research still runs, history won't load"
+                        onClick={retryAuth}
+                        className="font-mono text-[11px] text-[var(--muted)] hover:text-[var(--foreground)] underline underline-offset-2"
+                        title="popup stuck? retry"
                       >
-                        skip sign-in ›
+                        retry ↻
                       </button>
                     </span>
                   )}

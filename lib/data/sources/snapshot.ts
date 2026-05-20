@@ -35,31 +35,33 @@ interface RawResponse {
   };
 }
 
-function buildQuery(space: string, state?: "active" | "closed", first = 10): string {
-  const where = state
-    ? `where: { space: "${space}", state: "${state}" }`
-    : `where: { space: "${space}" }`;
-  return `{
-    proposals(${where}, first: ${first}, orderBy: "created", orderDirection: desc) {
-      id
-      title
-      state
-      scores_total
-      scores
-      choices
-      start
-      end
-      space { id }
-    }
-  }`;
-}
+// Use GraphQL variables, never string interpolation: `space`/`state` originate
+// from LLM-produced hints, so interpolating them into the query body is a
+// GraphQL injection vector. The `$state` filter is included only when set.
+const QUERY = `query ($space: String!, $state: String, $first: Int!) {
+  proposals(
+    where: { space: $space, state: $state }
+    first: $first
+    orderBy: "created"
+    orderDirection: desc
+  ) {
+    id
+    title
+    state
+    scores_total
+    scores
+    choices
+    start
+    end
+    space { id }
+  }
+}`;
 
 async function fetchProposals(
   space: string,
   state: "active" | "closed" | undefined,
   first: number,
 ): Promise<WithFreshness<SnapshotProposal[]> | null> {
-  const query = buildQuery(space, state, first);
   const res = await fetchJson<RawResponse>(ENDPOINT, {
     source: SOURCE,
     cacheKey: cacheKey([SOURCE, space.toLowerCase(), state ?? "any", first]),
@@ -67,7 +69,10 @@ async function fetchProposals(
     timeoutMs: TIMEOUT,
     init: {
       method: "POST",
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({
+        query: QUERY,
+        variables: { space, state: state ?? null, first },
+      }),
     },
     headers: { "Content-Type": "application/json" },
   });

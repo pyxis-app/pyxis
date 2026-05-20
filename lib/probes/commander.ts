@@ -52,26 +52,45 @@ function coerceSubTopics(v: unknown): string[] | undefined {
   return list.length >= 2 ? list : undefined;
 }
 
+// Hints become path/query/GraphQL params hitting external APIs, so validate
+// their FORMAT here (not just type/length) before they leave the process. The
+// values come from the LLM, which the user's topic influences — a hint shaped
+// like an injection payload is dropped rather than forwarded. Defense-in-depth:
+// the source modules also encodeURIComponent at the call site.
+const EVM_ADDRESS = /^0x[a-fA-F0-9]{40}$/;
+const SOLANA_ADDRESS = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+
+function clean(v: unknown, re: RegExp, transform: (s: string) => string): string | undefined {
+  const s = coerceStr(v);
+  if (!s) return undefined;
+  const t = transform(s.trim());
+  return re.test(t) ? t : undefined;
+}
+
 function coerceHints(raw: unknown): CommanderHints {
   if (!raw || typeof raw !== "object") return {};
   const r = raw as Record<string, unknown>;
   const out: CommanderHints = {};
-  const symbol = coerceStr(r.symbol);
-  if (symbol) out.symbol = symbol.toUpperCase().replace(/^\$/, "");
-  const binanceSymbol = coerceStr(r.binanceSymbol);
-  if (binanceSymbol) out.binanceSymbol = binanceSymbol.toUpperCase();
-  const geckoNetwork = coerceStr(r.geckoNetwork);
-  if (geckoNetwork) out.geckoNetwork = geckoNetwork.toLowerCase();
-  const defillamaSlug = coerceStr(r.defillamaSlug);
-  if (defillamaSlug) out.defillamaSlug = defillamaSlug.toLowerCase();
-  const contractAddress = coerceStr(r.contractAddress);
+  const symbol = clean(r.symbol, /^[A-Z0-9]{1,20}$/, (s) => s.toUpperCase().replace(/^\$/, ""));
+  if (symbol) out.symbol = symbol;
+  const binanceSymbol = clean(r.binanceSymbol, /^[A-Z0-9]{1,20}$/, (s) => s.toUpperCase());
+  if (binanceSymbol) out.binanceSymbol = binanceSymbol;
+  const geckoNetwork = clean(r.geckoNetwork, /^[a-z0-9-]{1,40}$/, (s) => s.toLowerCase());
+  if (geckoNetwork) out.geckoNetwork = geckoNetwork;
+  const defillamaSlug = clean(r.defillamaSlug, /^[a-z0-9-]{1,60}$/, (s) => s.toLowerCase());
+  if (defillamaSlug) out.defillamaSlug = defillamaSlug;
+  const contractAddress = clean(
+    r.contractAddress,
+    new RegExp(`${EVM_ADDRESS.source}|${SOLANA_ADDRESS.source}`),
+    (s) => s,
+  );
   if (contractAddress) out.contractAddress = contractAddress;
-  const twitterHandle = coerceStr(r.twitterHandle);
-  if (twitterHandle) out.twitterHandle = twitterHandle.replace(/^@/, "");
-  const subreddit = coerceStr(r.subreddit);
-  if (subreddit) out.subreddit = subreddit.replace(/^r\//, "");
-  const snapshotSpace = coerceStr(r.snapshotSpace);
-  if (snapshotSpace) out.snapshotSpace = snapshotSpace.toLowerCase();
+  const twitterHandle = clean(r.twitterHandle, /^[A-Za-z0-9_]{1,15}$/, (s) => s.replace(/^@/, ""));
+  if (twitterHandle) out.twitterHandle = twitterHandle;
+  const subreddit = clean(r.subreddit, /^[A-Za-z0-9_]{1,30}$/, (s) => s.replace(/^r\//, ""));
+  if (subreddit) out.subreddit = subreddit;
+  const snapshotSpace = clean(r.snapshotSpace, /^[a-z0-9.-]{1,60}$/, (s) => s.toLowerCase());
+  if (snapshotSpace) out.snapshotSpace = snapshotSpace;
   return out;
 }
 

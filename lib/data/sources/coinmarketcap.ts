@@ -56,7 +56,7 @@ export async function getCmcQuote(
   if (!isConfigured()) return null;
   const upper = symbol.toUpperCase();
   const res = await fetchJson<RawResponse>(
-    `${BASE}/cryptocurrency/quotes/latest?symbol=${upper}`,
+    `${BASE}/cryptocurrency/quotes/latest?symbol=${encodeURIComponent(upper)}`,
     {
       source: SOURCE,
       cacheKey: cacheKey([SOURCE, "quote", upper]),

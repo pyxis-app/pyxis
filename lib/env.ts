@@ -21,6 +21,19 @@ export const env = {
   X402_FACILITATOR: () =>
     optional("X402_FACILITATOR_URL", "https://x402.org/facilitator"),
   SIWE_JWT_SECRET: () => required("SIWE_JWT_SECRET"),
-  SIWE_DOMAIN: () => optional("SIWE_DOMAIN", "localhost:3000"),
+  // The host the SIWE signature must be bound to. The client signs with
+  // `window.location.host`, so this must match the deployed host exactly.
+  // Defaults to APP_URL's host (prod: usepyxis.com) so we don't silently fall
+  // back to localhost in production. Override with SIWE_DOMAIN only if the
+  // signing origin differs from APP_URL.
+  SIWE_DOMAIN: () => {
+    const explicit = process.env.SIWE_DOMAIN;
+    if (explicit) return explicit;
+    try {
+      return new URL(env.APP_URL()).host;
+    } catch {
+      return "localhost:3000";
+    }
+  },
   APP_URL: () => optional("NEXT_PUBLIC_APP_URL", "http://localhost:3000"),
 };

@@ -24,6 +24,10 @@ export async function signInWithEthereum(opts: {
     chainId: opts.chainId,
     nonce,
     issuedAt: new Date().toISOString(),
+    // Self-contained expiry so a captured (message, signature) pair can't be
+    // replayed indefinitely. Matches the server-side 10-min nonce window; the
+    // server passes `time` to siwe.verify so this is enforced.
+    expirationTime: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
   }).prepareMessage();
 
   // 3. sign via wallet

@@ -22,7 +22,17 @@ export function rateLimit(
 }
 
 export function clientIp(req: Request): string {
+  // Prefer `x-real-ip`: on Vercel the platform sets it to the true client IP
+  // and a client cannot forge it. The leftmost `x-forwarded-for` entry is
+  // client-controlled (anyone can prepend a fake hop), so keying the limiter on
+  // it lets an attacker mint unlimited buckets and bypass the limit. Use XFF
+  // only as a fallback, and take the LAST hop (closest to our trusted proxy).
+  const real = req.headers.get("x-real-ip");
+  if (real) return real.trim();
   const fwd = req.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
-  return req.headers.get("x-real-ip") ?? "unknown";
+  if (fwd) {
+    const hops = fwd.split(",").map((h) => h.trim()).filter(Boolean);
+    if (hops.length > 0) return hops[hops.length - 1];
+  }
+  return "unknown";
 }

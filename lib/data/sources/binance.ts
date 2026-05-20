@@ -32,7 +32,7 @@ export async function getSpotTicker(
 ): Promise<WithFreshness<SpotTicker | null> | null> {
   const upper = symbol.toUpperCase();
   const res = await fetchJson<RawTicker>(
-    `${BASE}/ticker/24hr?symbol=${upper}`,
+    `${BASE}/ticker/24hr?symbol=${encodeURIComponent(upper)}`,
     {
       source: SOURCE,
       cacheKey: cacheKey([SOURCE, "ticker", upper]),

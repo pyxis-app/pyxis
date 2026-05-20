@@ -60,7 +60,7 @@ export async function getSolTokenMeta(
 ): Promise<WithFreshness<SolTokenMeta | null> | null> {
   if (!keyOk()) return null;
   const res = await fetchJson<RawMetaResp>(
-    `${BASE}/token/meta?address=${address}`,
+    `${BASE}/token/meta?address=${encodeURIComponent(address)}`,
     {
       source: SOURCE,
       cacheKey: cacheKey([SOURCE, "meta", address]),
@@ -92,7 +92,7 @@ export async function getSolTopHolders(
 ): Promise<WithFreshness<SolHolder[]> | null> {
   if (!keyOk()) return null;
   const res = await fetchJson<RawHoldersResp>(
-    `${BASE}/token/holders?address=${address}&page=1&page_size=${limit}`,
+    `${BASE}/token/holders?address=${encodeURIComponent(address)}&page=1&page_size=${limit}`,
     {
       source: SOURCE,
       cacheKey: cacheKey([SOURCE, "holders", address, limit]),

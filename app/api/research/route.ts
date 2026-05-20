@@ -5,7 +5,20 @@ import {
   findRecentDuplicate,
 } from "@/lib/repos/research-sessions";
 import { recordPaymentNonce } from "@/lib/repos/nonces";
+import { verifyJwt } from "@/lib/siwe";
+import { verifyUsdcPayment } from "@/lib/payment-verify";
+import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
+
+function parseCookie(req: Request, name: string): string | null {
+  const c = req.headers.get("cookie");
+  if (!c) return null;
+  for (const part of c.split(";")) {
+    const [k, ...v] = part.trim().split("=");
+    if (k === name) return decodeURIComponent(v.join("="));
+  }
+  return null;
+}
 
 export async function POST(req: Request) {
   let body: { topic?: string };
@@ -23,17 +36,33 @@ export async function POST(req: Request) {
     );
   }
 
-  // Payer address: in production this comes from x402-next's request context,
-  // header here as fallback / dev path.
-  const payer = (
-    req.headers.get("X-PAYER-ADDRESS") ??
-    (req as unknown as { payer?: { address?: string } }).payer?.address ??
-    ""
-  ).toLowerCase();
-  if (!payer.startsWith("0x") || payer.length !== 42) {
-    return NextResponse.json({ error: "no payer" }, { status: 402 });
+  // SIWE is mandatory. The payer is derived ONLY from the cryptographically-
+  // verified session cookie — never from a client header. This closes the IDOR
+  // where a spoofed X-PAYER-ADDRESS let anyone write research into another
+  // wallet's history. No valid session → no research.
+  const sessionJwt = parseCookie(req, "pyxis_session");
+  const payer = sessionJwt ? verifyJwt(sessionJwt) : null;
+  if (!payer) {
+    return NextResponse.json({ error: "sign in required" }, { status: 401 });
   }
-  const paymentTx = req.headers.get("X-PAYMENT-TX") ?? null;
+
+  // Payment proof. In free beta no payment occurs, so never persist a tx. When
+  // paid, only store a tx hash we've actually confirmed on-chain (correct USDC
+  // amount → our pay-to address); a claimed-but-unverified hash is dropped/
+  // rejected so it can't be rendered as a fake basescan "proof of payment".
+  let paymentTx: string | null = null;
+  if (!env.X402_FREE_MODE()) {
+    const claimedTx = req.headers.get("X-PAYMENT-TX");
+    if (claimedTx) {
+      if (!(await verifyUsdcPayment(claimedTx))) {
+        return NextResponse.json(
+          { error: "payment not verified" },
+          { status: 402 },
+        );
+      }
+      paymentTx = claimedTx.toLowerCase();
+    }
+  }
   const paymentNonce = req.headers.get("X-PAYMENT-NONCE") ?? null;
 
   // Replay protection: payment nonce must be unique

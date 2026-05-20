@@ -8,7 +8,16 @@ export async function verifySiweMessage(
   expectedNonce: string,
 ): Promise<string> {
   const siwe = new SiweMessage(message);
-  const result = await siwe.verify({ signature, nonce: expectedNonce });
+  // Bind the signature to OUR domain + nonce + current time. Without `domain`,
+  // a message signed for any origin would verify here, enabling a phishing
+  // relay (EIP-4361's whole point is domain binding). `time` makes siwe enforce
+  // the message's expirationTime/notBefore if present.
+  const result = await siwe.verify({
+    signature,
+    nonce: expectedNonce,
+    domain: env.SIWE_DOMAIN(),
+    time: new Date().toISOString(),
+  });
   if (!result.success) throw new Error("siwe-verify-failed");
   return result.data.address.toLowerCase();
 }
@@ -22,7 +31,9 @@ export function issueJwt(wallet: string): string {
 
 export function verifyJwt(token: string): string | null {
   try {
-    const decoded = jwt.verify(token, env.SIWE_JWT_SECRET()) as {
+    const decoded = jwt.verify(token, env.SIWE_JWT_SECRET(), {
+      algorithms: ["HS256"],
+    }) as {
       sub?: string;
     };
     return decoded.sub ? decoded.sub.toLowerCase() : null;

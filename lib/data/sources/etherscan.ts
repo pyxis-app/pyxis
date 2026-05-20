@@ -83,7 +83,7 @@ export async function getContractMeta(
   if (!id) return null;
   const url =
     `${BASE}?chainid=${id}&module=contract&action=getsourcecode` +
-    `&address=${address}&apikey=${process.env.ETHERSCAN_API_KEY}`;
+    `&address=${encodeURIComponent(address)}&apikey=${process.env.ETHERSCAN_API_KEY}`;
   const res = await fetchJson<RawSourceCodeResponse>(url, {
     source: SOURCE,
     cacheKey: cacheKey([SOURCE, "src", id, address.toLowerCase()]),
@@ -119,7 +119,7 @@ export async function getContractCreation(
   if (!id) return null;
   const url =
     `${BASE}?chainid=${id}&module=contract&action=getcontractcreation` +
-    `&contractaddresses=${address}&apikey=${process.env.ETHERSCAN_API_KEY}`;
+    `&contractaddresses=${encodeURIComponent(address)}&apikey=${process.env.ETHERSCAN_API_KEY}`;
   const res = await fetchJson<RawCreationResponse>(url, {
     source: SOURCE,
     cacheKey: cacheKey([SOURCE, "creation", id, address.toLowerCase()]),
@@ -149,7 +149,7 @@ export async function getTokenSupply(
   if (!id) return null;
   const url =
     `${BASE}?chainid=${id}&module=stats&action=tokensupply` +
-    `&contractaddress=${address}&apikey=${process.env.ETHERSCAN_API_KEY}`;
+    `&contractaddress=${encodeURIComponent(address)}&apikey=${process.env.ETHERSCAN_API_KEY}`;
   const res = await fetchJson<RawSupplyResponse>(url, {
     source: SOURCE,
     cacheKey: cacheKey([SOURCE, "supply", id, address.toLowerCase()]),
