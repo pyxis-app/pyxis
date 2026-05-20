@@ -32,20 +32,35 @@ export function AppSidebar() {
 
   useEffect(() => {
     if (!isConnected) return;
-    fetch("/api/history")
-      .then(async (r) => {
-        // 401 = wallet connected but no SIWE session. Distinct from "loading"
-        // so the UI can prompt sign-in instead of spinning forever.
-        if (r.status === 401) {
-          setNeedsAuth(true);
-          return;
-        }
-        if (!r.ok) return;
-        const j = await r.json();
-        setNeedsAuth(false);
-        setHistory(j?.sessions?.slice(0, 12) ?? []);
-      })
-      .catch(() => {});
+
+    let cancelled = false;
+    function load() {
+      fetch("/api/history")
+        .then(async (r) => {
+          if (cancelled) return;
+          // 401 = wallet connected but no SIWE session. Distinct from "loading"
+          // so the UI can prompt sign-in instead of spinning forever.
+          if (r.status === 401) {
+            setNeedsAuth(true);
+            return;
+          }
+          if (!r.ok) return;
+          const j = await r.json();
+          if (cancelled) return;
+          setNeedsAuth(false);
+          setHistory(j?.sessions?.slice(0, 12) ?? []);
+        })
+        .catch(() => {});
+    }
+
+    load();
+    // Re-fetch when SIWE sign-in/out happens elsewhere (this effect's deps
+    // don't change on sign-in, so without this the prompt would stick).
+    window.addEventListener("pyxis:auth-change", load);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("pyxis:auth-change", load);
+    };
   }, [isConnected, address]);
 
   return (

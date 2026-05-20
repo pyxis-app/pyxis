@@ -36,10 +36,20 @@ export async function signInWithEthereum(opts: {
     body: JSON.stringify({ message, signature }),
   });
   if (!verifyRes.ok) throw new Error("verify failed");
-  return await verifyRes.json();
+  const result = await verifyRes.json();
+  // Notify other mounted components (e.g. the persistent sidebar) that auth
+  // state changed, so they can re-fetch — their effects don't otherwise
+  // re-run when sign-in happens on a different page.
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("pyxis:auth-change"));
+  }
+  return result;
 }
 
 export async function signOut() {
   // Server doesn't track sessions other than cookie expiry; client clears cookie by setting empty
   document.cookie = "pyxis_session=; Path=/; Max-Age=0; SameSite=Strict";
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("pyxis:auth-change"));
+  }
 }
