@@ -5,7 +5,7 @@ import type { WithFreshness } from "../freshness";
 const BASE = "https://api.coingecko.com/api/v3";
 const SOURCE = "coingecko";
 const SEARCH_TTL = 60 * 60 * 1000; // 1h — coin id mapping rarely changes
-const SNAPSHOT_TTL = 60 * 1000; // 60s — price/volume detik-detikan
+const SNAPSHOT_TTL = 60 * 1000; // 60s — price/volume changes second-to-second
 const TIMEOUT = 4000;
 
 export interface CoinHit {
