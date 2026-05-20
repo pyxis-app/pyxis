@@ -1,6 +1,10 @@
 # Pyxis — Web3 Intelligence Swarm
 
-A five-agent research pipeline that turns any Web3 topic into a sourced, structured briefing. **Free during beta** — wallet-gated workspace, no paywall. LLM inference routes through [gitlawb's Opengateway](https://gitlawb.com/opengateway) (`mimo-v2.5-pro` by default).
+A five-agent research pipeline that turns any Web3 topic into a sourced, structured briefing. **Free during beta** — wallet-gated workspace, no paywall.
+
+Integrated with the gitlawb stack at two levels:
+- **Runtime:** all LLM inference routes through [gitlawb's Opengateway](https://gitlawb.com/opengateway) (`mimo-v2.5-pro` by default).
+- **Infrastructure:** source code auto-mirrors to gitlawb's federated network on every push — UCAN-delegated, DID-addressed at [`gitlawb.com/z6MkpbZk`](https://gitlawb.com/z6MkpbZk).
 
 x402 micropayment code paths (Base mainnet, $0.10 USDC/session) are kept gated behind `NEXT_PUBLIC_X402_FREE_MODE=false` and will resume at GA exit.
 
