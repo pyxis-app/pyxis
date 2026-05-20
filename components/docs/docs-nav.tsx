@@ -15,15 +15,19 @@ export function DocsNav({ onMenu }: { onMenu: () => void }) {
         >
           ☰
         </button>
-        <Link href="/docs" className="flex items-center gap-2.5">
-          <Image src="/logo.png" alt="" width={24} height={24} className="opacity-95" />
-          <span className="font-mono text-[15px] tracking-tight">pyxis</span>
+        <div className="flex items-center gap-2.5">
+          <a href="https://usepyxis.com" className="flex items-center gap-2.5" aria-label="Pyxis home">
+            <Image src="/logo.png" alt="" width={24} height={24} className="opacity-95" />
+            <span className="font-mono text-[15px] tracking-tight">pyxis</span>
+          </a>
           <span className="font-mono text-[13px] text-[var(--muted)]">/</span>
-          <span className="font-mono text-[13px] text-[var(--accent)]">docs</span>
+          <Link href="/docs" className="font-mono text-[13px] text-[var(--accent)]">
+            docs
+          </Link>
           <span className="ml-1 hidden rounded border border-[var(--hair)] px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.22em] text-[var(--scout)] sm:inline">
             free beta
           </span>
-        </Link>
+        </div>
       </div>
       <div className="flex items-center gap-4">
         <a
