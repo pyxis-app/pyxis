@@ -44,6 +44,7 @@ next-env.d.ts
 memory.*
 .mastra
 docs
+!components/docs/
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
