@@ -3,6 +3,7 @@ name: Mirror to gitlawb
 on:
   push:
     branches: [main]
+    tags: ['v*']
   workflow_dispatch:
 
 permissions:
@@ -82,4 +83,6 @@ jobs:
           # Incremental push. Initial mirror was bootstrapped via `gl mirror` once;
           # subsequent pushes are fast-forward from main. If gitlawb diverges
           # for any reason, re-bootstrap manually: gl mirror https://github.com/pyxis-app/pyxis
-          git push gitlawb main
+          # --follow-tags pushes annotated tags reachable from pushed commits,
+          # so v1/v2/v3 release tags propagate to gitlawb on the same push.
+          git push gitlawb main --follow-tags
