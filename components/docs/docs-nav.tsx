@@ -8,6 +8,7 @@ export function DocsNav({ onMenu }: { onMenu: () => void }) {
     <nav className="sticky top-0 z-[60] flex h-[54px] items-center justify-between border-b border-[var(--hair)] bg-[var(--background)]/85 px-5 backdrop-blur-md">
       <div className="flex items-center gap-3">
         <button
+          type="button"
           onClick={onMenu}
           aria-label="Toggle navigation"
           className="flex h-[34px] w-[34px] items-center justify-center rounded-md border border-[var(--hair)] text-[var(--foreground)] md:hidden"
