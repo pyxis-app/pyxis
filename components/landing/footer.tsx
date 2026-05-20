@@ -43,7 +43,7 @@ export function Footer() {
           <FooterCol
             label="// resources"
             links={[
-              { href: "/docs", text: "docs" },
+              { href: "https://docs.usepyxis.com", text: "docs" },
               { href: "#method", text: "method" },
               { href: "#briefing", text: "briefing" },
               { href: "#pricing", text: "pricing" },

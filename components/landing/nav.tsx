@@ -37,12 +37,12 @@ export function LandingNav() {
           <a href="#pricing" className="hover:text-[var(--foreground)] transition-colors">
             pricing
           </a>
-          <Link
-            href="/docs"
+          <a
+            href="https://docs.usepyxis.com"
             className="hover:text-[var(--foreground)] transition-colors"
           >
             docs
-          </Link>
+          </a>
           <a
             href="https://github.com/pyxis-app/pyxis"
             target="_blank"
