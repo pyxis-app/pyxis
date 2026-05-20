@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { HealthStatus } from "@/components/shared/health-status";
 
 export function Footer() {
   return (
@@ -60,8 +61,9 @@ export function Footer() {
 
         {/* Bottom row */}
         <div className="border-t border-[var(--hair)] pt-6 mt-12 flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">
-          <div>
-            issued by pyxis · vol I · MMXXVI · agpl-3.0
+          <div className="flex items-center gap-4">
+            <HealthStatus />
+            <span>issued by pyxis · vol I · MMXXVI · agpl-3.0</span>
           </div>
           <div className="opacity-70">
             made for crypto-native researchers · made with terminal energy

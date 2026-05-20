@@ -7,6 +7,7 @@ import { wrapFetchWithPayment } from "x402-fetch";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { TopicInput } from "./topic-input";
 import { BriefingCard, type Briefing } from "./briefing-card";
+import { HealthStatus } from "@/components/shared/health-status";
 import { signInWithEthereum } from "@/lib/siwe-client";
 
 type State =
@@ -269,8 +270,11 @@ export function ResearchWorkspace() {
           <span className="text-[var(--muted)]">pyxis://research/</span>
           {runSlug}
         </span>
-        <span className="ml-auto font-mono text-[11px] text-[var(--muted)] tabular-nums">
-          {utcClock}
+        <span className="ml-auto flex items-center gap-4">
+          <HealthStatus />
+          <span className="font-mono text-[11px] text-[var(--muted)] tabular-nums">
+            {utcClock}
+          </span>
         </span>
       </header>
 
