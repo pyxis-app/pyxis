@@ -43,8 +43,9 @@ next-env.d.ts
 
 memory.*
 .mastra
-docs
-!components/docs/
+# Local-only working docs (specs, plans, runbooks) at the repo root.
+# Anchored to root so it does NOT match app/(docs)/docs or components/docs.
+/docs
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
