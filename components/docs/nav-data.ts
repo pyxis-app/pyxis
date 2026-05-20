@@ -23,7 +23,7 @@ export const DOC_NAV: DocGroup[] = [
     items: [
       { title: "What Pyxis can & can’t do", href: "/docs/capabilities" },
       { title: "FAQ", href: "/docs/faq" },
-      { title: "Changelog", href: "/changelog", external: true },
+      { title: "Changelog", href: "https://usepyxis.com/changelog", external: true },
     ],
   },
 ];

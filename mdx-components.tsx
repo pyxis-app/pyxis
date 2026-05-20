@@ -18,9 +18,15 @@ export function useMDXComponents(): MDXComponents {
     ),
     h3: (p) => <h3 className="mb-2 mt-8 font-mono text-base font-medium" {...p} />,
     p: (p) => <p className="mb-3.5 max-w-[64ch] leading-relaxed text-[var(--foreground)]/80" {...p} />,
-    a: ({ href = "", ...rest }) => (
-      <Link href={href} className="text-[var(--accent)] underline-offset-2 hover:underline" {...rest} />
-    ),
+    a: ({ href = "", ...rest }) => {
+      const external = /^https?:\/\//.test(href);
+      const cls = "text-[var(--accent)] underline-offset-2 hover:underline";
+      return external ? (
+        <a href={href} target="_blank" rel="noopener noreferrer" className={cls} {...rest} />
+      ) : (
+        <Link href={href} className={cls} {...rest} />
+      );
+    },
     ul: (p) => <ul className="mb-4 max-w-[64ch] list-disc space-y-1.5 pl-5 text-[var(--foreground)]/80" {...p} />,
     ol: (p) => <ol className="mb-4 max-w-[64ch] list-decimal space-y-1.5 pl-5 text-[var(--foreground)]/80" {...p} />,
     li: (p) => <li className="leading-relaxed" {...p} />,

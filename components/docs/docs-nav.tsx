@@ -34,18 +34,18 @@ export function DocsNav({ onMenu }: { onMenu: () => void }) {
         >
           github
         </a>
-        <Link
-          href="/changelog"
+        <a
+          href="https://usepyxis.com/changelog"
           className="hidden font-mono text-[12px] text-[var(--muted)] hover:text-[var(--foreground)] md:inline"
         >
           changelog
-        </Link>
-        <Link
-          href="/research"
+        </a>
+        <a
+          href="https://usepyxis.com/research"
           className="rounded-md border border-[var(--accent)]/40 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--accent)] hover:border-[var(--scout)]/60 hover:text-[var(--scout)]"
         >
           launch app →
-        </Link>
+        </a>
       </div>
     </nav>
   );
