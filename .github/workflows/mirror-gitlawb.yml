@@ -80,9 +80,15 @@ jobs:
         run: |
           MY_DID=$(gl identity show)
           git remote add gitlawb "gitlawb://$MY_DID/pyxis"
-          # Incremental push. Initial mirror was bootstrapped via `gl mirror` once;
-          # subsequent pushes are fast-forward from main. If gitlawb diverges
-          # for any reason, re-bootstrap manually: gl mirror https://github.com/pyxis-app/pyxis
-          # --follow-tags pushes annotated tags reachable from pushed commits,
-          # so v1/v2/v3 release tags propagate to gitlawb on the same push.
-          git push gitlawb main --follow-tags
+          # Two trigger shapes need different pushes:
+          #  - branch push (ref_type=branch): main is checked out → push main +
+          #    reachable annotated tags via --follow-tags.
+          #  - tag push (ref_type=tag): detached HEAD, NO local `main` branch, so
+          #    `git push gitlawb main` fails with "src refspec main does not
+          #    match any". Push just that tag ref instead.
+          # Re-bootstrap manually if gitlawb diverges: gl mirror https://github.com/pyxis-app/pyxis
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            git push gitlawb tag "${{ github.ref_name }}"
+          else
+            git push gitlawb main --follow-tags
+          fi
