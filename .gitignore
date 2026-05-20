@@ -19,7 +19,7 @@ node_modules
 
 # production
 /build
-
+.claude 
 # misc
 .DS_Store
 *.pem
@@ -101,3 +101,4 @@ bun.lockb
 /data/
 .env*.local
 scripts
+.superpowers
