@@ -6,24 +6,33 @@ import { env } from "@/lib/env";
 import { rateLimit, clientIp } from "@/lib/ratelimit";
 import { docsRewrite } from "@/lib/docs-rewrite";
 
-const cfg = x402Config();
 const freeMode = env.X402_FREE_MODE();
 
-const payment = paymentMiddleware(
-  cfg.payTo as Address,
-  {
-    "/api/research": {
-      price: cfg.price,
-      network: cfg.network as "base" | "base-sepolia",
-      config: {
-        description: "Pyxis research session",
-        mimeType: "application/json",
-        maxTimeoutSeconds: 60,
+// Constructed lazily so non-payment requests (docs, landing, every page now
+// reaching the proxy via the broadened matcher) never touch x402 env. Only
+// a real /api/research call in paid mode initializes the payment middleware.
+let payment: ReturnType<typeof paymentMiddleware> | null = null;
+function getPayment() {
+  if (!payment) {
+    const cfg = x402Config();
+    payment = paymentMiddleware(
+      cfg.payTo as Address,
+      {
+        "/api/research": {
+          price: cfg.price,
+          network: cfg.network as "base" | "base-sepolia",
+          config: {
+            description: "Pyxis research session",
+            mimeType: "application/json",
+            maxTimeoutSeconds: 60,
+          },
+        },
       },
-    },
-  },
-  { url: cfg.facilitator as `${string}://${string}` },
-);
+      { url: cfg.facilitator as `${string}://${string}` },
+    );
+  }
+  return payment;
+}
 
 export async function proxy(req: NextRequest) {
   // docs.usepyxis.com → /docs subtree
@@ -44,7 +53,7 @@ export async function proxy(req: NextRequest) {
       );
     }
     if (freeMode) return NextResponse.next();
-    return payment(req);
+    return getPayment()(req);
   }
 
   return NextResponse.next();
