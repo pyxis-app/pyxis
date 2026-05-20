@@ -1,0 +1,26 @@
+export const metadata = { title: "Sentiment methodology" };
+
+# Sentiment methodology
+
+The Sentinel reports a social sentiment read. It's worth understanding exactly
+how that number is produced.
+
+## Lexicon-based, not a black box
+
+Sentiment is scored **in code, not by the language model.** Pyxis matches posts
+against fixed sets of positive and negative words and emoji, then computes a
+breakdown. The agent *interprets* that breakdown in plain language, but the
+score itself is deterministic and reproducible.
+
+<Callout type="warn">
+A lexicon score is a rough signal, not a verdict. The Sentinel never quotes a raw
+percentage without disclaiming how it was measured, and neither should you.
+</Callout>
+
+## What feeds it
+
+Twitter activity (within a strict per-run budget), Reddit discussion, the Fear &
+Greed Index as a macro overlay, and — for protocols — Snapshot governance
+proposals.
+
+Next: [What Pyxis can & can't do](/docs/capabilities) →
