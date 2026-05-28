@@ -13,6 +13,31 @@ type Release = {
 
 const RELEASES: Release[] = [
   {
+    version: "v3.3.0",
+    date: "2026-05-28",
+    codename: "csp report-only",
+    highlight:
+      "Ships a Content-Security-Policy in Report-Only mode plus a violation-collecting endpoint at /api/csp-report. The browser does not block anything yet — it streams what *would* have been blocked into a Postgres table so the policy can be tightened against real traffic before enforce mode flips on.",
+    groups: [
+      {
+        label: "added",
+        items: [
+          "Content-Security-Policy-Report-Only header on every response with a curated baseline: WalletConnect + Vercel analytics in connect-src, fonts allowlisted via Google's CDN, image-src widened to https: for token logos and OG previews. frame-ancestors aligned to the route's X-Frame-Options ('none' on /cli-auth, 'self' elsewhere)",
+          "New POST endpoint /api/csp-report accepts both the legacy csp-report wrapper and the Reporting API array shape; rows persist to a new csp_violations Postgres table with directive/blocked-uri/document-uri/source-file/line-column metadata",
+          "New repo helper lib/repos/csp-violations.ts: insertCspViolation() and groupRecentCspViolations() (grouped count + last-seen per (directive, blocked-uri) pair) ready for an admin readout in a later release",
+          "Loose IP-keyed rate limit on /api/csp-report (200/min) that silently returns 204 over the cap — browsers retry on non-204 responses, which would amplify the very thing we're rate-limiting",
+        ],
+      },
+      {
+        label: "deferred",
+        items: [
+          "Enforce mode flip — gated on at least one full week of policy data plus a wallet/sign/research full-flow regression pass. Aiming for v3.3.1 after observation",
+          "Admin readout of violations — groupRecentCspViolations() is wired but not yet surfaced under /admin; revisit when the policy is close to enforce",
+        ],
+      },
+    ],
+  },
+  {
     version: "v3.2.2",
     date: "2026-05-28",
     codename: "share polish",

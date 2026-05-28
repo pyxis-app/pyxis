@@ -8,15 +8,35 @@ import { docsRewrite } from "@/lib/docs-rewrite";
 
 const freeMode = env.X402_FREE_MODE();
 
+// Baseline CSP directives shipped in v3.3.0 as REPORT-ONLY. The connect-src
+// allowlist covers WalletConnect (Web3 wallet bridge) + Vercel analytics +
+// self. 'unsafe-inline' / 'unsafe-eval' on script-src reflect what Next.js
+// 16 + Turbopack emit at runtime; will tighten when violations data lets us.
+// frame-ancestors is set per-route from the X-Frame-Options value below.
+const CSP_REPORT_ONLY_BASE = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "img-src 'self' data: blob: https:",
+  "connect-src 'self' wss://*.walletconnect.com wss://*.walletconnect.org https://*.walletconnect.com https://*.walletconnect.org https://api.web3modal.com https://explorer-api.walletconnect.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
+  "frame-src 'self' https://verify.walletconnect.com https://verify.walletconnect.org",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+  "report-uri /api/csp-report",
+];
+
 // Apply baseline security headers to every response. Tightened from Vercel
 // defaults: explicit XCTO / Referrer-Policy / Permissions-Policy / HSTS with
-// includeSubDomains. No CSP yet — that needs a curated connect-src list
-// against the wallet + analytics surface, scheduled for v3.3.0.
+// includeSubDomains, plus a Report-Only CSP that pipes violations to
+// /api/csp-report for later policy refinement before enforce mode flips on.
 function withSecurity(
   res: NextResponse,
   opts: { frameOptions?: "DENY" | "SAMEORIGIN" } = {},
 ): NextResponse {
-  res.headers.set("X-Frame-Options", opts.frameOptions ?? "SAMEORIGIN");
+  const xfo = opts.frameOptions ?? "SAMEORIGIN";
+  res.headers.set("X-Frame-Options", xfo);
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.headers.set(
@@ -29,6 +49,10 @@ function withSecurity(
     "Strict-Transport-Security",
     "max-age=63072000; includeSubDomains",
   );
+  // CSP — Report-Only. frame-ancestors aligned to the route's XFO value.
+  const frameAncestors = xfo === "DENY" ? "'none'" : "'self'";
+  const csp = [...CSP_REPORT_ONLY_BASE, `frame-ancestors ${frameAncestors}`].join("; ");
+  res.headers.set("Content-Security-Policy-Report-Only", csp);
   return res;
 }
 
@@ -72,6 +96,17 @@ export async function proxy(req: NextRequest) {
     const res = withSecurity(NextResponse.next(), { frameOptions: "DENY" });
     res.headers.set("Cache-Control", "no-store");
     return res;
+  }
+
+  // Rate limit on /api/csp-report. CSP violation reports can be high-volume
+  // (every page load if policy is broken). Silently drop above the cap —
+  // returning 429 would just generate more reports because browsers retry.
+  if (req.nextUrl.pathname === "/api/csp-report") {
+    const ip = clientIp(req);
+    const { ok } = rateLimit(`csp-report:${ip}`, 200, 60_000);
+    if (!ok) {
+      return withSecurity(new NextResponse(null, { status: 204 }));
+    }
   }
 
   // Loose rate limit on /api/auth/* to prevent nonce-table flooding and
