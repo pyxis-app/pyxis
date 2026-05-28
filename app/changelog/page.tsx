@@ -13,6 +13,27 @@ type Release = {
 
 const RELEASES: Release[] = [
   {
+    version: "v3.2.2",
+    date: "2026-05-28",
+    codename: "share polish",
+    highlight:
+      "Two small but visible fixes to how links to usepyxis.com unfurl on Twitter, Slack, LinkedIn, and Discord: the canonical host stops 307-redirecting the OG image, and the OG image itself is now a quieter wordmark composition that reads cleanly at thumbnail size.",
+    groups: [
+      {
+        label: "fixed",
+        items: [
+          "OG canonical URL: metadataBase and openGraph.url were hardcoded https://www.usepyxis.com — since apex is now primary and www. 307-redirects, Twitterbot fetched the redirect as text/plain and cached an empty Card. Both literals flipped to the apex; b/[id] and other surfaces were already correct",
+        ],
+      },
+      {
+        label: "design",
+        items: [
+          "OG image refreshed from the P-block + wordmark + constellation backdrop to a quieter wordmark-only composition (large Fraunces \"Pyxis\" over a subtle radial gradient, with \"THE RESEARCH SWARM\" as the eyebrow). 1200x630 declared, rendered at 2x for retina",
+        ],
+      },
+    ],
+  },
+  {
     version: "v3.2.1",
     date: "2026-05-28",
     codename: "security baseline",

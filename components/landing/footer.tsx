@@ -27,7 +27,7 @@ export function Footer() {
             </p>
             <div className="mt-4">
               <span className="term-chip" style={{ cursor: "default" }}>
-                [ free beta · v3.2.1 ]
+                [ free beta · v3.2.2 ]
               </span>
             </div>
           </div>
