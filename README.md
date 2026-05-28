@@ -79,6 +79,13 @@ docs/               # internal specs (gitignored from public mirror)
 
 See [AGENTS.md](./AGENTS.md) for the 5-agent pipeline architecture.
 
+## Companion packages
+
+| Package | What it does | License |
+|---|---|---|
+| [`@pyxis-labs/cli`](https://github.com/pyxis-app/cli) | Run the same 5-agent pipeline from your terminal via SIWE browser-callback auth. `npm i -g @pyxis-labs/cli`. | MIT |
+| [`@pyxis-labs/web3-sources`](https://github.com/pyxis-app/web3-sources) | The 13 free crypto data clients extracted from `lib/data/sources/` as a standalone zero-dep npm package. | MIT |
+
 ## License
 
 Copyright (C) 2026 Pyxis Authors
