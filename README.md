@@ -8,7 +8,7 @@ Integrated with the gitlawb stack at two levels:
 
 x402 micropayment code paths (Base mainnet, $0.10 USDC/session) are kept gated behind `NEXT_PUBLIC_X402_FREE_MODE=false` and will resume at GA exit.
 
-Live at **[usepyxis.com](https://www.usepyxis.com)** · Changelog at **[usepyxis.com/changelog](https://www.usepyxis.com/changelog)**
+Live at **[usepyxis.com](https://www.usepyxis.com)** · Docs at **[docs.usepyxis.com](https://docs.usepyxis.com)** · Changelog at **[usepyxis.com/changelog](https://www.usepyxis.com/changelog)**
 
 ## Stack
 
