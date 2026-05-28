@@ -13,6 +13,31 @@ type Release = {
 
 const RELEASES: Release[] = [
   {
+    version: "v3.2.1",
+    date: "2026-05-28",
+    codename: "security baseline",
+    highlight:
+      "Baseline web security headers across every route, loose rate limits on the auth endpoints, and a responsible-disclosure path at /.well-known/security.txt. Curated CSP is queued behind a Report-Only roll-out for the next minor.",
+    groups: [
+      {
+        label: "security",
+        items: [
+          "Five baseline response headers shipped via a withSecurity() helper in the platform proxy: X-Content-Type-Options: nosniff, Referrer-Policy: strict-origin-when-cross-origin, Permissions-Policy disabling camera/microphone/geolocation/interest-cohort, HSTS tightened to max-age=63072000; includeSubDomains, and X-Frame-Options: SAMEORIGIN globally (with DENY preserved on /cli-auth)",
+          "Loose IP-keyed rate limit on /api/auth/nonce (60/min) and /api/auth/verify (30/min) — prevents nonce-table flooding and verify brute-force without hampering retries on flaky wallets",
+          "Responsible-disclosure path at /.well-known/security.txt routing to admin@usepyxis.com",
+        ],
+      },
+      {
+        label: "deferred",
+        items: [
+          "Content-Security-Policy: needs a curated connect-src list against the wallet + analytics surface; rolling out behind a Report-Only header first to collect real violation data before enforce",
+          "HSTS preload: permanent commitment to HTTPS for the whole subtree — defer until six months of stable HTTPS-only behaviour are observed",
+          "Durable rate-limit store (Vercel KV / Upstash): the in-memory bucket survives per-instance only; cross-instance cap is looser than advertised",
+        ],
+      },
+    ],
+  },
+  {
     version: "v3.2.0",
     date: "2026-05-21",
     codename: "hardening & observability",
