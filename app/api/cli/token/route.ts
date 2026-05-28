@@ -12,6 +12,11 @@ interface PendingEntry {
 
 const PENDING_TTL_MS = 5 * 60 * 1000;
 const MAX_PENDING = 100;
+// NOTE: per-instance state. POST and PUT must land on the same Vercel
+// instance for the exchange to succeed. Pyxis is deployed to a single
+// region (sin1) so this is rarely hit; users retry `pyxis login` on miss.
+// Upgrade to Vercel KV / Edge Config if cross-instance state becomes a
+// real problem.
 const pendingTokens = new Map<string, PendingEntry>();
 
 function isValidChallenge(s: unknown): s is string {
@@ -36,9 +41,12 @@ function prunePending(now = Date.now()) {
   for (const [k, v] of pendingTokens) {
     if (now - v.createdAt > PENDING_TTL_MS) pendingTokens.delete(k);
   }
+  // Bound size — drop oldest if over the cap. Snapshot overflow before
+  // the loop because deletes mutate `size` mid-iteration.
   if (pendingTokens.size > MAX_PENDING) {
     const keys = Array.from(pendingTokens.keys());
-    for (let i = 0; i < pendingTokens.size - MAX_PENDING; i++) {
+    const overflow = pendingTokens.size - MAX_PENDING;
+    for (let i = 0; i < overflow; i++) {
       pendingTokens.delete(keys[i]);
     }
   }

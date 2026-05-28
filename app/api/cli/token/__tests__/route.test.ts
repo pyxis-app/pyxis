@@ -94,4 +94,14 @@ describe("/api/cli/token PUT (exchange)", () => {
     const res = await PUT(reqWithBody({ code: challenge, verifier }, undefined, "PUT"));
     expect(res.status).toBe(401);
   });
+
+  it("rejects malformed code or verifier (400)", async () => {
+    const { verifier, challenge } = genChallengeAndVerifier();
+    // Bad code (too short)
+    const badCodeRes = await PUT(reqWithBody({ code: "tooshort", verifier }, undefined, "PUT"));
+    expect(badCodeRes.status).toBe(400);
+    // Bad verifier (too short)
+    const badVerifierRes = await PUT(reqWithBody({ code: challenge, verifier: "tooshort" }, undefined, "PUT"));
+    expect(badVerifierRes.status).toBe(400);
+  });
 });
