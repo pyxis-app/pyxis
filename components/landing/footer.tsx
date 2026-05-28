@@ -54,7 +54,6 @@ export function Footer() {
             label="// connect"
             links={[
               { href: "https://github.com/pyxis-app/pyxis", text: "github", external: true },
-              { href: "https://gitlawb.com/z6MkpbZk", text: "gitlawb", external: true },
               { href: "https://x.com/pyxisbase", text: "x · @pyxisbase", external: true },
             ]}
           />

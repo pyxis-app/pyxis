@@ -2,17 +2,13 @@
 
 A five-agent research pipeline that turns any Web3 topic into a sourced, structured briefing. **Free during beta** — wallet-gated workspace, no paywall.
 
-Integrated with the gitlawb stack at two levels:
-- **Runtime:** all LLM inference routes through [gitlawb's Opengateway](https://gitlawb.com/opengateway) (`mimo-v2.5-pro` by default).
-- **Infrastructure:** source code auto-mirrors to gitlawb's federated network on every push — UCAN-delegated, DID-addressed at [`gitlawb.com/z6MkpbZk`](https://gitlawb.com/z6MkpbZk).
-
 x402 micropayment code paths (Base mainnet, $0.10 USDC/session) are kept gated behind `NEXT_PUBLIC_X402_FREE_MODE=false` and will resume at GA exit.
 
 Live at **[usepyxis.com](https://www.usepyxis.com)** · Docs at **[docs.usepyxis.com](https://docs.usepyxis.com)** · Changelog at **[usepyxis.com/changelog](https://www.usepyxis.com/changelog)**
 
 ## Stack
 
-Next.js 16 · TypeScript · Tailwind v4 · wagmi v2 + RainbowKit · viem · x402-next + x402-fetch · siwe · postgres · openai SDK pointed at **Opengateway** (gitlawb's OpenAI-compatible gateway, default `mimo-v2.5-pro`) · framer-motion · Lenis · Vitest.
+Next.js 16 · TypeScript · Tailwind v4 · wagmi v2 + RainbowKit · viem · x402-next + x402-fetch · siwe · postgres · openai SDK against an OpenAI-compatible endpoint (default model `mimo-v2.5-pro`) · framer-motion · Lenis · Vitest.
 
 ### Data layer
 
@@ -48,7 +44,7 @@ npm run test:watch
 
 ## Deploy
 
-Production runs on **Vercel** with **Neon Postgres** for session persistence. Pushes to `main` auto-deploy via Vercel's GitHub integration; pushes also mirror to gitlawb's federated network via [`.github/workflows/mirror-gitlawb.yml`](.github/workflows/mirror-gitlawb.yml).
+Production runs on **Vercel** with **Neon Postgres** for session persistence. Pushes to `main` auto-deploy via Vercel's GitHub integration.
 
 Required Vercel environment variables:
 
@@ -73,8 +69,8 @@ components/         # landing/, app/, shared/
 lib/                # llm, probes/, data/{sources,dossiers}, x402, siwe, db, repos, ...
 lib/migrations/     # Postgres schema migrations (applied at boot)
 public/             # logo, icons, og
-docs/               # internal specs (gitignored from public mirror)
-.github/workflows/  # gitlawb auto-mirror
+docs/               # internal specs (gitignored)
+.github/workflows/  # CI
 ```
 
 See [AGENTS.md](./AGENTS.md) for the 5-agent pipeline architecture.
