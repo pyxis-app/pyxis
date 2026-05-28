@@ -31,7 +31,7 @@ const SITE_DESCRIPTION =
   "Five-agent research pipeline for any Web3 topic. Every number sampled from a live API, cited inline with a freshness timestamp. Free during beta.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.usepyxis.com"),
+  metadataBase: new URL("https://usepyxis.com"),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
   icons: {
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: "https://www.usepyxis.com",
+    url: "https://usepyxis.com",
     siteName: "Pyxis",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
