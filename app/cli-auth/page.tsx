@@ -28,10 +28,13 @@ export default async function CliAuthPage({
   if (!valid) {
     return (
       <main className="mx-auto max-w-md p-8">
-        <h1 className="text-2xl font-semibold">Invalid CLI auth link</h1>
-        <p className="mt-2 text-sm text-zinc-400">
+        <h1 className="font-display text-2xl text-[var(--foreground)]">
+          Invalid CLI auth link
+        </h1>
+        <p className="mt-2 font-mono text-[13px] text-[var(--muted)] leading-[1.6]">
           The link is missing or malformed parameters. Start over by running{" "}
-          <code>pyxis login</code> in your terminal.
+          <code className="term-chip" style={{ cursor: "default" }}>pyxis login</code>{" "}
+          in your terminal.
         </p>
       </main>
     );
@@ -39,8 +42,10 @@ export default async function CliAuthPage({
 
   return (
     <main className="mx-auto max-w-md p-8">
-      <h1 className="text-2xl font-semibold">Authorize Pyxis CLI</h1>
-      <p className="mt-2 text-sm text-zinc-400">
+      <h1 className="font-display text-2xl text-[var(--foreground)]">
+        Authorize Pyxis CLI
+      </h1>
+      <p className="mt-2 font-mono text-[13px] text-[var(--muted)] leading-[1.6]">
         Grant terminal access to this device. The token expires in 24 hours.
       </p>
       <ClientAuthFlow
