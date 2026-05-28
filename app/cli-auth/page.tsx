@@ -26,15 +26,32 @@ export default async function CliAuthPage({
     isValidChallenge(params.challenge);
 
   if (!valid) {
+    // Tab-2 case: some wallet extensions redirect back to /cli-auth with a
+    // truncated query string (state only, missing port/challenge) as part of
+    // their connect flow. Help the user notice their original tab is still
+    // waiting rather than panicking that login broke.
+    const isPartial = !!params.state && (!params.port || !params.challenge);
     return (
       <main className="mx-auto max-w-md p-8">
         <h1 className="font-display text-2xl text-[var(--foreground)]">
-          Invalid CLI auth link
+          {isPartial ? "Duplicate auth tab" : "Invalid CLI auth link"}
         </h1>
         <p className="mt-2 font-mono text-[13px] text-[var(--muted)] leading-[1.6]">
-          The link is missing or malformed parameters. Start over by running{" "}
-          <code className="term-chip" style={{ cursor: "default" }}>pyxis login</code>{" "}
-          in your terminal.
+          {isPartial ? (
+            <>
+              This tab is missing the <code className="term-chip" style={{ cursor: "default" }}>port</code> and{" "}
+              <code className="term-chip" style={{ cursor: "default" }}>challenge</code> params — likely a
+              redirect from your wallet's connect flow. Switch back to the original{" "}
+              <code className="term-chip" style={{ cursor: "default" }}>/cli-auth</code> tab (the one with the
+              full URL); it&apos;s still waiting for you. You can close this tab safely.
+            </>
+          ) : (
+            <>
+              The link is missing or malformed parameters. Start over by running{" "}
+              <code className="term-chip" style={{ cursor: "default" }}>pyxis login</code>{" "}
+              in your terminal.
+            </>
+          )}
         </p>
       </main>
     );
