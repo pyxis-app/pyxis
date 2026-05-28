@@ -43,6 +43,14 @@ export async function proxy(req: NextRequest) {
     return NextResponse.rewrite(url);
   }
 
+  // Block framing of /cli-auth to prevent CSRF via embedded sign-in.
+  if (req.nextUrl.pathname.startsWith("/cli-auth")) {
+    const res = NextResponse.next();
+    res.headers.set("X-Frame-Options", "DENY");
+    res.headers.set("Cache-Control", "no-store");
+    return res;
+  }
+
   if (req.nextUrl.pathname.startsWith("/api/research")) {
     const ip = clientIp(req);
     const { ok, retryAfter } = rateLimit(`research:${ip}`, 30, 60_000);
