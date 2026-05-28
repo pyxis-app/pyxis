@@ -1,0 +1,4 @@
+Contact: mailto:admin@usepyxis.com
+Expires: 2027-05-28T00:00:00.000Z
+Preferred-Languages: en, id
+Canonical: https://usepyxis.com/.well-known/security.txt
